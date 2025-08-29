@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Modal,
   Platform,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -46,7 +45,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   disabled = false,
 }) => {
   const [showPicker, setShowPicker] = useState(false);
-  const [showModal, setShowModal] = useState(false);
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
     if (Platform.OS === 'android') {
@@ -56,19 +54,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     if (selectedDate) {
       onDateChange(selectedDate);
       if (Platform.OS === 'ios') {
-        setShowModal(false);
+        setShowPicker(false);
       }
     }
   };
 
   const openPicker = () => {
     if (disabled) return;
-    
-    if (Platform.OS === 'ios') {
-      setShowModal(true);
-    } else {
-      setShowPicker(true);
-    }
+    setShowPicker(true);
   };
 
   const getQuickDateOptions = () => {
@@ -118,98 +111,15 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         )}
       </TouchableOpacity>
 
-      {/* Android Date Picker */}
-      {showPicker && Platform.OS === 'android' && (
+      {/* Date Picker - Direct display for both platforms */}
+      {showPicker && (
         <DateTimePicker
           value={date}
           mode="date"
-          display="default"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={handleDateChange}
           maximumDate={new Date()}
         />
-      )}
-
-      {/* iOS Date Picker Modal */}
-      {Platform.OS === 'ios' && (
-        <Modal
-          visible={showModal}
-          animationType="slide"
-          presentationStyle="pageSheet"
-          onRequestClose={() => setShowModal(false)}
-        >
-          <View className="flex-1 bg-white">
-            {/* Header */}
-            <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
-              <TouchableOpacity onPress={() => setShowModal(false)}>
-                <Text className="text-blue-600 font-medium text-lg">Batal</Text>
-              </TouchableOpacity>
-              <Text className="text-xl font-bold text-gray-900">Pilih Tanggal</Text>
-              <TouchableOpacity onPress={() => setShowModal(false)}>
-                <Text className="text-blue-600 font-medium text-lg">Selesai</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Quick Date Options */}
-            <View className="p-4">
-              <Text className="text-lg font-semibold text-gray-900 mb-3">
-                Pilihan Cepat
-              </Text>
-              <View className="flex-row justify-between mb-4">
-                {getQuickDateOptions().map((option, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => {
-                      onDateChange(option.date);
-                      setShowModal(false);
-                    }}
-                    className={`flex-1 mx-1 p-3 rounded-xl border-2 ${
-                      date.toDateString() === option.date.toDateString()
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 bg-white'
-                    }`}
-                  >
-                    <Text
-                      className={`text-center font-medium ${
-                        date.toDateString() === option.date.toDateString()
-                          ? 'text-blue-700'
-                          : 'text-gray-700'
-                      }`}
-                    >
-                      {option.label}
-                    </Text>
-                    <Text
-                      className={`text-center text-sm mt-1 ${
-                        date.toDateString() === option.date.toDateString()
-                          ? 'text-blue-600'
-                          : 'text-gray-500'
-                      }`}
-                    >
-                      {option.date.toLocaleDateString('id-ID', {
-                        day: '2-digit',
-                        month: '2-digit',
-                      })}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            {/* Date Picker */}
-            <View className="flex-1 justify-center">
-              <DateTimePicker
-                value={date}
-                mode="date"
-                display="spinner"
-                onChange={handleDateChange}
-                maximumDate={new Date()}
-                style={{ backgroundColor: 'white' }}
-              />
-            </View>
-
-            {/* Bottom Safe Area */}
-            <View className="h-8" />
-          </View>
-        </Modal>
       )}
     </>
   );

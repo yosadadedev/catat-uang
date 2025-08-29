@@ -59,7 +59,7 @@ const TransactionsScreen = () => {
       case 'monthly':
         start.setDate(1);
         start.setHours(0, 0, 0, 0);
-        end.setMonth(end.getMonth() + 1, 0);
+        end.setMonth(start.getMonth() + 1, 0);
         end.setHours(23, 59, 59, 999);
         break;
       case 'yearly':
@@ -80,6 +80,10 @@ const TransactionsScreen = () => {
     // Filter by date range based on active tab
     filtered = filtered.filter(transaction => {
       const transactionDate = new Date(transaction.date);
+      // Handle both ISO string and date string formats
+      if (isNaN(transactionDate.getTime())) {
+        return false;
+      }
       return transactionDate >= start && transactionDate <= end;
     });
 
@@ -568,7 +572,7 @@ const TransactionsScreen = () => {
       {/* Content */}
       <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
         {/* Transaction List */}
-        <View style={{ flex: 1, marginTop: 16 }}>
+        <View style={{ flex: 1, marginTop: 0 }}>
           {filteredTransactions.length > 0 ? (
             <TransactionList
               transactions={filteredTransactions}

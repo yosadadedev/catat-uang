@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Transaction, Category } from '../database/database';
+import { useTheme } from '../contexts/ThemeContext';
+import { useLocalization } from '../contexts/LocalizationContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 const chartWidth = screenWidth - 32; // 16px padding on each side
@@ -25,13 +27,15 @@ export const PieChart: React.FC<PieChartProps> = ({
   size = 200,
   showLegend = true,
 }) => {
+  const { colors } = useTheme();
+  const { t } = useLocalization();
   const total = data.reduce((sum, item) => sum + item.value, 0);
   
   if (total === 0) {
     return (
-      <View className="items-center justify-center" style={{ height: size }}>
-        <Ionicons name="pie-chart-outline" size={64} color="#D1D5DB" />
-        <Text className="text-gray-500 mt-2">Tidak ada data</Text>
+      <View style={{ alignItems: 'center', justifyContent: 'center', height: size }}>
+        <Ionicons name="pie-chart-outline" size={64} color={colors.textSecondary} />
+        <Text style={{ color: colors.textSecondary, marginTop: 8 }}>{t('noData')}</Text>
       </View>
     );
   }
@@ -82,46 +86,53 @@ export const PieChart: React.FC<PieChartProps> = ({
         
         {/* Center circle */}
         <View
-          className="absolute bg-white rounded-full items-center justify-center"
-          style={
-            {
-              width: size * 0.6,
-              height: size * 0.6,
-              top: size * 0.2,
-              left: size * 0.2,
-            }
-          }
+          style={{
+            position: 'absolute',
+            backgroundColor: colors.surface,
+            borderRadius: size * 0.3,
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: size * 0.6,
+            height: size * 0.6,
+            top: size * 0.2,
+            left: size * 0.2,
+          }}
         >
-          <Text className="text-2xl font-bold text-gray-900">
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}>
             {data.length}
           </Text>
-          <Text className="text-sm text-gray-500">Kategori</Text>
+          <Text style={{ fontSize: 14, color: colors.textSecondary }}>{t('categories')}</Text>
         </View>
       </View>
 
       {/* Legend */}
       {showLegend && (
-        <View className="mt-6 w-full">
+        <View style={{ marginTop: 24, width: '100%' }}>
           {data.map((item, index) => (
-            <View key={index} className="flex-row items-center justify-between py-2">
-              <View className="flex-row items-center flex-1">
+            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                 <View
-                  className="w-4 h-4 rounded-full mr-3"
-                  style={{ backgroundColor: item.color }}
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: 8,
+                    marginRight: 12,
+                    backgroundColor: item.color
+                  }}
                 />
-                <Text className="text-gray-700 font-medium flex-1" numberOfLines={1}>
+                <Text style={{ color: colors.text, fontWeight: '500', flex: 1 }} numberOfLines={1}>
                   {item.label}
                 </Text>
               </View>
-              <View className="items-end">
-                <Text className="text-gray-900 font-semibold">
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={{ color: colors.text, fontWeight: '600' }}>
                   {new Intl.NumberFormat('id-ID', {
                     style: 'currency',
                     currency: 'IDR',
                     minimumFractionDigits: 0,
                   }).format(item.value)}
                 </Text>
-                <Text className="text-gray-500 text-sm">
+                <Text style={{ color: colors.textSecondary, fontSize: 14 }}>
                   {item.percentage.toFixed(1)}%
                 </Text>
               </View>
@@ -145,27 +156,29 @@ export const BarChart: React.FC<BarChartProps> = ({
   height = 200,
   showValues = true,
 }) => {
+  const { colors } = useTheme();
+  const { t } = useLocalization();
   const maxValue = Math.max(...data.map(item => item.value));
   
   if (maxValue === 0) {
     return (
-      <View className="items-center justify-center" style={{ height }}>
-        <Ionicons name="bar-chart-outline" size={64} color="#D1D5DB" />
-        <Text className="text-gray-500 mt-2">Tidak ada data</Text>
+      <View style={{ alignItems: 'center', justifyContent: 'center', height }}>
+        <Ionicons name="bar-chart-outline" size={64} color={colors.textSecondary} />
+        <Text style={{ color: colors.textSecondary, marginTop: 8 }}>{t('noData')}</Text>
       </View>
     );
   }
 
   return (
-    <View className="w-full">
-      <View className="flex-row items-end justify-between" style={{ height }}>
+    <View style={{ width: '100%' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height }}>
         {data.map((item, index) => {
           const barHeight = (item.value / maxValue) * (height - 40); // 40px for labels
           return (
-            <View key={index} className="items-center flex-1 mx-1">
+            <View key={index} style={{ alignItems: 'center', flex: 1, marginHorizontal: 4 }}>
               {/* Value label */}
               {showValues && item.value > 0 && (
-                <Text className="text-xs text-gray-600 mb-1 font-medium">
+                <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 4, fontWeight: '500' }}>
                   {new Intl.NumberFormat('id-ID', {
                     notation: 'compact',
                     compactDisplay: 'short',
@@ -175,8 +188,10 @@ export const BarChart: React.FC<BarChartProps> = ({
               
               {/* Bar */}
               <View
-                className="w-full rounded-t-lg"
                 style={{
+                  width: '100%',
+                  borderTopLeftRadius: 8,
+                  borderTopRightRadius: 8,
                   height: Math.max(barHeight, 4), // Minimum height of 4px
                   backgroundColor: item.color,
                   minHeight: item.value > 0 ? 8 : 4,
@@ -185,7 +200,13 @@ export const BarChart: React.FC<BarChartProps> = ({
               
               {/* Category label */}
               <Text
-                className="text-xs text-gray-700 mt-2 text-center font-medium"
+                style={{
+                  fontSize: 12,
+                  color: colors.text,
+                  marginTop: 8,
+                  textAlign: 'center',
+                  fontWeight: '500'
+                }}
                 numberOfLines={2}
               >
                 {item.label}

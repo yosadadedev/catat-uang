@@ -11,20 +11,24 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFinanceStore } from '../store/useStore';
+import { useTheme } from '../contexts/ThemeContext';
+import { useLocalization } from '../contexts/LocalizationContext';
 import { Category } from '../database/database';
 
 const SettingsScreen = () => {
   const { categories, loading } = useFinanceStore();
   const { addCategory, updateCategory, deleteCategory, loadCategories } = useFinanceStore();
+  const { isDarkMode, toggleDarkMode, colors } = useTheme();
+  const { locale, setLocale, t } = useLocalization();
 
   const [showAddCategory, setShowAddCategory] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryName, setCategoryName] = useState('');
   const [categoryIcon, setCategoryIcon] = useState('💰');
   const [categoryColor, setCategoryColor] = useState('#3B82F6');
   const [categoryType, setCategoryType] = useState<'income' | 'expense'>('expense');
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   const predefinedIcons = [
     '💰', '🍔', '🚗', '🏠', '💊', '🎬', '👕', '📱',
@@ -115,23 +119,24 @@ const SettingsScreen = () => {
   const expenseCategories = categories.filter(c => c.type === 'expense');
 
   return (
-    <ScrollView className="flex-1 bg-gray-50" showsVerticalScrollIndicator={false}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} showsVerticalScrollIndicator={false}>
       {/* Header */}
-      <View className="bg-white mx-4 mt-4 rounded-xl p-4 shadow-sm border border-gray-100">
-        <Text className="text-xl font-bold text-gray-900">Pengaturan</Text>
-        <Text className="text-gray-600 mt-1">Kelola kategori dan preferensi aplikasi</Text>
+      <View style={{ backgroundColor: colors.surface, marginHorizontal: 16, marginTop: 16, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: colors.border }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text }}>{t('settingsTitle')}</Text>
+        <Text style={{ color: colors.textSecondary, marginTop: 4 }}>{t('settingsSubtitle')}</Text>
       </View>
 
       {/* App Preferences */}
-      <View className="bg-white mx-4 mt-4 rounded-xl p-4 shadow-sm border border-gray-100">
-        <Text className="text-lg font-bold text-gray-900 mb-4">Preferensi Aplikasi</Text>
+      <View style={{ backgroundColor: colors.surface, marginHorizontal: 16, marginTop: 16, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: colors.border }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 16 }}>{t('appPreferences')}</Text>
         
-        <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
-          <View className="flex-row items-center flex-1">
-            <Ionicons name="notifications" size={20} color="#6B7280" />
-            <View className="ml-3 flex-1">
-              <Text className="text-gray-900 font-medium">Notifikasi</Text>
-              <Text className="text-gray-500 text-sm">Terima pengingat dan notifikasi</Text>
+        <View 
+        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <Ionicons name="notifications" size={20} color={colors.textSecondary} />
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text style={{ color: colors.text, fontWeight: '500' }}>{t('notifications')}</Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('notificationsDesc')}</Text>
             </View>
           </View>
           <Switch
@@ -142,141 +147,56 @@ const SettingsScreen = () => {
           />
         </View>
 
-        <View className="flex-row items-center justify-between py-3">
-          <View className="flex-row items-center flex-1">
-            <Ionicons name="moon" size={20} color="#6B7280" />
-            <View className="ml-3 flex-1">
-              <Text className="text-gray-900 font-medium">Mode Gelap</Text>
-              <Text className="text-gray-500 text-sm">Tampilan gelap untuk mata</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <Ionicons name="moon" size={20} color={colors.textSecondary} />
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text style={{ color: colors.text, fontWeight: '500' }}>{t('darkMode')}</Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('darkModeDesc')}</Text>
             </View>
           </View>
           <Switch
-            value={darkMode}
-            onValueChange={setDarkMode}
+            value={isDarkMode}
+            onValueChange={toggleDarkMode}
             trackColor={{ false: '#D1D5DB', true: '#3B82F6' }}
-            thumbColor={darkMode ? '#FFFFFF' : '#FFFFFF'}
+            thumbColor={isDarkMode ? '#FFFFFF' : '#FFFFFF'}
           />
         </View>
-      </View>
 
-      {/* Category Management */}
-      <View className="bg-white mx-4 mt-4 rounded-xl p-4 shadow-sm border border-gray-100">
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-lg font-bold text-gray-900">Manajemen Kategori</Text>
-          <TouchableOpacity
-            onPress={() => {
+        <TouchableOpacity
+          onPress={() => setShowLanguageModal(true)}
+         style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <Ionicons name="language" size={20} color={colors.textSecondary} />
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text style={{ color: colors.text, fontWeight: '500' }}>{t('language')}</Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('languageDesc')}</Text>
+            </View>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ color: colors.textSecondary, marginRight: 8 }}>
+              {locale === 'id' ? 'Indonesia' : 'English'}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 }}
+          onPress={() => {
               resetForm();
               setEditingCategory(null);
               setShowAddCategory(true);
             }}
-            className="bg-blue-600 px-4 py-2 rounded-lg flex-row items-center"
-          >
-            <Ionicons name="add" size={16} color="white" />
-            <Text className="text-white font-medium ml-1">Tambah</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Income Categories */}
-        <View className="mb-6">
-          <Text className="text-md font-semibold text-green-700 mb-3">Kategori Pemasukan</Text>
-          {incomeCategories.length > 0 ? (
-            incomeCategories.map((category) => (
-              <View key={category.id} className="flex-row items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                <View className="flex-row items-center flex-1">
-                  <View
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginRight: 12,
-                      backgroundColor: category.color + '20'
-                    }}
-                  >
-                    <Ionicons name={category.icon as any} size={20} color={category.color} />
-                  </View>
-                  <Text className="text-gray-900 font-medium flex-1">{category.name}</Text>
-                </View>
-                <View className="flex-row items-center">
-                  <TouchableOpacity
-                    onPress={() => handleEditCategory(category)}
-                    className="p-2 mr-2"
-                  >
-                    <Ionicons name="pencil" size={16} color="#6B7280" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleDeleteCategory(category)}
-                    className="p-2"
-                  >
-                    <Ionicons name="trash" size={16} color="#EF4444" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))
-          ) : (
-            <Text className="text-gray-500 text-center py-4">Belum ada kategori pemasukan</Text>
-          )}
-        </View>
-
-        {/* Expense Categories */}
-        <View>
-          <Text className="text-md font-semibold text-red-700 mb-3">Kategori Pengeluaran</Text>
-          {expenseCategories.length > 0 ? (
-            expenseCategories.map((category) => (
-              <View key={category.id} className="flex-row items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                <View className="flex-row items-center flex-1">
-                  <View
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginRight: 12,
-                      backgroundColor: category.color + '20'
-                    }}
-                  >
-                    <Ionicons name={category.icon as any} size={20} color={category.color} />
-                  </View>
-                  <Text className="text-gray-900 font-medium flex-1">{category.name}</Text>
-                </View>
-                <View className="flex-row items-center">
-                  <TouchableOpacity
-                    onPress={() => handleEditCategory(category)}
-                    className="p-2 mr-2"
-                  >
-                    <Ionicons name="pencil" size={16} color="#6B7280" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleDeleteCategory(category)}
-                    className="p-2"
-                  >
-                    <Ionicons name="trash" size={16} color="#EF4444" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))
-          ) : (
-            <Text className="text-gray-500 text-center py-4">Belum ada kategori pengeluaran</Text>
-          )}
-        </View>
-      </View>
-
-      {/* About Section */}
-      <View className="bg-white mx-4 mt-4 rounded-xl p-4 shadow-sm border border-gray-100">
-        <Text className="text-lg font-bold text-gray-900 mb-4">Tentang Aplikasi</Text>
-        
-        <View className="items-center py-4">
-          <View className="w-16 h-16 bg-blue-100 rounded-full items-center justify-center mb-3">
-            <Ionicons name="wallet" size={32} color="#3B82F6" />
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <Ionicons name="notifications" size={20} color={colors.textSecondary} />
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text style={{ color: colors.text, fontWeight: '500' }}>Kelola Kategori</Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('notificationsDesc')}</Text>
+            </View>
           </View>
-          <Text className="text-gray-900 font-bold text-lg">Catatan Keuangan</Text>
-          <Text className="text-gray-500 text-sm mt-1">Versi 1.0.0</Text>
-          <Text className="text-gray-500 text-sm text-center mt-3">
-            Aplikasi sederhana untuk mencatat dan mengelola keuangan pribadi
-          </Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Add/Edit Category Modal */}
@@ -290,9 +210,9 @@ const SettingsScreen = () => {
           resetForm();
         }}
       >
-        <View className="flex-1 bg-gray-50">
-          <View className="bg-white p-4 border-b border-gray-200">
-            <View className="flex-row items-center justify-between">
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
+          <View style={{ backgroundColor: colors.surface, padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <TouchableOpacity
                 onPress={() => {
                   setShowAddCategory(false);
@@ -300,59 +220,74 @@ const SettingsScreen = () => {
                   resetForm();
                 }}
               >
-                <Text className="text-blue-600 font-medium">Batal</Text>
+                <Text style={{ color: colors.primary, fontWeight: '500' }}>{t('cancel')}</Text>
               </TouchableOpacity>
-              <Text className="text-lg font-bold text-gray-900">
-                {editingCategory ? 'Edit Kategori' : 'Tambah Kategori'}
+              <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text }}>
+                {editingCategory ? t('editCategory') : t('addCategory')}
               </Text>
               <TouchableOpacity onPress={handleSaveCategory}>
-                <Text className="text-blue-600 font-medium">Simpan</Text>
+                <Text style={{ color: colors.primary, fontWeight: '500' }}>{t('save')}</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          <ScrollView className="flex-1 p-4">
-            {/* Category Name */}
-            <View className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
-              <Text className="text-gray-700 font-medium mb-2">Nama Kategori</Text>
-              <TextInput
-                value={categoryName}
-                onChangeText={setCategoryName}
-                placeholder="Masukkan nama kategori"
-                className="bg-gray-50 p-3 rounded-lg text-gray-900"
-                maxLength={50}
-              />
-            </View>
+          <ScrollView style={{ flex: 1, padding: 16 }}>
+             {/* Category Name */}
+             <View style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}>
+               <Text style={{ color: colors.text, fontWeight: '500', marginBottom: 8 }}>{t('categoryName')}</Text>
+               <TextInput
+                 value={categoryName}
+                 onChangeText={setCategoryName}
+                 placeholder={t('enterCategoryName')}
+                 style={{ backgroundColor: colors.background, padding: 12, borderRadius: 8, color: colors.text, borderWidth: 1, borderColor: colors.border }}
+                 placeholderTextColor={colors.textSecondary}
+                 maxLength={50}
+               />
+             </View>
 
-            {/* Category Type */}
-            <View className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
-              <Text className="text-gray-700 font-medium mb-3">Jenis Kategori</Text>
-              <View className="flex-row">
-                <TouchableOpacity
-                  onPress={() => setCategoryType('income')}
-                  className={`flex-1 py-3 px-4 rounded-lg mr-2 items-center ${
-                    categoryType === 'income' ? 'bg-green-600' : 'bg-gray-100'
-                  }`}
-                >
-                  <Text className={`font-medium ${
-                    categoryType === 'income' ? 'text-white' : 'text-gray-600'
-                  }`}>
-                    Pemasukan
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setCategoryType('expense')}
-                  className={`flex-1 py-3 px-4 rounded-lg ml-2 items-center ${
-                    categoryType === 'expense' ? 'bg-red-600' : 'bg-gray-100'
-                  }`}
-                >
-                  <Text className={`font-medium ${
-                    categoryType === 'expense' ? 'text-white' : 'text-gray-600'
-                  }`}>
-                    Pengeluaran
-                  </Text>
-                </TouchableOpacity>
-              </View>
+             {/* Category Type */}
+             <View style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}>
+               <Text style={{ color: colors.text, fontWeight: '500', marginBottom: 12 }}>{t('categoryType')}</Text>
+               <View style={{ flexDirection: 'row' }}>
+                 <TouchableOpacity
+                   onPress={() => setCategoryType('income')}
+                   style={{
+                     flex: 1,
+                     paddingVertical: 12,
+                     paddingHorizontal: 16,
+                     borderRadius: 8,
+                     marginRight: 8,
+                     alignItems: 'center',
+                     backgroundColor: categoryType === 'income' ? '#10B981' : colors.background
+                   }}
+                 >
+                   <Text style={{
+                     fontWeight: '500',
+                     color: categoryType === 'income' ? 'white' : colors.textSecondary
+                   }}>
+                     {t('income')}
+                   </Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity
+                   onPress={() => setCategoryType('expense')}
+                   style={{
+                     flex: 1,
+                     paddingVertical: 12,
+                     paddingHorizontal: 16,
+                     borderRadius: 8,
+                     marginLeft: 8,
+                     alignItems: 'center',
+                     backgroundColor: categoryType === 'expense' ? '#EF4444' : colors.background
+                   }}
+                 >
+                   <Text style={{
+                     fontWeight: '500',
+                     color: categoryType === 'expense' ? 'white' : colors.textSecondary
+                   }}>
+                     {t('expense')}
+                   </Text>
+                 </TouchableOpacity>
+               </View>
             </View>
 
             {/* Category Icon */}
@@ -414,8 +349,89 @@ const SettingsScreen = () => {
         </View>
       </Modal>
 
+      {/* Language Selection Modal */}
+      <Modal
+        visible={showLanguageModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowLanguageModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
+          <View style={{ backgroundColor: colors.surface, padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
+                <Text style={{ color: colors.primary, fontWeight: '500' }}>{t('cancel')}</Text>
+              </TouchableOpacity>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text }}>
+                {t('language')}
+              </Text>
+              <View style={{ width: 60 }} />
+            </View>
+          </View>
+
+          <View style={{ flex: 1, padding: 16 }}>
+            <TouchableOpacity
+              onPress={() => {
+                setLocale('id');
+                setShowLanguageModal(false);
+              }}
+              style={{
+                backgroundColor: colors.surface,
+                padding: 16,
+                borderRadius: 12,
+                marginBottom: 12,
+                borderWidth: locale === 'id' ? 2 : 1,
+                borderColor: locale === 'id' ? colors.primary : colors.border,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{ fontSize: 24, marginRight: 12 }}>🇮🇩</Text>
+                <View>
+                  <Text style={{ color: colors.text, fontWeight: '500', fontSize: 16 }}>Indonesia</Text>
+                  <Text style={{ color: colors.textSecondary, fontSize: 14 }}>Bahasa Indonesia</Text>
+                </View>
+              </View>
+              {locale === 'id' && (
+                <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                setLocale('en');
+                setShowLanguageModal(false);
+              }}
+              style={{
+                backgroundColor: colors.surface,
+                padding: 16,
+                borderRadius: 12,
+                borderWidth: locale === 'en' ? 2 : 1,
+                borderColor: locale === 'en' ? colors.primary : colors.border,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{ fontSize: 24, marginRight: 12 }}>🇺🇸</Text>
+                <View>
+                  <Text style={{ color: colors.text, fontWeight: '500', fontSize: 16 }}>English</Text>
+                  <Text style={{ color: colors.textSecondary, fontSize: 14 }}>English (US)</Text>
+                </View>
+              </View>
+              {locale === 'en' && (
+                <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       {/* Bottom Spacing */}
-      <View className="h-8" />
+      <View style={{ height: 32 }} />
     </ScrollView>
   );
 };

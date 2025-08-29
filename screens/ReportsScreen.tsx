@@ -13,8 +13,12 @@ import { PieChart, BarChart, MonthlyTrend, prepareChartData } from '../component
 // import { DateRangePicker } from '../components/DatePicker';
 import { useFinanceStore } from '../store/useStore';
 import { Transaction } from '../database/database';
+import { useTheme } from '../contexts/ThemeContext';
+import { useLocalization } from '../contexts/LocalizationContext';
 
 const ReportsScreen = () => {
+  const { colors } = useTheme();
+  const { t } = useLocalization();
   const transactions = useFinanceStore((state) => state.transactions);
   const categories = useFinanceStore((state) => state.categories);
   const loading = useFinanceStore((state) => state.loading);
@@ -167,27 +171,47 @@ ${topIncome.map((item, index) => `${index + 1}. ${item.icon} ${item.category}: $
 
   return (
     <ScrollView
-      className="flex-1 bg-gray-50"
+      style={{ flex: 1, backgroundColor: colors.background }}
       refreshControl={
         <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
       }
       showsVerticalScrollIndicator={false}
     >
       {/* Header with Export Button */}
-      <View className="bg-white mx-4 mt-4 rounded-xl p-4 shadow-sm border border-gray-100">
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-xl font-bold text-gray-900">Laporan Keuangan</Text>
+      <View style={{
+        backgroundColor: colors.surface,
+        marginHorizontal: 16,
+        marginTop: 16,
+        borderRadius: 12,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: colors.border
+      }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text }}>{t('financialReport')}</Text>
           <TouchableOpacity
             onPress={exportReport}
-            className="bg-blue-600 px-4 py-2 rounded-lg flex-row items-center"
+            style={{
+              backgroundColor: '#3B82F6',
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 8,
+              flexDirection: 'row',
+              alignItems: 'center'
+            }}
           >
             <Ionicons name="share" size={16} color="white" />
-            <Text className="text-white font-medium ml-2">Export</Text>
+            <Text style={{ color: 'white', fontWeight: '500', marginLeft: 8 }}>{t('export')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Period Selection */}
-        <View className="flex-row justify-between mb-4">
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
           {(['week', 'month', 'year', 'custom'] as const).map((period) => (
             <TouchableOpacity
               key={period}
@@ -198,66 +222,108 @@ ${topIncome.map((item, index) => `${index + 1}. ${item.icon} ${item.category}: $
                   setSelectedPeriod(period);
                 }
               }}
-              className={`flex-1 py-2 mx-1 rounded-lg items-center ${
-                selectedPeriod === period ? 'bg-blue-600' : 'bg-gray-100'
-              }`}
+              style={{
+                flex: 1,
+                paddingVertical: 8,
+                marginHorizontal: 4,
+                borderRadius: 8,
+                alignItems: 'center',
+                backgroundColor: selectedPeriod === period ? '#3B82F6' : colors.surface,
+                borderWidth: 1,
+                borderColor: selectedPeriod === period ? '#3B82F6' : colors.border
+              }}
             >
-              <Text className={`font-medium ${
-                selectedPeriod === period ? 'text-white' : 'text-gray-600'
-              }`}>
-                {period === 'week' ? 'Minggu' : 
-                 period === 'month' ? 'Bulan' : 
-                 period === 'year' ? 'Tahun' : 'Custom'}
+              <Text style={{
+                fontWeight: '500',
+                color: selectedPeriod === period ? 'white' : colors.text
+              }}>
+                {period === 'week' ? t('week') : 
+                 period === 'month' ? t('month') : 
+                 period === 'year' ? t('year') : t('custom')}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Date Range Display */}
-        <Text className="text-gray-600 text-center">{formatDateRange()}</Text>
+        <Text style={{ color: colors.textSecondary, textAlign: 'center' }}>{formatDateRange()}</Text>
       </View>
 
       {/* Summary Cards */}
-      <View className="mx-4 mt-4">
-        <View className="flex-row justify-between mb-4">
-          <View className="flex-1 bg-green-50 rounded-xl p-4 mr-2 border border-green-100">
-            <View className="flex-row items-center mb-2">
+      <View style={{ marginHorizontal: 16, marginTop: 16 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
+          <View style={{
+            flex: 1,
+            backgroundColor: '#F0FDF4',
+            borderRadius: 12,
+            padding: 16,
+            marginRight: 8,
+            borderWidth: 1,
+            borderColor: '#BBF7D0'
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
               <Ionicons name="trending-up" size={20} color="#059669" />
-              <Text className="text-green-700 font-medium ml-2">Pemasukan</Text>
+              <Text style={{ color: '#047857', fontWeight: '500', marginLeft: 8 }}>{t('income')}</Text>
             </View>
-            <Text className="text-green-800 text-xl font-bold">
+            <Text style={{ color: '#065F46', fontSize: 20, fontWeight: 'bold' }}>
               {formatCurrency(summary.income)}
             </Text>
           </View>
-          <View className="flex-1 bg-red-50 rounded-xl p-4 ml-2 border border-red-100">
-            <View className="flex-row items-center mb-2">
+          <View style={{
+            flex: 1,
+            backgroundColor: '#FEF2F2',
+            borderRadius: 12,
+            padding: 16,
+            marginLeft: 8,
+            borderWidth: 1,
+            borderColor: '#FECACA'
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
               <Ionicons name="trending-down" size={20} color="#DC2626" />
-              <Text className="text-red-700 font-medium ml-2">Pengeluaran</Text>
+              <Text style={{ color: '#B91C1C', fontWeight: '500', marginLeft: 8 }}>{t('expense')}</Text>
             </View>
-            <Text className="text-red-800 text-xl font-bold">
+            <Text style={{ color: '#991B1B', fontSize: 20, fontWeight: 'bold' }}>
               {formatCurrency(summary.expense)}
             </Text>
           </View>
         </View>
 
-        <View className="flex-row justify-between">
-          <View className="flex-1 bg-blue-50 rounded-xl p-4 mr-2 border border-blue-100">
-            <View className="flex-row items-center mb-2">
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={{
+            flex: 1,
+            backgroundColor: '#EFF6FF',
+            borderRadius: 12,
+            padding: 16,
+            marginRight: 8,
+            borderWidth: 1,
+            borderColor: '#DBEAFE'
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
               <Ionicons name="wallet" size={20} color="#2563EB" />
-              <Text className="text-blue-700 font-medium ml-2">Saldo</Text>
+              <Text style={{ color: '#1D4ED8', fontWeight: '500', marginLeft: 8 }}>{t('balance')}</Text>
             </View>
-            <Text className={`text-xl font-bold ${
-              summary.balance >= 0 ? 'text-blue-800' : 'text-red-600'
-            }`}>
+            <Text style={{
+              fontSize: 20,
+              fontWeight: 'bold',
+              color: summary.balance >= 0 ? '#1E40AF' : '#DC2626'
+            }}>
               {formatCurrency(summary.balance)}
             </Text>
           </View>
-          <View className="flex-1 bg-gray-50 rounded-xl p-4 ml-2 border border-gray-100">
-            <View className="flex-row items-center mb-2">
-              <Ionicons name="receipt" size={20} color="#6B7280" />
-              <Text className="text-gray-700 font-medium ml-2">Transaksi</Text>
+          <View style={{
+            flex: 1,
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            padding: 16,
+            marginLeft: 8,
+            borderWidth: 1,
+            borderColor: colors.border
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <Ionicons name="receipt" size={20} color={colors.textSecondary} />
+              <Text style={{ color: colors.text, fontWeight: '500', marginLeft: 8 }}>{t('transactions')}</Text>
             </View>
-            <Text className="text-gray-800 text-xl font-bold">
+            <Text style={{ color: colors.text, fontSize: 20, fontWeight: 'bold' }}>
               {summary.totalTransactions}
             </Text>
           </View>
@@ -269,8 +335,21 @@ ${topIncome.map((item, index) => `${index + 1}. ${item.icon} ${item.category}: $
         <>
           {/* Expense Pie Chart */}
            {summary.expense > 0 && (
-             <View className="bg-white mx-4 mt-4 rounded-xl p-4 shadow-sm border border-gray-100">
-               <Text className="text-lg font-bold text-gray-900 mb-4">Distribusi Pengeluaran</Text>
+             <View style={{
+               backgroundColor: colors.surface,
+               marginHorizontal: 16,
+               marginTop: 16,
+               borderRadius: 12,
+               padding: 16,
+               shadowColor: '#000',
+               shadowOffset: { width: 0, height: 1 },
+               shadowOpacity: 0.1,
+               shadowRadius: 2,
+               elevation: 2,
+               borderWidth: 1,
+               borderColor: colors.border
+             }}>
+               <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 16 }}>{t('expenseDistribution')}</Text>
                <PieChart
                  data={prepareChartData(
                    filteredTransactions.filter(t => t.type === 'expense'),

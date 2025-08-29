@@ -3,6 +3,8 @@ import { StatusBar } from 'expo-status-bar';
 import { View, Text, ActivityIndicator } from 'react-native';
 import AppNavigator from './navigation/AppNavigator';
 import { useFinanceStore } from './store/useStore';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { LocalizationProvider } from './contexts/LocalizationContext';
 import './global.css';
 
 export default function App() {
@@ -33,9 +35,11 @@ export default function App() {
   }
 
   return (
-    <>
-      <AppNavigator />
-      <StatusBar style="auto" />
-    </>
+    <LocalizationProvider>
+      <ThemeProvider>
+        <AppNavigator />
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </LocalizationProvider>
   );
 }
