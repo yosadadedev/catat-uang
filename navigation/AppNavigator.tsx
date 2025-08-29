@@ -125,13 +125,23 @@ const DrawerNavigator = () => {
               justifyContent: 'center',
               alignItems: 'center',
               marginRight: 8,
+              opacity: focused ? 1 : 0.8,
+              transform: [{ scale: focused ? 1.05 : 1 }],
+              shadowColor: focused ? backgroundColor : 'transparent',
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: focused ? 0.3 : 0,
+              shadowRadius: 4,
+              elevation: focused ? 4 : 0,
             }}>
               <Ionicons name={iconName} size={size - 4} color={iconColor} />
             </View>
           );
         },
-        drawerActiveTintColor: colors.primary,
-        drawerInactiveTintColor: colors.textSecondary,
+        drawerActiveTintColor: '#FFFFFF',
+        drawerInactiveTintColor: 'rgba(255, 255, 255, 0.7)',
         drawerStyle: {
           backgroundColor: '#3B82F6', // Blue background
           width: 280,
@@ -142,6 +152,14 @@ const DrawerNavigator = () => {
           marginLeft: -8,
           color: '#FFFFFF', // White text for blue background
         },
+        drawerItemStyle: {
+          borderRadius: 12,
+          marginHorizontal: 4,
+          marginVertical: 4,
+          paddingVertical: 4,
+        },
+        drawerActiveBackgroundColor: 'rgba(255, 255, 255, 0.15)',
+        drawerInactiveBackgroundColor: 'transparent',
         headerStyle: {
           backgroundColor: colors.surface,
           elevation: 0,
