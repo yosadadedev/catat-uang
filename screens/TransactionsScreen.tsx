@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   TextInput,
   Modal,
@@ -15,7 +14,7 @@ import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useFinanceStore } from '../store/useStore';
-import { TransactionCard } from '../components/TransactionCard';
+import { TransactionCard, TransactionList } from '../components/TransactionCard';
 import { DatePicker } from '../components/DatePicker';
 import { Transaction } from '../database/database';
 
@@ -446,29 +445,34 @@ const TransactionsScreen = () => {
         </View>
 
         {/* Tab View */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
-          {(['daily', 'weekly', 'monthly', 'yearly'] as TabType[]).map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              style={{
-                paddingHorizontal: 20,
-                paddingVertical: 8,
-                borderRadius: 20,
-                marginRight: 12,
-                backgroundColor: activeTab === tab ? 'white' : 'rgba(255,255,255,0.2)'
-              }}
-              onPress={() => setActiveTab(tab)}
-            >
-              <Text style={{
-                fontSize: 12,
-                fontWeight: '600',
-                color: activeTab === tab ? '#3B82F6' : 'white'
-              }}>
-                {getTabLabel(tab)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <View style={{ marginBottom: 16 }}>
+          <View style={{
+            flexDirection: 'row',
+            paddingHorizontal: 16
+          }}>
+            {(['daily', 'weekly', 'monthly', 'yearly'] as TabType[]).map((tab) => (
+              <TouchableOpacity
+                key={tab}
+                style={{
+                  paddingHorizontal: 20,
+                  paddingVertical: 8,
+                  borderRadius: 20,
+                  marginRight: 12,
+                  backgroundColor: activeTab === tab ? 'white' : 'rgba(255,255,255,0.2)'
+                }}
+                onPress={() => setActiveTab(tab)}
+              >
+                <Text style={{
+                  fontSize: 12,
+                  fontWeight: '600',
+                  color: activeTab === tab ? '#3B82F6' : 'white'
+                }}>
+                  {getTabLabel(tab)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
         {/* Filter Options */}
         {showFilters && (
@@ -479,72 +483,78 @@ const TransactionsScreen = () => {
             padding: 12
           }}>
             {/* Type Filter */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-              {(['all', 'income', 'expense'] as FilterType[]).map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 6,
-                    borderRadius: 16,
-                    marginRight: 8,
-                    backgroundColor: filterType === type ? 'white' : 'rgba(255,255,255,0.2)'
-                  }}
-                  onPress={() => setFilterType(type)}
-                >
-                  <Text style={{
-                    fontSize: 12,
-                    fontWeight: '600',
-                    color: filterType === type ? '#3B82F6' : 'white'
-                  }}>
-                    {type === 'all' ? 'Semua' : type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <View style={{ marginBottom: 12 }}>
+              <View style={{ flexDirection: 'row' }}>
+                {(['all', 'income', 'expense'] as FilterType[]).map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={{
+                      paddingHorizontal: 16,
+                      paddingVertical: 6,
+                      borderRadius: 16,
+                      marginRight: 8,
+                      backgroundColor: filterType === type ? 'white' : 'rgba(255,255,255,0.2)'
+                    }}
+                    onPress={() => setFilterType(type)}
+                  >
+                    <Text style={{
+                      fontSize: 12,
+                      fontWeight: '600',
+                      color: filterType === type ? '#3B82F6' : 'white'
+                    }}>
+                      {type === 'all' ? 'Semua' : type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
             
             {/* Category Filter */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <TouchableOpacity
-                style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 6,
-                  borderRadius: 16,
-                  marginRight: 8,
-                  backgroundColor: !selectedCategory ? 'white' : 'rgba(255,255,255,0.2)'
-                }}
-                onPress={() => setSelectedCategory(null)}
-              >
-                <Text style={{
-                  fontSize: 12,
-                  fontWeight: '600',
-                  color: !selectedCategory ? '#3B82F6' : 'white'
-                }}>
-                  Semua Kategori
-                </Text>
-              </TouchableOpacity>
-              {categories.map((category) => (
+            <View>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                 <TouchableOpacity
-                  key={category.id}
                   style={{
                     paddingHorizontal: 16,
                     paddingVertical: 6,
                     borderRadius: 16,
                     marginRight: 8,
-                    backgroundColor: selectedCategory === category.id ? 'white' : 'rgba(255,255,255,0.2)'
+                    marginBottom: 8,
+                    backgroundColor: !selectedCategory ? 'white' : 'rgba(255,255,255,0.2)'
                   }}
-                  onPress={() => setSelectedCategory(category.id!)}
+                  onPress={() => setSelectedCategory(null)}
                 >
                   <Text style={{
                     fontSize: 12,
                     fontWeight: '600',
-                    color: selectedCategory === category.id ? '#3B82F6' : 'white'
+                    color: !selectedCategory ? '#3B82F6' : 'white'
                   }}>
-                    {category.name}
+                    Semua Kategori
                   </Text>
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
+                {categories.map((category) => (
+                  <TouchableOpacity
+                    key={category.id}
+                    style={{
+                      paddingHorizontal: 16,
+                      paddingVertical: 6,
+                      borderRadius: 16,
+                      marginRight: 8,
+                      marginBottom: 8,
+                      backgroundColor: selectedCategory === category.id ? 'white' : 'rgba(255,255,255,0.2)'
+                    }}
+                    onPress={() => setSelectedCategory(category.id!)}
+                  >
+                    <Text style={{
+                      fontSize: 12,
+                      fontWeight: '600',
+                      color: selectedCategory === category.id ? '#3B82F6' : 'white'
+                    }}>
+                      {category.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
           </View>
         )}
       </View>
@@ -552,19 +562,18 @@ const TransactionsScreen = () => {
       {/* Content */}
       <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
 
+
         {/* Transaction List */}
-        <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
+        <View style={{ flex: 1, marginTop: 16 }}>
           {filteredTransactions.length > 0 ? (
-            <View style={{ paddingVertical: 16 }}>
-              {filteredTransactions.map((transaction) => (
-                <View key={transaction.id} style={{ marginBottom: 12 }}>
-                  <TransactionCard
-                     transaction={transaction}
-                     onLongPress={() => handleDeleteTransaction(transaction.id!)}
-                   />
-                </View>
-              ))}
-            </View>
+            <TransactionList
+              transactions={filteredTransactions}
+              categories={categories}
+              onTransactionPress={(transaction) => {
+                // Handle transaction press if needed
+              }}
+              onTransactionLongPress={(transaction) => handleDeleteTransaction(transaction.id!)}
+            />
           ) : (
             <View style={{
               flex: 1,
@@ -594,7 +603,7 @@ const TransactionsScreen = () => {
               </Text>
             </View>
           )}
-        </ScrollView>
+        </View>
       </View>
 
       {/* Export Modal */}

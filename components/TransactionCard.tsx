@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Transaction, Category } from '../database/database';
 
@@ -143,20 +143,26 @@ export const TransactionList: React.FC<TransactionListProps> = ({
     );
   }
 
+  const renderTransaction = ({ item: transaction }: { item: Transaction }) => {
+    const category = categories.find(cat => cat.id === transaction.category_id);
+    return (
+      <TransactionCard
+        transaction={transaction}
+        category={category}
+        onPress={() => onTransactionPress?.(transaction)}
+        onLongPress={() => onTransactionLongPress?.(transaction)}
+      />
+    );
+  };
+
   return (
-    <View className="flex-1">
-      {transactions.map((transaction) => {
-        const category = categories.find(cat => cat.id === transaction.category_id);
-        return (
-          <TransactionCard
-            key={transaction.id}
-            transaction={transaction}
-            category={category}
-            onPress={() => onTransactionPress?.(transaction)}
-            onLongPress={() => onTransactionLongPress?.(transaction)}
-          />
-        );
-      })}
-    </View>
+    <FlatList
+      data={transactions}
+      renderItem={renderTransaction}
+      keyExtractor={(item) => item.id!.toString()}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingVertical: 16 }}
+      ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+    />
   );
 };
