@@ -85,7 +85,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={handleDateChange}
-          maximumDate={new Date()}
         />
 
     </>
