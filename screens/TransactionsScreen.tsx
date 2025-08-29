@@ -8,6 +8,8 @@ import {
   Alert,
   SafeAreaView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import * as XLSX from 'xlsx';
 import * as Print from 'expo-print';
@@ -17,12 +19,16 @@ import { useFinanceStore } from '../store/useStore';
 import { TransactionCard, TransactionList } from '../components/TransactionCard';
 import { DatePicker } from '../components/DatePicker';
 import { Transaction } from '../database/database';
+import { TabParamList } from '../navigation/AppNavigator';
 
 type TabType = 'daily' | 'weekly' | 'monthly' | 'yearly';
 type FilterType = 'all' | 'income' | 'expense';
 type SortType = 'newest' | 'oldest';
 
+type TransactionsScreenNavigationProp = BottomTabNavigationProp<TabParamList, 'Transactions'>;
+
 const TransactionsScreen = () => {
+  const navigation = useNavigation<TransactionsScreenNavigationProp>();
   const { transactions, categories, deleteTransaction } = useFinanceStore();
   const [activeTab, setActiveTab] = useState<TabType>('daily');
   const [filterType, setFilterType] = useState<FilterType>('all');
@@ -561,8 +567,6 @@ const TransactionsScreen = () => {
 
       {/* Content */}
       <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
-
-
         {/* Transaction List */}
         <View style={{ flex: 1, marginTop: 16 }}>
           {filteredTransactions.length > 0 ? (
@@ -820,6 +824,31 @@ const TransactionsScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          bottom: 30,
+          right: 20,
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          backgroundColor: '#3B82F6',
+          justifyContent: 'center',
+          alignItems: 'center',
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 4,
+          zIndex: 1000,
+        }}
+        onPress={() => (navigation as any).navigate('AddTransaction', {})}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="add" size={24} color="white" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };

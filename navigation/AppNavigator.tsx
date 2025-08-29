@@ -5,7 +5,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 
 // Import screens (will be created later)
-import HomeScreen from '../screens/HomeScreen';
 import TransactionsScreen from '../screens/TransactionsScreen';
 import ReportsScreen from '../screens/ReportsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -25,7 +24,6 @@ export type RootStackParamList = {
 };
 
 export type TabParamList = {
-  Home: undefined;
   Transactions: undefined;
   Reports: undefined;
   Settings: undefined;
@@ -43,9 +41,6 @@ const TabNavigator = () => {
           let iconName: keyof typeof Ionicons.glyphMap;
 
           switch (route.name) {
-            case 'Home':
-              iconName = focused ? 'home' : 'home-outline';
-              break;
             case 'Transactions':
               iconName = focused ? 'list' : 'list-outline';
               break;
@@ -91,14 +86,6 @@ const TabNavigator = () => {
         headerTintColor: '#3B82F6',
       })}
     >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          title: 'Beranda',
-          headerShown: false,
-        }}
-      />
       <Tab.Screen
         name="Transactions"
         component={TransactionsScreen}
