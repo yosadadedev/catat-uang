@@ -96,7 +96,7 @@ const TabNavigator = () => {
         component={HomeScreen}
         options={{
           title: 'Beranda',
-          headerTitle: 'Catatan Keuangan',
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -104,7 +104,7 @@ const TabNavigator = () => {
         component={TransactionsScreen}
         options={{
           title: 'Transaksi',
-          headerTitle: 'Riwayat Transaksi',
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -112,7 +112,7 @@ const TabNavigator = () => {
         component={ReportsScreen}
         options={{
           title: 'Laporan',
-          headerTitle: 'Laporan Keuangan',
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -120,7 +120,7 @@ const TabNavigator = () => {
         component={SettingsScreen}
         options={{
           title: 'Pengaturan',
-          headerTitle: 'Pengaturan',
+          headerShown: false,
         }}
       />
     </Tab.Navigator>

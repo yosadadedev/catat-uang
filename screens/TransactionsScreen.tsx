@@ -7,6 +7,7 @@ import {
   TextInput,
   Modal,
   Alert,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as XLSX from 'xlsx';
@@ -18,53 +19,73 @@ import { TransactionCard } from '../components/TransactionCard';
 import { DatePicker } from '../components/DatePicker';
 import { Transaction } from '../database/database';
 
+type TabType = 'daily' | 'weekly' | 'monthly' | 'yearly';
+type FilterType = 'all' | 'income' | 'expense';
+type SortType = 'newest' | 'oldest';
+
 const TransactionsScreen = () => {
   const { transactions, categories, deleteTransaction } = useFinanceStore();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
-  const [dateFilter, setDateFilter] = useState<{ start: Date | null; end: Date | null }>({ start: null, end: null });
+  const [activeTab, setActiveTab] = useState<TabType>('daily');
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [sortOrder, setSortOrder] = useState<SortType>('newest');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [datePickerType, setDatePickerType] = useState<'start' | 'end'>('start');
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [showExportModal, setShowExportModal] = useState(false);
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
+
+  const getDateRange = (tab: TabType, date: Date) => {
+    const start = new Date(date);
+    const end = new Date(date);
+    
+    switch (tab) {
+      case 'daily':
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'weekly':
+        const dayOfWeek = start.getDay();
+        start.setDate(start.getDate() - dayOfWeek);
+        start.setHours(0, 0, 0, 0);
+        end.setDate(start.getDate() + 6);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'monthly':
+        start.setDate(1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(end.getMonth() + 1, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'yearly':
+        start.setMonth(0, 1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(11, 31);
+        end.setHours(23, 59, 59, 999);
+        break;
+    }
+    
+    return { start, end };
+  };
 
   useEffect(() => {
     let filtered = transactions;
+    const { start, end } = getDateRange(activeTab, selectedDate);
+
+    // Filter by date range based on active tab
+    filtered = filtered.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= start && transactionDate <= end;
+    });
 
     // Filter by type
     if (filterType !== 'all') {
       filtered = filtered.filter(transaction => transaction.type === filterType);
     }
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(transaction => {
-        const category = categories.find(cat => cat.id === transaction.category_id);
-        return (
-          transaction.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          category?.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      });
-    }
-
-    // Filter by date range
-    if (dateFilter.start || dateFilter.end) {
-      filtered = filtered.filter(transaction => {
-        const transactionDate = new Date(transaction.date);
-        const startDate = dateFilter.start ? new Date(dateFilter.start) : null;
-        const endDate = dateFilter.end ? new Date(dateFilter.end) : null;
-        
-        if (startDate && endDate) {
-          return transactionDate >= startDate && transactionDate <= endDate;
-        } else if (startDate) {
-          return transactionDate >= startDate;
-        } else if (endDate) {
-          return transactionDate <= endDate;
-        }
-        return true;
-      });
+    // Filter by category
+    if (selectedCategory) {
+      filtered = filtered.filter(transaction => transaction.category_id === selectedCategory);
     }
 
     // Sort by date
@@ -75,7 +96,7 @@ const TransactionsScreen = () => {
     });
 
     setFilteredTransactions(filtered);
-  }, [transactions, searchQuery, filterType, categories, dateFilter, sortOrder]);
+  }, [transactions, activeTab, selectedDate, filterType, selectedCategory, sortOrder, categories]);
 
   const handleDeleteTransaction = (transactionId: number) => {
     Alert.alert(
@@ -93,16 +114,29 @@ const TransactionsScreen = () => {
   };
 
   const handleDateSelect = (date: Date) => {
-    if (datePickerType === 'start') {
-      setDateFilter(prev => ({ ...prev, start: date }));
-    } else {
-      setDateFilter(prev => ({ ...prev, end: date }));
-    }
+    setSelectedDate(date);
     setShowDatePicker(false);
   };
 
-  const clearDateFilter = () => {
-    setDateFilter({ start: null, end: null });
+  const navigateDate = (direction: 'prev' | 'next') => {
+    const newDate = new Date(selectedDate);
+    
+    switch (activeTab) {
+      case 'daily':
+        newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
+        break;
+      case 'weekly':
+        newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+        break;
+      case 'monthly':
+        newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+        break;
+      case 'yearly':
+        newDate.setFullYear(newDate.getFullYear() + (direction === 'next' ? 1 : -1));
+        break;
+    }
+    
+    setSelectedDate(newDate);
   };
 
   const formatDate = (date: Date | null) => {
@@ -248,252 +282,320 @@ const TransactionsScreen = () => {
     };
   };
 
+  const formatDateHeader = () => {
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    
+    switch (activeTab) {
+      case 'daily':
+        return selectedDate.toLocaleDateString('id-ID', options);
+      case 'weekly':
+        const { start, end } = getDateRange('weekly', selectedDate);
+        return `${start.getDate()} - ${end.getDate()} ${end.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}`;
+      case 'monthly':
+        return selectedDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+      case 'yearly':
+        return selectedDate.getFullYear().toString();
+      default:
+        return '';
+    }
+  };
+
+  const getTabLabel = (tab: TabType) => {
+    switch (tab) {
+      case 'daily': return 'Harian';
+      case 'weekly': return 'Mingguan';
+      case 'monthly': return 'Bulanan';
+      case 'yearly': return 'Tahunan';
+    }
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#3B82F6', paddingTop: 24 }}>
       {/* Header */}
       <View style={{
-        backgroundColor: 'white',
+        backgroundColor: '#3B82F6',
         paddingHorizontal: 16,
         paddingTop: 16,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB'
+        paddingBottom: 0,
       }}>
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 16
-        }}>
-          <Text style={{
-            fontSize: 24,
-            fontWeight: 'bold',
-            color: '#111827'
-          }}>
-            Riwayat Transaksi
-          </Text>
-          
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: '#3B82F6',
-              borderRadius: 8,
-              paddingHorizontal: 12,
-              paddingVertical: 8
-            }}
-            onPress={() => setShowExportModal(true)}
-          >
-            <Ionicons name="download-outline" size={16} color="white" />
-            <Text style={{
-              marginLeft: 4,
-              fontSize: 14,
-              fontWeight: '600',
-              color: 'white'
-            }}>
-              Export
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Search Bar */}
+        {/* Combined Navigation and Filter Row */}
         <View style={{
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: '#F3F4F6',
-          borderRadius: 12,
-          paddingHorizontal: 12,
-          marginBottom: 12
+          marginBottom: 16,
+          gap: 12
         }}>
-          <Ionicons name="search" size={20} color="#6B7280" />
-          <TextInput
-            style={{
-              flex: 1,
-              paddingVertical: 12,
-              paddingHorizontal: 8,
-              fontSize: 16,
-              color: '#111827'
-            }}
-            placeholder="Cari transaksi..."
-            placeholderTextColor="#9CA3AF"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={20} color="#6B7280" />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Filter Buttons */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-          <TouchableOpacity
-            style={getFilterButtonStyle('all')}
-            onPress={() => setFilterType('all')}
-          >
-            <Text style={getFilterTextStyle('all')}>Semua</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={getFilterButtonStyle('income')}
-            onPress={() => setFilterType('income')}
-          >
-            <Text style={getFilterTextStyle('income')}>Pemasukan</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={getFilterButtonStyle('expense')}
-            onPress={() => setFilterType('expense')}
-          >
-            <Text style={getFilterTextStyle('expense')}>Pengeluaran</Text>
-          </TouchableOpacity>
-        </ScrollView>
-
-        {/* Date Filter and Sort Controls */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-          {/* Date Filter */}
-          <View style={{ flex: 1, marginRight: 8 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TouchableOpacity
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  backgroundColor: '#F3F4F6',
-                  borderRadius: 8,
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                  marginRight: 8,
-                  flex: 1
-                }}
-                onPress={() => {
-                  setDatePickerType('start');
-                  setShowDatePicker(true);
-                }}
-              >
-                <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-                <Text style={{
-                  marginLeft: 6,
-                  fontSize: 12,
-                  color: dateFilter.start ? '#111827' : '#9CA3AF'
-                }}>
-                  {dateFilter.start ? formatDate(dateFilter.start) : 'Dari'}
-                </Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  backgroundColor: '#F3F4F6',
-                  borderRadius: 8,
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                  flex: 1
-                }}
-                onPress={() => {
-                  setDatePickerType('end');
-                  setShowDatePicker(true);
-                }}
-              >
-                <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-                <Text style={{
-                  marginLeft: 6,
-                  fontSize: 12,
-                  color: dateFilter.end ? '#111827' : '#9CA3AF'
-                }}>
-                  {dateFilter.end ? formatDate(dateFilter.end) : 'Sampai'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Clear Date Filter */}
-          {(dateFilter.start || dateFilter.end) && (
-            <TouchableOpacity
-              style={{
-                backgroundColor: '#EF4444',
-                borderRadius: 8,
-                paddingHorizontal: 8,
-                paddingVertical: 8,
-                marginRight: 8
-              }}
-              onPress={clearDateFilter}
-            >
-              <Ionicons name="close" size={16} color="white" />
-            </TouchableOpacity>
-          )}
-
-          {/* Sort Toggle */}
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: '#F3F4F6',
-              borderRadius: 8,
-              paddingHorizontal: 12,
-              paddingVertical: 8
-            }}
-            onPress={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-          >
-            <Ionicons 
-              name={sortOrder === 'newest' ? 'arrow-down' : 'arrow-up'} 
-              size={16} 
-              color="#6B7280" 
-            />
-            <Text style={{
-              marginLeft: 4,
-              fontSize: 12,
-              color: '#6B7280',
-              fontWeight: '600'
-            }}>
-              {sortOrder === 'newest' ? 'Terbaru' : 'Terlama'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Transaction List */}
-      <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
-        {filteredTransactions.length > 0 ? (
-          <View style={{ paddingVertical: 16 }}>
-            {filteredTransactions.map((transaction) => (
-              <View key={transaction.id} style={{ marginBottom: 12 }}>
-                <TransactionCard
-                   transaction={transaction}
-                   onLongPress={() => handleDeleteTransaction(transaction.id!)}
-                 />
-              </View>
-            ))}
-          </View>
-        ) : (
+          {/* Date Navigation - 1/3 */}
           <View style={{
             flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingVertical: 64
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center'
           }}>
-            <Ionicons name="receipt-outline" size={64} color="#D1D5DB" />
-            <Text style={{
-              fontSize: 18,
-              fontWeight: '600',
-              color: '#6B7280',
-              marginTop: 16,
-              marginBottom: 8
-            }}>
-              {searchQuery || filterType !== 'all' ? 'Tidak ada transaksi ditemukan' : 'Belum ada transaksi'}
-            </Text>
-            <Text style={{
-              fontSize: 14,
-              color: '#9CA3AF',
-              textAlign: 'center',
-              paddingHorizontal: 32
-            }}>
-              {searchQuery || filterType !== 'all'
-                ? 'Coba ubah filter atau kata kunci pencarian'
-                : 'Mulai tambahkan transaksi pertama Anda'}
-            </Text>
+            <TouchableOpacity
+              onPress={() => navigateDate('prev')}
+              style={{ padding: 6 }}
+            >
+              <Ionicons name="chevron-back" size={20} color="white" />
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => setShowDatePicker(true)}
+              style={{ flex: 1, alignItems: 'center' }}
+            >
+              <Text style={{
+                fontSize: 8,
+                fontWeight: 'bold',
+                color: 'white',
+                textAlign: 'center'
+              }}>
+                {formatDateHeader()}
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => navigateDate('next')}
+              style={{ padding: 6 }}
+            >
+              <Ionicons name="chevron-forward" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Filter Toolbar - 2/3 */}
+          <View style={{
+            flex: 2,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <TouchableOpacity
+              onPress={() => setShowFilters(!showFilters)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: 6,
+                paddingHorizontal: 8,
+                paddingVertical: 6
+              }}
+            >
+              <Ionicons name="filter" size={14} color="white" />
+              <Text style={{
+                marginLeft: 3,
+                fontSize: 12,
+                color: 'white',
+                fontWeight: '600'
+              }}>
+                Filter
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: 6,
+                paddingHorizontal: 8,
+                paddingVertical: 6
+              }}
+            >
+              <Ionicons 
+                name={sortOrder === 'newest' ? 'arrow-down' : 'arrow-up'} 
+                size={14} 
+                color="white" 
+              />
+              <Text style={{
+                marginLeft: 3,
+                fontSize: 12,
+                color: 'white',
+                fontWeight: '600'
+              }}>
+                {sortOrder === 'newest' ? 'Terbaru' : 'Terlama'}
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => setShowExportModal(true)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: 6,
+                paddingHorizontal: 8,
+                paddingVertical: 6
+              }}
+            >
+              <Ionicons name="download" size={14} color="white" />
+              <Text style={{
+                marginLeft: 3,
+                fontSize: 12,
+                color: 'white',
+                fontWeight: '600'
+              }}>
+                Export
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Tab View */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+          {(['daily', 'weekly', 'monthly', 'yearly'] as TabType[]).map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={{
+                paddingHorizontal: 20,
+                paddingVertical: 8,
+                borderRadius: 20,
+                marginRight: 12,
+                backgroundColor: activeTab === tab ? 'white' : 'rgba(255,255,255,0.2)'
+              }}
+              onPress={() => setActiveTab(tab)}
+            >
+              <Text style={{
+                fontSize: 12,
+                fontWeight: '600',
+                color: activeTab === tab ? '#3B82F6' : 'white'
+              }}>
+                {getTabLabel(tab)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Filter Options */}
+        {showFilters && (
+          <View style={{
+            marginTop: 16,
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderRadius: 12,
+            padding: 12
+          }}>
+            {/* Type Filter */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+              {(['all', 'income', 'expense'] as FilterType[]).map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 6,
+                    borderRadius: 16,
+                    marginRight: 8,
+                    backgroundColor: filterType === type ? 'white' : 'rgba(255,255,255,0.2)'
+                  }}
+                  onPress={() => setFilterType(type)}
+                >
+                  <Text style={{
+                    fontSize: 12,
+                    fontWeight: '600',
+                    color: filterType === type ? '#3B82F6' : 'white'
+                  }}>
+                    {type === 'all' ? 'Semua' : type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            
+            {/* Category Filter */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <TouchableOpacity
+                style={{
+                  paddingHorizontal: 16,
+                  paddingVertical: 6,
+                  borderRadius: 16,
+                  marginRight: 8,
+                  backgroundColor: !selectedCategory ? 'white' : 'rgba(255,255,255,0.2)'
+                }}
+                onPress={() => setSelectedCategory(null)}
+              >
+                <Text style={{
+                  fontSize: 12,
+                  fontWeight: '600',
+                  color: !selectedCategory ? '#3B82F6' : 'white'
+                }}>
+                  Semua Kategori
+                </Text>
+              </TouchableOpacity>
+              {categories.map((category) => (
+                <TouchableOpacity
+                  key={category.id}
+                  style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 6,
+                    borderRadius: 16,
+                    marginRight: 8,
+                    backgroundColor: selectedCategory === category.id ? 'white' : 'rgba(255,255,255,0.2)'
+                  }}
+                  onPress={() => setSelectedCategory(category.id!)}
+                >
+                  <Text style={{
+                    fontSize: 12,
+                    fontWeight: '600',
+                    color: selectedCategory === category.id ? '#3B82F6' : 'white'
+                  }}>
+                    {category.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         )}
-      </ScrollView>
+      </View>
+
+      {/* Content */}
+      <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
+
+        {/* Transaction List */}
+        <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
+          {filteredTransactions.length > 0 ? (
+            <View style={{ paddingVertical: 16 }}>
+              {filteredTransactions.map((transaction) => (
+                <View key={transaction.id} style={{ marginBottom: 12 }}>
+                  <TransactionCard
+                     transaction={transaction}
+                     onLongPress={() => handleDeleteTransaction(transaction.id!)}
+                   />
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingVertical: 64
+            }}>
+              <Ionicons name="receipt-outline" size={64} color="#D1D5DB" />
+              <Text style={{
+                fontSize: 18,
+                fontWeight: '600',
+                color: '#6B7280',
+                marginTop: 16,
+                marginBottom: 8
+              }}>
+                {filterType !== 'all' || selectedCategory ? 'Tidak ada transaksi ditemukan' : 'Belum ada transaksi'}
+              </Text>
+              <Text style={{
+                fontSize: 14,
+                color: '#9CA3AF',
+                textAlign: 'center',
+                paddingHorizontal: 32
+              }}>
+                {filterType !== 'all' || selectedCategory
+                  ? 'Coba ubah filter yang dipilih'
+                  : 'Mulai tambahkan transaksi pertama Anda'}
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+      </View>
 
       {/* Export Modal */}
       <Modal
@@ -688,7 +790,7 @@ const TransactionsScreen = () => {
                 fontWeight: 'bold',
                 color: '#111827'
               }}>
-                Pilih Tanggal {datePickerType === 'start' ? 'Mulai' : 'Akhir'}
+                Pilih Tanggal
               </Text>
               <TouchableOpacity
                 onPress={() => setShowDatePicker(false)}
@@ -703,13 +805,13 @@ const TransactionsScreen = () => {
             </View>
             
             <DatePicker
-               date={datePickerType === 'start' ? (dateFilter.start || new Date()) : (dateFilter.end || new Date())}
+               date={selectedDate}
                onDateChange={handleDateSelect}
              />
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
