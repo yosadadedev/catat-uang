@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   Platform,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Ionicons } from '@expo/vector-icons';
 
 interface DatePickerProps {
   date: Date;
@@ -15,67 +13,16 @@ interface DatePickerProps {
   disabled?: boolean;
 }
 
-const formatDate = (date: Date): string => {
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  if (date.toDateString() === today.toDateString()) {
-    return 'Hari ini';
-  } else if (date.toDateString() === yesterday.toDateString()) {
-    return 'Kemarin';
-  } else if (date.toDateString() === tomorrow.toDateString()) {
-    return 'Besok';
-  } else {
-    return date.toLocaleDateString('id-ID', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined,
-    });
-  }
-};
-
 export const DatePicker: React.FC<DatePickerProps> = ({
   date,
   onDateChange,
-  placeholder = 'Pilih tanggal',
-  disabled = false,
 }) => {
-  const [showPicker, setShowPicker] = useState(false);
+
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowPicker(false);
-    }
-    
     if (selectedDate) {
       onDateChange(selectedDate);
-      if (Platform.OS === 'ios') {
-        setShowPicker(false);
-      }
     }
-  };
-
-  const openPicker = () => {
-    if (disabled) return;
-    setShowPicker(true);
-  };
-
-  const getQuickDateOptions = () => {
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const dayBeforeYesterday = new Date(today);
-    dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2);
-
-    return [
-      { label: 'Hari ini', date: today },
-      { label: 'Kemarin', date: yesterday },
-      { label: 'Lusa', date: dayBeforeYesterday },
-    ];
   };
 
   return (
@@ -85,6 +32,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={handleDateChange}
+          maximumDate={new Date()}
         />
 
     </>

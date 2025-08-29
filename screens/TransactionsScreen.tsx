@@ -19,6 +19,7 @@ import { TransactionList } from '../components/TransactionCard';
 
 import { Transaction } from '../database/database';
 import { TabParamList } from '../navigation/AppNavigator';
+import { DatePicker } from '~/components/DatePicker';
 
 type TabType = 'daily' | 'weekly' | 'monthly' | 'yearly';
 type FilterType = 'all' | 'income' | 'expense';
@@ -764,6 +765,12 @@ const TransactionsScreen = () => {
         </View>
       </Modal>
 
+      {showDatePicker &&
+        <DatePicker
+          date={selectedDate}
+          onDateChange={handleDateSelect}
+      />}
+    
       {/* Floating Action Button */}
       <TouchableOpacity
         style={{

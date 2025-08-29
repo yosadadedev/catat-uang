@@ -196,6 +196,9 @@ const SettingsScreen = () => {
               <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('notificationsDesc')}</Text>
             </View>
           </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+          </View>
         </TouchableOpacity>
       </View>
 
