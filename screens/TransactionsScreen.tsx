@@ -561,6 +561,146 @@ const TransactionsScreen = () => {
 
       {/* Content */}
       <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
+        {/* Summary Cards */}
+        <View style={{
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          backgroundColor: '#F9FAFB'
+        }}>
+          <View style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: 8
+          }}>
+            {/* Total Pemasukan */}
+            <View style={{
+              flex: 1,
+              backgroundColor: 'white',
+              borderRadius: 12,
+              padding: 12,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 2
+            }}>
+              <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 4
+              }}>
+                <Ionicons name="trending-up" size={12} color="#10B981" style={{ marginRight: 4 }} />
+                <Text style={{
+                  fontSize: 10,
+                  color: '#6B7280',
+                  fontWeight: '500'
+                }}>
+                  Total Pemasukan
+                </Text>
+              </View>
+              <Text style={{
+                fontSize: 14,
+                fontWeight: 'bold',
+                color: '#10B981'
+              }}>
+                Rp {filteredTransactions
+                  .filter(t => t.type === 'income')
+                  .reduce((sum, t) => sum + t.amount, 0)
+                  .toLocaleString('id-ID')}
+              </Text>
+            </View>
+
+            {/* Total Pengeluaran */}
+            <View style={{
+              flex: 1,
+              backgroundColor: 'white',
+              borderRadius: 12,
+              padding: 12,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 2
+            }}>
+              <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 4
+              }}>
+                <Ionicons name="trending-down" size={12} color="#EF4444" style={{ marginRight: 4 }} />
+                <Text style={{
+                  fontSize: 10,
+                  color: '#6B7280',
+                  fontWeight: '500'
+                }}>
+                  Total Pengeluaran
+                </Text>
+              </View>
+              <Text style={{
+                fontSize: 14,
+                fontWeight: 'bold',
+                color: '#EF4444'
+              }}>
+                Rp {filteredTransactions
+                  .filter(t => t.type === 'expense')
+                  .reduce((sum, t) => sum + t.amount, 0)
+                  .toLocaleString('id-ID')}
+              </Text>
+            </View>
+
+            {/* Saldo */}
+            <View style={{
+              flex: 1,
+              backgroundColor: 'white',
+              borderRadius: 12,
+              padding: 12,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 2
+            }}>
+              <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 4
+              }}>
+                <Ionicons name="wallet" size={12} color="#6B7280" style={{ marginRight: 4 }} />
+                <Text style={{
+                  fontSize: 10,
+                  color: '#6B7280',
+                  fontWeight: '500'
+                }}>
+                  Saldo
+                </Text>
+              </View>
+              <Text style={{
+                fontSize: 14,
+                fontWeight: 'bold',
+                color: (() => {
+                  const balance = filteredTransactions
+                    .filter(t => t.type === 'income')
+                    .reduce((sum, t) => sum + t.amount, 0) -
+                    filteredTransactions
+                    .filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                  return balance >= 0 ? '#10B981' : '#EF4444';
+                })()
+              }}>
+                Rp {(() => {
+                  const balance = filteredTransactions
+                    .filter(t => t.type === 'income')
+                    .reduce((sum, t) => sum + t.amount, 0) -
+                    filteredTransactions
+                    .filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                  return Math.abs(balance).toLocaleString('id-ID');
+                })()}
+              </Text>
+            </View>
+          </View>
+        </View>
+
         {/* Transaction List */}
         <View style={{ flex: 1, marginTop: 0 }}>
           {filteredTransactions.length > 0 ? (
@@ -765,11 +905,12 @@ const TransactionsScreen = () => {
         </View>
       </Modal>
 
-      {showDatePicker &&
+      {showDatePicker && (
         <DatePicker
           date={selectedDate}
           onDateChange={handleDateSelect}
-      />}
+        />
+      )}
     
       {/* Floating Action Button */}
       <TouchableOpacity

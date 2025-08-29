@@ -30,9 +30,12 @@ const formatDate = (dateString: string): string => {
     return 'Kemarin';
   } else {
     return date.toLocaleDateString('id-ID', {
+      weekday: 'long',
       day: 'numeric',
-      month: 'short',
-      year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined,
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   }
 };
