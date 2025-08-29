@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   Modal,
   Alert,
   SafeAreaView,
@@ -16,8 +15,8 @@ import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useFinanceStore } from '../store/useStore';
-import { TransactionCard, TransactionList } from '../components/TransactionCard';
-import { DatePicker } from '../components/DatePicker';
+import { TransactionList } from '../components/TransactionCard';
+
 import { Transaction } from '../database/database';
 import { TabParamList } from '../navigation/AppNavigator';
 
@@ -50,8 +49,10 @@ const TransactionsScreen = () => {
         end.setHours(23, 59, 59, 999);
         break;
       case 'weekly':
+        // Mulai dari hari Senin (1) bukan Minggu (0)
         const dayOfWeek = start.getDay();
-        start.setDate(start.getDate() - dayOfWeek);
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Jika Minggu, mundur 6 hari ke Senin
+        start.setDate(start.getDate() - daysToMonday);
         start.setHours(0, 0, 0, 0);
         end.setDate(start.getDate() + 6);
         end.setHours(23, 59, 59, 999);
@@ -271,26 +272,6 @@ const TransactionsScreen = () => {
     }
   };
 
-  const getFilterButtonStyle = (type: 'all' | 'income' | 'expense') => {
-    const isActive = filterType === type;
-    return {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 20,
-      marginRight: 8,
-      backgroundColor: isActive ? '#3B82F6' : '#F3F4F6',
-    };
-  };
-
-  const getFilterTextStyle = (type: 'all' | 'income' | 'expense') => {
-    const isActive = filterType === type;
-    return {
-      fontSize: 14,
-      fontWeight: '600' as const,
-      color: isActive ? 'white' : '#6B7280',
-    };
-  };
-
   const formatDateHeader = () => {
     const options: Intl.DateTimeFormatOptions = {
       weekday: 'long',
@@ -304,7 +285,15 @@ const TransactionsScreen = () => {
         return selectedDate.toLocaleDateString('id-ID', options);
       case 'weekly':
         const { start, end } = getDateRange('weekly', selectedDate);
-        return `${start.getDate()} - ${end.getDate()} ${end.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}`;
+        const startMonth = start.toLocaleDateString('id-ID', { month: 'long' });
+        const endMonth = end.toLocaleDateString('id-ID', { month: 'long' });
+        const year = end.getFullYear();
+        
+        if (start.getMonth() === end.getMonth()) {
+          return `${start.getDate()} - ${end.getDate()} ${endMonth} ${year}`;
+        } else {
+          return `${start.getDate()} ${startMonth} - ${end.getDate()} ${endMonth} ${year}`;
+        }
       case 'monthly':
         return selectedDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
       case 'yearly':
@@ -458,7 +447,7 @@ const TransactionsScreen = () => {
         <View style={{ marginBottom: 16 }}>
           <View style={{
             flexDirection: 'row',
-            paddingHorizontal: 16
+            paddingHorizontal: 0
           }}>
             {(['daily', 'weekly', 'monthly', 'yearly'] as TabType[]).map((tab) => (
               <TouchableOpacity
@@ -774,12 +763,7 @@ const TransactionsScreen = () => {
           </View>
         </View>
       </Modal>
-{showDatePicker &&
-          <DatePicker
-               date={selectedDate}
-               onDateChange={handleDateSelect}
-             />
-}
+
       {/* Floating Action Button */}
       <TouchableOpacity
         style={{
