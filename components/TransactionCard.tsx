@@ -161,7 +161,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
       renderItem={renderTransaction}
       keyExtractor={(item) => item.id!.toString()}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingVertical: 16 }}
+      contentContainerStyle={{ paddingVertical: 8 }}
       ItemSeparatorComponent={() => <View style={{ height: 0 }} />}
     />
   );

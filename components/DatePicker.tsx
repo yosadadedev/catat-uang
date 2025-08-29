@@ -80,39 +80,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   return (
     <>
-      {/* Date Selector Button */}
-      <TouchableOpacity
-        onPress={openPicker}
-        disabled={disabled}
-        className={`bg-gray-50 border border-gray-200 rounded-xl p-4 flex-row items-center justify-between ${
-          disabled ? 'opacity-50' : ''
-        }`}
-        activeOpacity={0.7}
-      >
-        <View className="flex-row items-center flex-1">
-          <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mr-3">
-            <Ionicons name="calendar" size={20} color="#3B82F6" />
-          </View>
-          <View className="flex-1">
-            <Text className="text-gray-900 font-medium text-base">
-              {formatDate(date)}
-            </Text>
-            <Text className="text-gray-500 text-sm">
-              {date.toLocaleDateString('id-ID', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-              })}
-            </Text>
-          </View>
-        </View>
-        {!disabled && (
-          <Ionicons name="chevron-down" size={20} color="#9CA3AF" />
-        )}
-      </TouchableOpacity>
-
-      {/* Date Picker - Direct display for both platforms */}
-      {showPicker && (
         <DateTimePicker
           value={date}
           mode="date"
@@ -120,7 +87,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           onChange={handleDateChange}
           maximumDate={new Date()}
         />
-      )}
+
     </>
   );
 };

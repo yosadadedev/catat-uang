@@ -774,61 +774,12 @@ const TransactionsScreen = () => {
           </View>
         </View>
       </Modal>
-
-      {/* Date Picker Modal */}
-      <Modal
-        visible={showDatePicker}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowDatePicker(false)}
-      >
-        <View style={{
-          flex: 1,
-          justifyContent: 'flex-end',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)'
-        }}>
-          <View style={{
-            backgroundColor: 'white',
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            paddingHorizontal: 16,
-            paddingTop: 16,
-            paddingBottom: 32,
-            maxHeight: 400
-          }}>
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 16
-            }}>
-              <Text style={{
-                fontSize: 18,
-                fontWeight: 'bold',
-                color: '#111827'
-              }}>
-                Pilih Tanggal
-              </Text>
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(false)}
-                style={{
-                  padding: 8,
-                  borderRadius: 20,
-                  backgroundColor: '#F3F4F6'
-                }}
-              >
-                <Ionicons name="close" size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-            
-            <DatePicker
+{showDatePicker &&
+          <DatePicker
                date={selectedDate}
                onDateChange={handleDateSelect}
              />
-          </View>
-        </View>
-      </Modal>
-
+}
       {/* Floating Action Button */}
       <TouchableOpacity
         style={{
