@@ -454,24 +454,35 @@ const TransactionsScreen = () => {
         <View style={{ marginBottom: 16 }}>
           <View style={{
             flexDirection: 'row',
-            paddingHorizontal: 0
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            borderRadius: 25,
+            padding: 4,
           }}>
-            {(['daily', 'weekly', 'monthly', 'yearly'] as TabType[]).map((tab) => (
+            {(['daily', 'weekly', 'monthly', 'yearly'] as TabType[]).map((tab, index) => (
               <TouchableOpacity
                 key={tab}
                 style={{
-                  paddingHorizontal: 20,
-                  paddingVertical: 8,
+                  flex: 1,
+                  paddingVertical: 10,
                   borderRadius: 20,
-                  marginRight: 12,
-                  backgroundColor: activeTab === tab ? 'white' : 'rgba(255,255,255,0.2)'
+                  marginHorizontal: 2,
+                  backgroundColor: activeTab === tab ? 'white' : 'transparent',
+                  shadowColor: activeTab === tab ? '#000' : 'transparent',
+                  shadowOffset: {
+                    width: 0,
+                    height: 2,
+                  },
+                  shadowOpacity: activeTab === tab ? 0.1 : 0,
+                  shadowRadius: 4,
+                  elevation: activeTab === tab ? 3 : 0,
                 }}
                 onPress={() => setActiveTab(tab)}
               >
                 <Text style={{
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: '600',
-                  color: activeTab === tab ? '#3B82F6' : 'white'
+                  color: activeTab === tab ? '#3B82F6' : 'rgba(255, 255, 255, 0.8)',
+                  textAlign: 'center',
                 }}>
                   {getTabLabel(tab)}
                 </Text>
