@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import * as XLSX from 'xlsx';
 import * as Print from 'expo-print';
@@ -18,14 +18,14 @@ import { useFinanceStore } from '../store/useStore';
 import { TransactionList } from '../components/TransactionCard';
 
 import { Transaction } from '../database/database';
-import { TabParamList } from '../navigation/AppNavigator';
+import { DrawerParamList } from '../navigation/AppNavigator';
 import { DatePicker } from '~/components/DatePicker';
 
 type TabType = 'daily' | 'weekly' | 'monthly' | 'yearly';
 type FilterType = 'all' | 'income' | 'expense';
 type SortType = 'newest' | 'oldest';
 
-type TransactionsScreenNavigationProp = BottomTabNavigationProp<TabParamList, 'Transactions'>;
+type TransactionsScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Transactions'>;
 
 const TransactionsScreen = () => {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
@@ -322,13 +322,97 @@ const TransactionsScreen = () => {
         paddingTop: 16,
         paddingBottom: 0,
       }}>
-        {/* Combined Navigation and Filter Row */}
         <View style={{
           flexDirection: 'row',
           alignItems: 'center',
           marginBottom: 16,
           gap: 12
         }}>
+          {/* Menu Button */}
+          <TouchableOpacity
+            onPress={() => navigation.openDrawer()}
+            style={{
+              padding: 8,
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              borderRadius: 6
+            }}
+          >
+            <Ionicons name="menu" size={20} color="white" />
+          </TouchableOpacity>
+          {/* Filter Toolbar - 2/3 */}
+          <View style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <TouchableOpacity
+              onPress={() => setShowFilters(!showFilters)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: 6,
+                padding: 8
+              }}
+            >
+              <Ionicons name="filter" size={20} color="white" />
+              {/* <Text style={{
+                marginLeft: 3,
+                fontSize: 12,
+                color: 'white',
+                fontWeight: '600'
+              }}>
+                Filter
+              </Text> */}
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: 6,
+                padding: 8,
+                marginHorizontal: 6
+              }}
+            >
+              <Ionicons 
+                name={sortOrder === 'newest' ? 'arrow-down' : 'arrow-up'} 
+                size={20} 
+                color="white" 
+              />
+              {/* <Text style={{
+                marginLeft: 3,
+                fontSize: 12,
+                color: 'white',
+                fontWeight: '600'
+              }}>
+                {sortOrder === 'newest' ? 'Terbaru' : 'Terlama'}
+              </Text> */}
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => setShowExportModal(true)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: 6,
+                padding: 8
+              }}
+            >
+              <Ionicons name="download" size={20} color="white" />
+              {/* <Text style={{
+                marginLeft: 3,
+                fontSize: 12,
+                color: 'white',
+                fontWeight: '600'
+              }}>
+                Export
+              </Text> */}
+            </TouchableOpacity>
+          </View>
           {/* Date Navigation - 1/3 */}
           <View style={{
             flex: 1,
@@ -348,7 +432,7 @@ const TransactionsScreen = () => {
               style={{ flex: 1, alignItems: 'center' }}
             >
               <Text style={{
-                fontSize: 8,
+                fontSize: 10,
                 fontWeight: 'bold',
                 color: 'white',
                 textAlign: 'center'
@@ -362,84 +446,6 @@ const TransactionsScreen = () => {
               style={{ padding: 6 }}
             >
               <Ionicons name="chevron-forward" size={20} color="white" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Filter Toolbar - 2/3 */}
-          <View style={{
-            flex: 2,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <TouchableOpacity
-              onPress={() => setShowFilters(!showFilters)}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderRadius: 6,
-                paddingHorizontal: 8,
-                paddingVertical: 6
-              }}
-            >
-              <Ionicons name="filter" size={14} color="white" />
-              <Text style={{
-                marginLeft: 3,
-                fontSize: 12,
-                color: 'white',
-                fontWeight: '600'
-              }}>
-                Filter
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              onPress={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderRadius: 6,
-                paddingHorizontal: 8,
-                paddingVertical: 6
-              }}
-            >
-              <Ionicons 
-                name={sortOrder === 'newest' ? 'arrow-down' : 'arrow-up'} 
-                size={14} 
-                color="white" 
-              />
-              <Text style={{
-                marginLeft: 3,
-                fontSize: 12,
-                color: 'white',
-                fontWeight: '600'
-              }}>
-                {sortOrder === 'newest' ? 'Terbaru' : 'Terlama'}
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              onPress={() => setShowExportModal(true)}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderRadius: 6,
-                paddingHorizontal: 8,
-                paddingVertical: 6
-              }}
-            >
-              <Ionicons name="download" size={14} color="white" />
-              <Text style={{
-                marginLeft: 3,
-                fontSize: 12,
-                color: 'white',
-                fontWeight: '600'
-              }}>
-                Export
-              </Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -54,7 +54,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
     <TouchableOpacity
       onPress={onPress}
       onLongPress={onLongPress}
-      className="bg-white rounded-xl p-4 mx-4 mb-2 shadow-sm border border-gray-100"
+      className="bg-white rounded-xl p-2 mx-4 mb-2 shadow-sm border border-gray-100"
       activeOpacity={0.7}
     >
       <View className="flex-row items-center justify-between">

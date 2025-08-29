@@ -1,8 +1,9 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity } from 'react-native';
 
 // Import screens (will be created later)
 import TransactionsScreen from '../screens/TransactionsScreen';
@@ -23,21 +24,21 @@ export type RootStackParamList = {
   };
 };
 
-export type TabParamList = {
+export type DrawerParamList = {
   Transactions: undefined;
   Reports: undefined;
   Settings: undefined;
 };
 
-const Tab = createBottomTabNavigator<TabParamList>();
+const Drawer = createDrawerNavigator<DrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 
-// Tab Navigator Component
-const TabNavigator = () => {
+// Drawer Navigator Component
+const DrawerNavigator = () => {
   return (
-    <Tab.Navigator
+    <Drawer.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        drawerIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
 
           switch (route.name) {
@@ -56,20 +57,16 @@ const TabNavigator = () => {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#3B82F6',
-        tabBarInactiveTintColor: '#9CA3AF',
-        tabBarStyle: {
+        drawerActiveTintColor: '#3B82F6',
+        drawerInactiveTintColor: '#9CA3AF',
+        drawerStyle: {
           backgroundColor: '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 88,
+          width: 280,
         },
-        tabBarLabelStyle: {
-          fontSize: 12,
+        drawerLabelStyle: {
+          fontSize: 16,
           fontWeight: '600',
-          marginTop: 4,
+          marginLeft: -16,
         },
         headerStyle: {
           backgroundColor: '#FFFFFF',
@@ -86,7 +83,7 @@ const TabNavigator = () => {
         headerTintColor: '#3B82F6',
       })}
     >
-      <Tab.Screen
+      <Drawer.Screen
         name="Transactions"
         component={TransactionsScreen}
         options={{
@@ -94,7 +91,7 @@ const TabNavigator = () => {
           headerShown: false,
         }}
       />
-      <Tab.Screen
+      <Drawer.Screen
         name="Reports"
         component={ReportsScreen}
         options={{
@@ -102,7 +99,7 @@ const TabNavigator = () => {
           headerShown: false,
         }}
       />
-      <Tab.Screen
+      <Drawer.Screen
         name="Settings"
         component={SettingsScreen}
         options={{
@@ -110,7 +107,7 @@ const TabNavigator = () => {
           headerShown: false,
         }}
       />
-    </Tab.Navigator>
+    </Drawer.Navigator>
   );
 };
 
@@ -140,7 +137,7 @@ const AppNavigator = () => {
       >
         <Stack.Screen
           name="MainTabs"
-          component={TabNavigator}
+          component={DrawerNavigator}
           options={{ headerShown: false }}
         />
         <Stack.Screen
