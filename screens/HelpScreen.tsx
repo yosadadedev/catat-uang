@@ -65,7 +65,7 @@ const HelpScreen = () => {
           ]
         },
         {
-          icon: 'bar-chart',
+          icon: 'pie-chart',
           title: 'Laporan Keuangan',
           description: 'Analisis keuangan dengan grafik dan statistik',
           steps: [
@@ -77,7 +77,7 @@ const HelpScreen = () => {
           ]
         },
         {
-          icon: 'folder',
+          icon: 'grid',
           title: 'Kelola Kategori',
           description: 'Atur kategori sesuai kebutuhan Anda',
           steps: [
@@ -347,40 +347,6 @@ const HelpScreen = () => {
           {helpSections[activeSection].items.map((item, index) => 
             renderFeatureItem(item, index)
           )}
-          
-          {/* Footer */}
-          <View style={{
-            backgroundColor: 'white',
-            borderRadius: 12,
-            padding: 20,
-            marginTop: 8,
-            alignItems: 'center',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 3
-          }}>
-            <Ionicons name="heart" size={24} color="#EF4444" style={{ marginBottom: 8 }} />
-            <Text style={{
-              fontSize: 16,
-              fontWeight: 'bold',
-              color: '#1F2937',
-              textAlign: 'center',
-              marginBottom: 4
-            }}>
-              Catat Uang v1.0
-            </Text>
-            <Text style={{
-              fontSize: 14,
-              color: '#6B7280',
-              textAlign: 'center',
-              lineHeight: 20
-            }}>
-              Aplikasi pencatat keuangan pribadi yang mudah dan praktis.{"\n"}
-              Dikembangkan dengan ❤️ menggunakan React Native.
-            </Text>
-          </View>
         </ScrollView>
       </View>
     </SafeAreaView>
