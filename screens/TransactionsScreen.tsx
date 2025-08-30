@@ -10,8 +10,9 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CompositeNavigationProp } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import * as XLSX from 'xlsx';
 import * as Print from 'expo-print';
@@ -21,14 +22,17 @@ import { useFinanceStore } from '../store/useStore';
 import { TransactionList } from '../components/TransactionCard';
 
 import { Transaction } from '../database/database';
-import { DrawerParamList } from '../navigation/AppNavigator';
+import { DrawerParamList, RootStackParamList } from '../navigation/AppNavigator';
 import { DatePicker } from '~/components/DatePicker';
 
 type TabType = 'daily' | 'weekly' | 'monthly' | 'yearly';
 type FilterType = 'all' | 'income' | 'expense';
 type SortType = 'newest' | 'oldest';
 
-type TransactionsScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Transactions'>;
+type TransactionsScreenNavigationProp = CompositeNavigationProp<
+  DrawerNavigationProp<DrawerParamList, 'Transactions'>,
+  StackNavigationProp<RootStackParamList>
+>;
 
 const TransactionsScreen = () => {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
@@ -638,7 +642,10 @@ const TransactionsScreen = () => {
               transactions={filteredTransactions}
               categories={categories}
               onTransactionPress={(transaction) => {
-                // Handle transaction press if needed
+                navigation.navigate('AddTransaction', { 
+                  transactionId: transaction.id!,
+                  isEdit: true
+                });
               }}
               onTransactionLongPress={(transaction) => handleDeleteTransaction(transaction.id!)}
             />

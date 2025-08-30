@@ -26,7 +26,11 @@ const AddTransactionScreen = () => {
   const navigation = useNavigation<AddTransactionScreenNavigationProp>();
   const route = useRoute<AddTransactionScreenRouteProp>();
   const categories = useFinanceStore((state) => state.categories);
-  const { addTransaction } = useFinanceStore();
+  const transactions = useFinanceStore((state) => state.transactions);
+  const { addTransaction, updateTransaction } = useFinanceStore();
+  
+  const isEditMode = route.params?.isEdit || false;
+  const transactionId = route.params?.transactionId;
 
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
@@ -40,14 +44,28 @@ const AddTransactionScreen = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
-    if (route.params?.categoryId) {
+    if (isEditMode && transactionId) {
+      // Load existing transaction data for edit mode
+      const transaction = transactions.find(t => t.id === transactionId);
+      if (transaction) {
+        setAmount(formatCurrency(Math.abs(transaction.amount).toString()));
+        setDescription(transaction.description);
+        setSelectedDate(new Date(transaction.date));
+        setTransactionType(transaction.type);
+        
+        const category = categories.find(c => c.id === transaction.category_id);
+        if (category) {
+          setSelectedCategory(category);
+        }
+      }
+    } else if (route.params?.categoryId) {
       const category = categories.find(c => c.id === route.params.categoryId);
       if (category) {
         setSelectedCategory(category);
         setTransactionType(category.type);
       }
     }
-  }, [route.params?.categoryId, categories]);
+  }, [route.params?.categoryId, categories, isEditMode, transactionId, transactions]);
 
   const formatCurrency = (value: string): string => {
     const numericValue = value.replace(/[^0-9]/g, '');
@@ -87,17 +105,23 @@ const AddTransactionScreen = () => {
         ? -Math.abs(parseCurrency(amount))
         : Math.abs(parseCurrency(amount));
 
-      await addTransaction({
-         amount: transactionAmount,
-         description: description.trim(),
-         category_id: selectedCategory.id!,
-         date: selectedDate.toISOString(),
-         type: transactionType,
-       });
+      const transactionData = {
+        amount: transactionAmount,
+        description: description.trim(),
+        category_id: selectedCategory.id!,
+        date: selectedDate.toISOString(),
+        type: transactionType,
+      };
+
+      if (isEditMode && transactionId) {
+        await updateTransaction(transactionId, transactionData);
+      } else {
+        await addTransaction(transactionData);
+      }
 
       Alert.alert(
         'Berhasil',
-        `Transaksi ${transactionType === 'income' ? 'pemasukan' : 'pengeluaran'} berhasil ditambahkan`,
+        `Transaksi ${transactionType === 'income' ? 'pemasukan' : 'pengeluaran'} berhasil ${isEditMode ? 'diperbarui' : 'ditambahkan'}`,
         [
           {
             text: 'OK',
@@ -106,7 +130,7 @@ const AddTransactionScreen = () => {
         ]
       );
     } catch (error) {
-      Alert.alert('Error', 'Gagal menyimpan transaksi. Silakan coba lagi.');
+      Alert.alert('Error', `Gagal ${isEditMode ? 'memperbarui' : 'menyimpan'} transaksi. Silakan coba lagi.`);
     } finally {
       setIsLoading(false);
     }
@@ -267,7 +291,7 @@ const AddTransactionScreen = () => {
               fontWeight: '600',
               fontSize: 18
             }}>
-              {isLoading ? 'Menyimpan...' : 'Simpan Transaksi'}
+              {isLoading ? (isEditMode ? 'Memperbarui...' : 'Menyimpan...') : (isEditMode ? 'Perbarui Transaksi' : 'Simpan Transaksi')}
             </Text>
           </TouchableOpacity>
         </View>
