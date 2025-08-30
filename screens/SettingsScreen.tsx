@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 import { DrawerParamList } from '../navigation/AppNavigator';
+import { useFinanceStore } from '../store/useStore';
 
 type SettingsScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Settings'>;
 
@@ -26,15 +27,35 @@ const SettingsScreen = () => {
   const [showResetModal, setShowResetModal] = useState(false);
   const [notifications, setNotifications] = useState(true);
 
-  const handleResetData = () => {
-    // TODO: Implement actual reset functionality
-    // This should clear all transactions, categories, and reset to default state
-    setShowResetModal(false);
-    Alert.alert(
-      'Berhasil',
-      'Semua data telah dihapus. Aplikasi akan dimulai dengan data kosong.',
-      [{ text: 'OK' }]
-    );
+  const handleResetData = async () => {
+    try {
+      setShowResetModal(false);
+      
+      // Show loading state
+      Alert.alert(
+        'Menghapus Data',
+        'Sedang menghapus semua data...',
+        [],
+        { cancelable: false }
+      );
+      
+      // Reset all data using store method
+      await useFinanceStore.getState().resetAllData();
+      
+      // Show success message
+      Alert.alert(
+        'Berhasil',
+        'Semua data telah dihapus. Aplikasi telah direset ke pengaturan awal.',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Reset data error:', error);
+      Alert.alert(
+        'Error',
+        'Gagal menghapus data. Silakan coba lagi.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
 
@@ -244,13 +265,13 @@ const SettingsScreen = () => {
                 marginBottom: 24
               }}>
                 <Text style={{
-                  fontSize: 14,
-                  color: '#92400E',
-                  textAlign: 'center',
-                  fontWeight: '500'
-                }}>
-                  ⚠️ Tindakan ini tidak dapat dibatalkan
-                </Text>
+                   fontSize: 14,
+                   color: '#92400E',
+                   textAlign: 'center',
+                   fontWeight: '500'
+                 }}>
+                   ⚠️ Data yang dihapus tidak dapat dikembalikan lagi
+                 </Text>
               </View>
 
               {/* Buttons */}

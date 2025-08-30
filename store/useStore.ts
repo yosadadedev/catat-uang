@@ -37,6 +37,7 @@ interface FinanceState {
   getRecentTransactions: (limit?: number) => Transaction[];
   getTransactionsByCategory: (categoryId: number) => Transaction[];
   getMonthlyTransactions: (year: number, month: number) => Transaction[];
+  resetAllData: () => Promise<void>;
 }
 
 export const useFinanceStore = create<FinanceState>((set, get) => ({
@@ -258,5 +259,44 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       const date = new Date(t.date);
       return date.getFullYear() === year && date.getMonth() === month;
     });
+  },
+
+  resetAllData: async () => {
+    const { db } = get();
+    if (!db) return;
+    
+    try {
+      set({ loading: true, error: null });
+      
+      // Delete all transactions
+      const transactions = await db.getTransactions();
+      for (const transaction of transactions) {
+        if (transaction.id) {
+          await db.deleteTransaction(transaction.id);
+        }
+      }
+      
+      // Delete all categories
+      const categories = await db.getCategories();
+      for (const category of categories) {
+        if (category.id) {
+          await db.deleteCategory(category.id);
+        }
+      }
+      
+      // Reinitialize with default categories
+      await db.init();
+      
+      // Reload data
+      await get().loadCategories();
+      await get().loadTransactions();
+      get().calculateBalance();
+      
+    } catch (error) {
+      console.error('Failed to reset data:', error);
+      set({ error: error instanceof Error ? error.message : 'Failed to reset data' });
+    } finally {
+      set({ loading: false });
+    }
   },
 }));
