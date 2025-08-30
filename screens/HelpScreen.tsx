@@ -131,6 +131,17 @@ const HelpScreen = () => {
           ]
         },
         {
+          icon: 'language',
+          title: 'Ubah Bahasa',
+          description: 'Pilih bahasa yang diinginkan untuk antarmuka aplikasi',
+          steps: [
+            'Buka menu "Pengaturan" dari sidebar',
+            'Tekan "Bahasa"',
+            'Pilih antara Bahasa Indonesia atau English',
+            'Aplikasi akan otomatis menerapkan bahasa yang dipilih'
+          ]
+        },
+        {
           icon: 'trash',
           title: 'Reset Data',
           description: 'Hapus semua data untuk memulai dari awal',
@@ -155,7 +166,7 @@ const HelpScreen = () => {
         {
           icon: 'sync',
           title: 'Bagaimana cara backup data?',
-          description: 'Gunakan fitur export di halaman transaksi untuk menyimpan data dalam format file yang dapat dibuka di aplikasi lain'
+          description: 'Gunakan fitur export di halaman transaksi untuk menyimpan data dalam format file yang dapat dibuka di Google Sheets, Microsoft Excel, WPS Office, dan aplikasi spreadsheet lainnya'
         },
         {
           icon: 'phone-portrait',
