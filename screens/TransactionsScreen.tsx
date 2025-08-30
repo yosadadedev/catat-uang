@@ -38,14 +38,14 @@ const TransactionsScreen = () => {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
   const { transactions, categories, deleteTransaction } = useFinanceStore();
   const [activeTab, setActiveTab] = useState<TabType>('daily');
-  const [filterType, setFilterType] = useState<FilterType>('income');
+  const [filterType, setFilterType] = useState<FilterType>('all');
   const [sortOrder, setSortOrder] = useState<SortType>('newest');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showExportModal, setShowExportModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [tempFilterType, setTempFilterType] = useState<FilterType>('income');
+  const [tempFilterType, setTempFilterType] = useState<FilterType>('all');
   const [tempSelectedCategory, setTempSelectedCategory] = useState<number | null>(null);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
 

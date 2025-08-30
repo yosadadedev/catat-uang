@@ -12,6 +12,7 @@ import ReportsScreen from '../screens/ReportsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import CategoryManagementScreen from '../screens/CategoryManagementScreen';
 import AddTransactionScreen from '../screens/AddTransactionScreen';
+import HelpScreen from '../screens/HelpScreen';
 
 
 // Navigation types
@@ -46,9 +47,6 @@ const DrawerNavigator = () => {
   
   const handleMenuPress = (menuType: string) => {
     switch (menuType) {
-      case 'Help':
-        Alert.alert('Bantuan', 'Fitur bantuan akan segera tersedia!');
-        break;
       case 'Share':
         Alert.alert('Bagikan', 'Bagikan aplikasi ini ke teman-teman Anda!');
         break;
@@ -209,16 +207,10 @@ const DrawerNavigator = () => {
       />
       <Drawer.Screen
         name="Help"
-        component={SettingsScreen}
+        component={HelpScreen}
         options={{
           title: 'Bantuan',
           headerShown: false,
-        }}
-        listeners={{
-          drawerItemPress: (e) => {
-            e.preventDefault();
-            handleMenuPress('Help');
-          },
         }}
       />
       <Drawer.Screen
@@ -299,13 +291,13 @@ const AppNavigator = () => {
         <Stack.Screen
           name="AddTransaction"
           component={AddTransactionScreen}
-          options={{
-            title: 'Tambah Transaksixx',
+          options={({ route }) => ({
+            title: route.params?.isEdit ? 'Perbarui Transaksi' : 'Tambah Transaksi',
             presentation: 'modal',
             headerStyle: {
               backgroundColor: '#FFFFFF',
             },
-          }}
+          })}
         />
 
       </Stack.Navigator>
