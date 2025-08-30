@@ -9,13 +9,19 @@ import {
   TextInput,
   Switch,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { useFinanceStore } from '../store/useStore';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 import { Category } from '../database/database';
+import { DrawerParamList } from '../navigation/AppNavigator';
+
+type SettingsScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Settings'>;
 
 const SettingsScreen = () => {
+  const navigation = useNavigation<SettingsScreenNavigationProp>();
   const { categories, loading } = useFinanceStore();
   const { addCategory, updateCategory, deleteCategory, loadCategories } = useFinanceStore();
   const { isDarkMode, toggleDarkMode, colors } = useTheme();
@@ -119,24 +125,59 @@ const SettingsScreen = () => {
   const expenseCategories = categories.filter(c => c.type === 'expense');
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} showsVerticalScrollIndicator={false}>
+    <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
       {/* Header */}
-      <View style={{ backgroundColor: colors.surface, marginHorizontal: 16, marginTop: 16, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: colors.border }}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text }}>{t('settingsTitle')}</Text>
-        <Text style={{ color: colors.textSecondary, marginTop: 4 }}>{t('settingsSubtitle')}</Text>
+      <View style={{
+        backgroundColor: '#3B82F6',
+        paddingTop: 60,
+        paddingBottom: 20,
+        paddingHorizontal: 16,
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
+      }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity
+              onPress={() => navigation.openDrawer()}
+              style={{
+                marginRight: 12,
+                padding: 8,
+                borderRadius: 8,
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+              }}
+            >
+              <Ionicons name="menu" size={20} color="white" />
+            </TouchableOpacity>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>{t('settingsTitle')}</Text>
+          </View>
+        </View>
+        <Text style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 16 }}>{t('settingsSubtitle')}</Text>
       </View>
 
-      {/* App Preferences */}
-      <View style={{ backgroundColor: colors.surface, marginHorizontal: 16, marginTop: 16, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: colors.border }}>
-        <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 16 }}>{t('appPreferences')}</Text>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+
+        {/* App Preferences */}
+        <View style={{
+          backgroundColor: 'white',
+          marginHorizontal: 16,
+          marginTop: 16,
+          borderRadius: 12,
+          padding: 16,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 1,
+        }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>{t('appPreferences')}</Text>
         
         <View 
         style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-            <Ionicons name="notifications" size={20} color={colors.textSecondary} />
+            <Ionicons name="notifications" size={20} color="#F59E0B" />
             <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={{ color: colors.text, fontWeight: '500' }}>{t('notifications')}</Text>
-              <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('notificationsDesc')}</Text>
+              <Text style={{ color: '#111827', fontWeight: '500' }}>{t('notifications')}</Text>
+              <Text style={{ color: '#6B7280', fontSize: 14 }}>{t('notificationsDesc')}</Text>
             </View>
           </View>
           <Switch
@@ -149,10 +190,10 @@ const SettingsScreen = () => {
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-            <Ionicons name="moon" size={20} color={colors.textSecondary} />
+            <Ionicons name="moon" size={20} color="#6366F1" />
             <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={{ color: colors.text, fontWeight: '500' }}>{t('darkMode')}</Text>
-              <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('darkModeDesc')}</Text>
+              <Text style={{ color: '#111827', fontWeight: '500' }}>{t('darkMode')}</Text>
+              <Text style={{ color: '#6B7280', fontSize: 14 }}>{t('darkModeDesc')}</Text>
             </View>
           </View>
           <Switch
@@ -168,17 +209,17 @@ const SettingsScreen = () => {
          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-            <Ionicons name="language" size={20} color={colors.textSecondary} />
+            <Ionicons name="language" size={20} color="#10B981" />
             <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={{ color: colors.text, fontWeight: '500' }}>{t('language')}</Text>
-              <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('languageDesc')}</Text>
+              <Text style={{ color: '#111827', fontWeight: '500' }}>{t('language')}</Text>
+              <Text style={{ color: '#6B7280', fontSize: 14 }}>{t('languageDesc')}</Text>
             </View>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ color: colors.textSecondary, marginRight: 8 }}>
+            <Text style={{ color: '#6B7280', marginRight: 8 }}>
               {locale === 'id' ? 'Indonesia' : 'English'}
             </Text>
-            <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+            <Ionicons name="chevron-forward" size={16} color="#6B7280" />
           </View>
         </TouchableOpacity>
 
@@ -190,14 +231,14 @@ const SettingsScreen = () => {
             }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-            <Ionicons name="notifications" size={20} color={colors.textSecondary} />
+            <Ionicons name="folder" size={20} color="#8B5CF6" />
             <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={{ color: colors.text, fontWeight: '500' }}>Kelola Kategori</Text>
-              <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('notificationsDesc')}</Text>
+              <Text style={{ color: '#111827', fontWeight: '500' }}>{t('categoryManagement')}</Text>
+              <Text style={{ color: '#6B7280', fontSize: 14 }}>{t('categoryManagementDesc')}</Text>
             </View>
           </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+            <Ionicons name="chevron-forward" size={16} color="#6B7280" />
           </View>
         </TouchableOpacity>
       </View>
@@ -213,30 +254,18 @@ const SettingsScreen = () => {
           resetForm();
         }}
       >
-        <View style={{ flex: 1, backgroundColor: colors.background }}>
-          <View style={{ backgroundColor: colors.surface, padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <TouchableOpacity
-                onPress={() => {
-                  setShowAddCategory(false);
-                  setEditingCategory(null);
-                  resetForm();
-                }}
-              >
-                <Text style={{ color: colors.primary, fontWeight: '500' }}>{t('cancel')}</Text>
-              </TouchableOpacity>
+        <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
+          <View style={{ backgroundColor: '#FFFFFF', padding: 16, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
               <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text }}>
-                {editingCategory ? t('editCategory') : t('addCategory')}
+                Tambah Kategori
               </Text>
-              <TouchableOpacity onPress={handleSaveCategory}>
-                <Text style={{ color: colors.primary, fontWeight: '500' }}>{t('save')}</Text>
-              </TouchableOpacity>
             </View>
           </View>
 
           <ScrollView style={{ flex: 1, padding: 16 }}>
              {/* Category Name */}
-             <View style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}>
+             <View style={{ backgroundColor: '#FFFFFF', borderRadius: 12, padding: 16, marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1, borderWidth: 1, borderColor: '#E5E7EB' }}>
                <Text style={{ color: colors.text, fontWeight: '500', marginBottom: 8 }}>{t('categoryName')}</Text>
                <TextInput
                  value={categoryName}
@@ -249,7 +278,7 @@ const SettingsScreen = () => {
              </View>
 
              {/* Category Type */}
-             <View style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}>
+             <View style={{ backgroundColor: '#FFFFFF', borderRadius: 12, padding: 16, marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1, borderWidth: 1, borderColor: '#E5E7EB' }}>
                <Text style={{ color: colors.text, fontWeight: '500', marginBottom: 12 }}>{t('categoryType')}</Text>
                <View style={{ flexDirection: 'row' }}>
                  <TouchableOpacity
@@ -349,6 +378,40 @@ const SettingsScreen = () => {
               </View>
             </View>
           </ScrollView>
+          
+          {/* Bottom Buttons */}
+          <View style={{ backgroundColor: '#FFFFFF', padding: 16, borderTopWidth: 1, borderTopColor: '#E5E7EB' }}>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowAddCategory(false);
+                  setEditingCategory(null);
+                  resetForm();
+                }}
+                style={{
+                   flex: 1,
+                   paddingVertical: 12,
+                   borderRadius: 8,
+                   backgroundColor: '#EF4444',
+                   alignItems: 'center'
+                 }}
+              >
+                <Text style={{ color: 'white', fontWeight: '600' }}>{t('cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={handleSaveCategory}
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 8,
+                  backgroundColor: '#2563EB',
+                  alignItems: 'center'
+                }}
+              >
+                <Text style={{ color: 'white', fontWeight: '600' }}>{t('save')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </Modal>
 
@@ -433,9 +496,10 @@ const SettingsScreen = () => {
         </View>
       </Modal>
 
-      {/* Bottom Spacing */}
-      <View style={{ height: 32 }} />
-    </ScrollView>
+        {/* Bottom Spacing */}
+        <View style={{ height: 32 }} />
+      </ScrollView>
+    </View>
   );
 };
 
