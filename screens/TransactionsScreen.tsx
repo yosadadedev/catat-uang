@@ -3,8 +3,11 @@ import {
   View,
   Text,
   TouchableOpacity,
+  FlatList,
   Modal,
   Alert,
+  StyleSheet,
+  ScrollView,
   SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -31,13 +34,15 @@ const TransactionsScreen = () => {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
   const { transactions, categories, deleteTransaction } = useFinanceStore();
   const [activeTab, setActiveTab] = useState<TabType>('daily');
-  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [filterType, setFilterType] = useState<FilterType>('income');
   const [sortOrder, setSortOrder] = useState<SortType>('newest');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [tempFilterType, setTempFilterType] = useState<FilterType>('income');
+  const [tempSelectedCategory, setTempSelectedCategory] = useState<number | null>(null);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
 
   const getDateRange = (tab: TabType, date: Date) => {
@@ -90,9 +95,7 @@ const TransactionsScreen = () => {
     });
 
     // Filter by type
-    if (filterType !== 'all') {
-      filtered = filtered.filter(transaction => transaction.type === filterType);
-    }
+    filtered = filtered.filter(transaction => transaction.type === filterType);
 
     // Filter by category
     if (selectedCategory) {
@@ -346,24 +349,20 @@ const TransactionsScreen = () => {
             alignItems: 'center'
           }}>
             <TouchableOpacity
-              onPress={() => setShowFilters(!showFilters)}
+              onPress={() => setShowFilterModal(true)}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderRadius: 6,
-                padding: 8
+                backgroundColor: selectedCategory !== null ? '#FF8C00' : 'rgba(255,255,255,0.2)',
+                borderRadius: 8,
+                padding: 10,
               }}
             >
-              <Ionicons name="filter" size={20} color="white" />
-              {/* <Text style={{
-                marginLeft: 3,
-                fontSize: 12,
-                color: 'white',
-                fontWeight: '600'
-              }}>
-                Filter
-              </Text> */}
+              <Ionicons 
+                name="filter" 
+                size={18} 
+                color={selectedCategory !== null ? 'white' : 'rgba(255,255,255,0.8)'} 
+              />
             </TouchableOpacity>
             
             <TouchableOpacity
@@ -371,25 +370,22 @@ const TransactionsScreen = () => {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderRadius: 6,
-                padding: 8,
-                marginHorizontal: 6
+                backgroundColor: '#8B5CF6',
+                borderRadius: 8,
+                padding: 10,
+                marginHorizontal: 6,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.15,
+                shadowRadius: 3,
+                elevation: 3
               }}
             >
               <Ionicons 
                 name={sortOrder === 'newest' ? 'arrow-down' : 'arrow-up'} 
-                size={20} 
+                size={18} 
                 color="white" 
               />
-              {/* <Text style={{
-                marginLeft: 3,
-                fontSize: 12,
-                color: 'white',
-                fontWeight: '600'
-              }}>
-                {sortOrder === 'newest' ? 'Terbaru' : 'Terlama'}
-              </Text> */}
             </TouchableOpacity>
             
             <TouchableOpacity
@@ -397,20 +393,17 @@ const TransactionsScreen = () => {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderRadius: 6,
-                padding: 8
+                backgroundColor: '#10B981',
+                borderRadius: 8,
+                padding: 10,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.15,
+                shadowRadius: 3,
+                elevation: 3
               }}
             >
-              <Ionicons name="download" size={20} color="white" />
-              {/* <Text style={{
-                marginLeft: 3,
-                fontSize: 12,
-                color: 'white',
-                fontWeight: '600'
-              }}>
-                Export
-              </Text> */}
+              <Ionicons name="download" size={18} color="white" />
             </TouchableOpacity>
           </View>
           {/* Date Navigation - 1/3 */}
@@ -491,89 +484,7 @@ const TransactionsScreen = () => {
           </View>
         </View>
 
-        {/* Filter Options */}
-        {showFilters && (
-          <View style={{
-            marginTop: 16,
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            borderRadius: 12,
-            padding: 12
-          }}>
-            {/* Type Filter */}
-            <View style={{ marginBottom: 12 }}>
-              <View style={{ flexDirection: 'row' }}>
-                {(['all', 'income', 'expense'] as FilterType[]).map((type) => (
-                  <TouchableOpacity
-                    key={type}
-                    style={{
-                      paddingHorizontal: 16,
-                      paddingVertical: 6,
-                      borderRadius: 16,
-                      marginRight: 8,
-                      backgroundColor: filterType === type ? 'white' : 'rgba(255,255,255,0.2)'
-                    }}
-                    onPress={() => setFilterType(type)}
-                  >
-                    <Text style={{
-                      fontSize: 12,
-                      fontWeight: '600',
-                      color: filterType === type ? '#3B82F6' : 'white'
-                    }}>
-                      {type === 'all' ? 'Semua' : type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-            
-            {/* Category Filter */}
-            <View>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                <TouchableOpacity
-                  style={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 6,
-                    borderRadius: 16,
-                    marginRight: 8,
-                    marginBottom: 8,
-                    backgroundColor: !selectedCategory ? 'white' : 'rgba(255,255,255,0.2)'
-                  }}
-                  onPress={() => setSelectedCategory(null)}
-                >
-                  <Text style={{
-                    fontSize: 12,
-                    fontWeight: '600',
-                    color: !selectedCategory ? '#3B82F6' : 'white'
-                  }}>
-                    Semua Kategori
-                  </Text>
-                </TouchableOpacity>
-                {categories.map((category) => (
-                  <TouchableOpacity
-                    key={category.id}
-                    style={{
-                      paddingHorizontal: 16,
-                      paddingVertical: 6,
-                      borderRadius: 16,
-                      marginRight: 8,
-                      marginBottom: 8,
-                      backgroundColor: selectedCategory === category.id ? 'white' : 'rgba(255,255,255,0.2)'
-                    }}
-                    onPress={() => setSelectedCategory(category.id!)}
-                  >
-                    <Text style={{
-                      fontSize: 12,
-                      fontWeight: '600',
-                      color: selectedCategory === category.id ? '#3B82F6' : 'white'
-                    }}>
-                      {category.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          </View>
-        )}
+
       </View>
 
       {/* Content */}
@@ -744,7 +655,7 @@ const TransactionsScreen = () => {
                 marginTop: 16,
                 marginBottom: 8
               }}>
-                {filterType !== 'all' || selectedCategory ? 'Tidak ada transaksi ditemukan' : 'Belum ada transaksi'}
+                {selectedCategory ? 'Tidak ada transaksi ditemukan' : 'Belum ada transaksi'}
               </Text>
               <Text style={{
                 fontSize: 14,
@@ -752,7 +663,7 @@ const TransactionsScreen = () => {
                 textAlign: 'center',
                 paddingHorizontal: 32
               }}>
-                {filterType !== 'all' || selectedCategory
+                {selectedCategory
                   ? 'Coba ubah filter yang dipilih'
                   : 'Mulai tambahkan transaksi pertama Anda'}
               </Text>
@@ -760,6 +671,290 @@ const TransactionsScreen = () => {
           )}
         </View>
       </View>
+
+      {/* Filter Modal */}
+      <Modal
+        visible={showFilterModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <TouchableOpacity 
+           style={{
+             flex: 1,
+             justifyContent: 'flex-end',
+             backgroundColor: 'rgba(0, 0, 0, 0.5)'
+           }}
+           activeOpacity={1}
+           onPress={() => {
+             setTempFilterType(filterType);
+             setTempSelectedCategory(selectedCategory);
+             setShowFilterModal(false);
+           }}
+         >
+           <TouchableOpacity activeOpacity={1} onPress={() => {}}
+             style={{
+               backgroundColor: 'white',
+               borderTopLeftRadius: 24,
+               borderTopRightRadius: 24,
+               paddingHorizontal: 16,
+               paddingTop: 16,
+               paddingBottom: 8,
+               maxHeight: '80%',
+             }}
+           >
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 24
+            }}>
+              <Text style={{
+                fontSize: 18,
+                fontWeight: 'bold',
+                color: '#111827'
+              }}>
+                Filter Transaksi
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setTempFilterType(filterType);
+                  setTempSelectedCategory(selectedCategory);
+                  setShowFilterModal(false);
+                }}
+                style={{
+                  padding: 8,
+                  borderRadius: 20,
+                  backgroundColor: '#F3F4F6'
+                }}
+              >
+                <Ionicons name="close" size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+            
+            {/* Type Filter Section */}
+            <View style={{ marginBottom: 24 }}>
+              <Text style={{
+                fontSize: 14,
+                fontWeight: '600',
+                color: '#111827',
+                marginBottom: 12
+              }}>
+                Jenis Transaksi
+              </Text>
+              <View style={{
+                flexDirection: 'row',
+                backgroundColor: '#F3F4F6',
+                borderRadius: 8,
+                padding: 4
+              }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setTempFilterType('income');
+                    setTempSelectedCategory(null);
+                  }}
+                  style={{
+                    flex: 1,
+                    backgroundColor: tempFilterType === 'income' ? '#10B981' : 'transparent',
+                    borderRadius: 6,
+                    paddingVertical: 10,
+                    paddingHorizontal: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Ionicons 
+                    name="trending-up" 
+                    size={14} 
+                    color={tempFilterType === 'income' ? 'white' : '#6B7280'} 
+                    style={{ marginRight: 4 }}
+                  />
+                  <Text style={{
+                    fontSize: 12,
+                    fontWeight: '600',
+                    color: tempFilterType === 'income' ? 'white' : '#6B7280'
+                  }}>
+                    Pemasukan
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setTempFilterType('expense');
+                    setTempSelectedCategory(null);
+                  }}
+                  style={{
+                    flex: 1,
+                    backgroundColor: tempFilterType === 'expense' ? '#EF4444' : 'transparent',
+                    borderRadius: 6,
+                    paddingVertical: 10,
+                    paddingHorizontal: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Ionicons 
+                    name="trending-down" 
+                    size={14} 
+                    color={tempFilterType === 'expense' ? 'white' : '#6B7280'} 
+                    style={{ marginRight: 4 }}
+                  />
+                  <Text style={{
+                    fontSize: 12,
+                    fontWeight: '600',
+                    color: tempFilterType === 'expense' ? 'white' : '#6B7280'
+                  }}>
+                    Pengeluaran
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Category Filter Section */}
+            <View style={{ marginBottom: 0 }}>
+              <Text style={{
+                fontSize: 14,
+                fontWeight: '600',
+                color: '#111827',
+                marginBottom: 12
+              }}>
+                Kategori
+              </Text>
+              <ScrollView style={{ maxHeight: 200 }} showsVerticalScrollIndicator={false}>
+                <View style={{ gap: 8 }}>
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      backgroundColor: !tempSelectedCategory ? '#F0F9FF' : '#F9FAFB',
+                      borderRadius: 10,
+                      padding: 12,
+                      borderWidth: !tempSelectedCategory ? 2 : 1,
+                      borderColor: !tempSelectedCategory ? '#3B82F6' : '#E5E7EB'
+                    }}
+                    onPress={() => setTempSelectedCategory(null)}
+                  >
+                    <View style={{
+                      backgroundColor: '#6B7280',
+                      borderRadius: 6,
+                      padding: 6,
+                      marginRight: 10
+                    }}>
+                      <Ionicons name="apps" size={16} color="white" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{
+                        fontSize: 14,
+                        fontWeight: '600',
+                        color: '#111827'
+                      }}>
+                        Semua Kategori
+                      </Text>
+                    </View>
+                    {!tempSelectedCategory && (
+                      <Ionicons name="checkmark-circle" size={18} color="#3B82F6" />
+                    )}
+                  </TouchableOpacity>
+                  {categories.filter(category => category.type === tempFilterType)
+                    .map((category) => (
+                    <TouchableOpacity
+                      key={category.id}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        backgroundColor: tempSelectedCategory === category.id ? '#F0F9FF' : '#F9FAFB',
+                        borderRadius: 10,
+                        padding: 12,
+                        borderWidth: tempSelectedCategory === category.id ? 2 : 1,
+                        borderColor: tempSelectedCategory === category.id ? '#3B82F6' : '#E5E7EB'
+                      }}
+                      onPress={() => setTempSelectedCategory(category.id!)}
+                    >
+                      <View style={{
+                         marginRight: 10
+                       }}>
+                         <Ionicons 
+                           name={category.icon as any} 
+                           size={20} 
+                           color={category.color} 
+                         />
+                       </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{
+                          fontSize: 14,
+                          fontWeight: '600',
+                          color: '#111827'
+                        }}>
+                          {category.name}
+                        </Text>
+                      </View>
+                      {tempSelectedCategory === category.id && (
+                        <Ionicons name="checkmark-circle" size={18} color="#3B82F6" />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={{
+              flexDirection: 'row',
+              gap: 12,
+              marginTop: 16,
+            }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  backgroundColor: '#FEE2E2',
+                  borderRadius: 10,
+                  padding: 12,
+                  alignItems: 'center'
+                }}
+                onPress={() => {
+                  setTempFilterType('income');
+                  setTempSelectedCategory(null);
+                  setFilterType('income');
+                  setSelectedCategory(null);
+                  setShowFilterModal(false);
+                }}
+              >
+                <Text style={{
+                  fontSize: 14,
+                  fontWeight: '600',
+                  color: '#DC2626'
+                }}>
+                  Reset
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  backgroundColor: '#3B82F6',
+                  borderRadius: 10,
+                  padding: 12,
+                  alignItems: 'center'
+                }}
+                onPress={() => {
+                  setFilterType(tempFilterType);
+                  setSelectedCategory(tempSelectedCategory);
+                  setShowFilterModal(false);
+                }}
+              >
+                <Text style={{
+                  fontSize: 14,
+                  fontWeight: '600',
+                  color: 'white'
+                }}>
+                  Terapkan
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Export Modal */}
       <Modal
