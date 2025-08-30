@@ -13,6 +13,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import CategoryManagementScreen from '../screens/CategoryManagementScreen';
 import AddTransactionScreen from '../screens/AddTransactionScreen';
 import HelpScreen from '../screens/HelpScreen';
+import AboutScreen from '../screens/AboutScreen';
 
 
 // Navigation types
@@ -52,9 +53,6 @@ const DrawerNavigator = () => {
         break;
       case 'Gift':
         Alert.alert('Hadiah untuk Developer', 'Terima kasih atas dukungan Anda!');
-        break;
-      case 'About':
-        Alert.alert('Tentang Aplikasi', 'Catat Uang v1.0\nAplikasi pencatat keuangan pribadi\nDikembangkan dengan React Native');
         break;
     }
   };
@@ -243,16 +241,10 @@ const DrawerNavigator = () => {
       />
       <Drawer.Screen
         name="About"
-        component={SettingsScreen}
+        component={AboutScreen}
         options={{
           title: 'Tentang',
           headerShown: false,
-        }}
-        listeners={{
-          drawerItemPress: (e) => {
-            e.preventDefault();
-            handleMenuPress('About');
-          },
         }}
       />
     </Drawer.Navigator>
