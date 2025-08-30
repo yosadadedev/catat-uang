@@ -95,7 +95,9 @@ const TransactionsScreen = () => {
     });
 
     // Filter by type
-    filtered = filtered.filter(transaction => transaction.type === filterType);
+    if (filterType !== 'all') {
+      filtered = filtered.filter(transaction => transaction.type === filterType);
+    }
 
     // Filter by category
     if (selectedCategory) {
@@ -750,6 +752,36 @@ const TransactionsScreen = () => {
               }}>
                 <TouchableOpacity
                   onPress={() => {
+                    setTempFilterType('all');
+                    setTempSelectedCategory(null);
+                  }}
+                  style={{
+                    flex: 1,
+                    backgroundColor: tempFilterType === 'all' ? '#2563EB' : 'transparent',
+                    borderRadius: 6,
+                    paddingVertical: 10,
+                    paddingHorizontal: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Ionicons 
+                    name="list" 
+                    size={14} 
+                    color={tempFilterType === 'all' ? 'white' : '#6B7280'} 
+                    style={{ marginRight: 4 }}
+                  />
+                  <Text style={{
+                    fontSize: 12,
+                    fontWeight: '600',
+                    color: tempFilterType === 'all' ? 'white' : '#6B7280'
+                  }}>
+                    Semua
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
                     setTempFilterType('income');
                     setTempSelectedCategory(null);
                   }}
@@ -913,9 +945,9 @@ const TransactionsScreen = () => {
                   alignItems: 'center'
                 }}
                 onPress={() => {
-                  setTempFilterType('income');
+                  setTempFilterType('all');
                   setTempSelectedCategory(null);
-                  setFilterType('income');
+                  setFilterType('all');
                   setSelectedCategory(null);
                   setShowFilterModal(false);
                 }}
