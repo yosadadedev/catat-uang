@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, View } from 'react-native';
+import { Alert, View, Linking } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 
 // Import screens (will be created later)
@@ -36,6 +36,7 @@ export type DrawerParamList = {
   Help: undefined;
   Share: undefined;
   Gift: undefined;
+  Rating: undefined;
   About: undefined;
 };
 
@@ -54,6 +55,32 @@ const DrawerNavigator = () => {
       case 'Gift':
         Alert.alert('Hadiah untuk Developer', 'Terima kasih atas dukungan Anda!');
         break;
+      case 'Rating':
+         Alert.alert(
+           'Rating Aplikasi',
+           'Terima kasih telah menggunakan Catat Uang. Bantu kami berkembang dengan memberi rating ⭐⭐⭐⭐⭐ di Play Store 🙏',
+           [
+             { text: 'Nanti Saja', style: 'cancel' },
+             {
+               text: 'Beri Rating ⭐',
+               onPress: () => {
+                 const storeUrl = 'https://play.google.com/store/apps/details?id=com.catatuang.app';
+                 Linking.canOpenURL(storeUrl)
+                   .then((supported) => {
+                     if (supported) {
+                       Linking.openURL(storeUrl);
+                     } else {
+                       Alert.alert('Error', 'Tidak dapat membuka store');
+                     }
+                   })
+                   .catch(() => {
+                     Alert.alert('Error', 'Gagal membuka store');
+                   });
+               },
+             },
+           ]
+         );
+         break;
     }
   };
 
@@ -100,6 +127,11 @@ const DrawerNavigator = () => {
               iconName = focused ? 'gift' : 'gift-outline';
               iconColor = '#FFFFFF';
               backgroundColor = '#EF4444'; // Red
+              break;
+            case 'Rating':
+              iconName = focused ? 'star' : 'star-outline';
+              iconColor = '#FFFFFF';
+              backgroundColor = '#F59E0B'; // Orange/Gold
               break;
             case 'About':
               iconName = focused ? 'information-circle' : 'information-circle-outline';
@@ -236,6 +268,20 @@ const DrawerNavigator = () => {
           drawerItemPress: (e) => {
             e.preventDefault();
             handleMenuPress('Gift');
+          },
+        }}
+      />
+      <Drawer.Screen
+        name="Rating"
+        component={SettingsScreen}
+        options={{
+          title: 'Rating Aplikasi',
+          headerShown: false,
+        }}
+        listeners={{
+          drawerItemPress: (e) => {
+            e.preventDefault();
+            handleMenuPress('Rating');
           },
         }}
       />
