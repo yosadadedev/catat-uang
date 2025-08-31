@@ -289,7 +289,7 @@ const TransactionsScreen = () => {
           rightButton={[
           {
             icon: sortOrder === 'newest' ? 'arrow-down' : 'arrow-up',
-            onPress: () => {}
+            onPress: () => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')
           },
           {
             icon: "download",
