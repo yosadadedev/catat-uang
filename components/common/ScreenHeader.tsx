@@ -3,14 +3,21 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 
+interface RightButtonConfig {
+  icon?: keyof typeof Ionicons.glyphMap;
+  text?: string;
+  onPress: () => void;
+  disabled?: boolean;
+  color?: string;
+  backgroundColor?: string;
+  size?: number;
+}
+
 interface ScreenHeaderProps {
   title: string;
   subtitle?: string;
   onMenuPress: () => void;
-  rightButton?: {
-    icon: keyof typeof Ionicons.glyphMap;
-    onPress: () => void;
-  };
+  rightButton?: RightButtonConfig | RightButtonConfig[];
   backgroundColor?: string;
 }
 
@@ -67,17 +74,67 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
       </View>
       
       {rightButton && (
-        <View className='flex-row justify-between items-center'>
-        <TouchableOpacity
-          onPress={rightButton.onPress}
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            borderRadius: 6,
-            padding: 8
-          }}
-        >
-          <Ionicons name={rightButton.icon} size={20} color="white" />
-        </TouchableOpacity>
+        <View className='flex-row items-center gap-2'>
+          {Array.isArray(rightButton) ? (
+            rightButton.map((button, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={button.onPress}
+                disabled={button.disabled}
+                style={{
+                  backgroundColor: button.backgroundColor || 'rgba(255,255,255,0.2)',
+                  borderRadius: 6,
+                  padding: 8,
+                  opacity: button.disabled ? 0.5 : 1
+                }}
+              >
+                {button.text ? (
+                  <Text style={{
+                    fontSize: button.size || 12,
+                    fontWeight: 'bold',
+                    color: button.color || 'white',
+                    textAlign: 'center'
+                  }}>
+                    {button.text}
+                  </Text>
+                ) : (
+                  <Ionicons 
+                    name={button.icon!} 
+                    size={button.size || 20} 
+                    color={button.color || "white"} 
+                  />
+                )}
+              </TouchableOpacity>
+            ))
+          ) : (
+            <TouchableOpacity
+              onPress={rightButton.onPress}
+              disabled={rightButton.disabled}
+              style={{
+                backgroundColor: rightButton.backgroundColor || 'rgba(255,255,255,0.2)',
+                borderRadius: 6,
+                padding: 8,
+                opacity: rightButton.disabled ? 0.5 : 1
+              }}
+            >
+              {rightButton.text ? (
+                <Text style={{
+                  fontSize: rightButton.size || 12,
+                  fontWeight: 'bold',
+                  color: rightButton.color || 'white',
+                  textAlign: 'center'
+                }}>
+                  {rightButton.text}
+                </Text>
+              ) : (
+                <Ionicons 
+                  name={rightButton.icon!} 
+                  size={rightButton.size || 20} 
+                  color={rightButton.color || "white"} 
+                />
+              )}
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </View>

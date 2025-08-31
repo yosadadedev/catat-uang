@@ -286,10 +286,22 @@ const TransactionsScreen = () => {
       <ScreenHeader
           title="Transaksi"
           onMenuPress={() => navigation.openDrawer()}
-          rightButton={{
-            icon: "add",
-            onPress: () => setShowTransactionModal(true)
-          }}
+          rightButton={[
+          {
+            icon: sortOrder === 'newest' ? 'arrow-down' : 'arrow-up',
+            onPress: () => {}
+          },
+          {
+            icon: "download",
+            onPress: () => setShowExportModal(true),
+            size: 20
+          },
+          {
+            icon: "filter",
+            onPress: () => setShowFilterModal(true),
+            backgroundColor:  selectedCategory !== null ? '#10B981' : 'rgba(255,255,255,0.2)'
+          },
+        ]}
         />
       {/* Filter Toolbar */}
       <View style={{
@@ -304,71 +316,6 @@ const TransactionsScreen = () => {
           marginBottom: 16,
           gap: 12
         }}>
-          {/* Filter Toolbar - 2/3 */}
-          <View style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <TouchableOpacity
-              onPress={() => setShowFilterModal(true)}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: selectedCategory !== null ? '#FF8C00' : 'rgba(255,255,255,0.2)',
-                borderRadius: 8,
-                padding: 10,
-              }}
-            >
-              <Ionicons 
-                name="filter" 
-                size={18} 
-                color={selectedCategory !== null ? 'white' : 'rgba(255,255,255,0.8)'} 
-              />
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              onPress={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: '#8B5CF6',
-                borderRadius: 8,
-                padding: 10,
-                marginHorizontal: 6,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.15,
-                shadowRadius: 3,
-                elevation: 3
-              }}
-            >
-              <Ionicons 
-                name={sortOrder === 'newest' ? 'arrow-down' : 'arrow-up'} 
-                size={18} 
-                color="white" 
-              />
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              onPress={() => setShowExportModal(true)}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: '#10B981',
-                borderRadius: 8,
-                padding: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.15,
-                shadowRadius: 3,
-                elevation: 3
-              }}
-            >
-              <Ionicons name="download" size={18} color="white" />
-            </TouchableOpacity>
-          </View>
-          {/* Date Navigation - 1/3 */}
           <View style={{
             flexDirection: 'row',
             alignItems: 'center',
