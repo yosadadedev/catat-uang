@@ -20,6 +20,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useFinanceStore } from '../store/useStore';
 import { TransactionList } from '../components/TransactionCard';
+import TransactionModal from '../components/TransactionModal';
 
 import { Transaction } from '../database/database';
 import { DrawerParamList, RootStackParamList } from '../navigation/AppNavigator';
@@ -48,6 +49,8 @@ const TransactionsScreen = () => {
   const [tempFilterType, setTempFilterType] = useState<FilterType>('all');
   const [tempSelectedCategory, setTempSelectedCategory] = useState<number | null>(null);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
+  const [showTransactionModal, setShowTransactionModal] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
   const getDateRange = (tab: TabType, date: Date) => {
     const start = new Date(date);
@@ -131,6 +134,21 @@ const TransactionsScreen = () => {
         },
       ]
     );
+  };
+
+  const handleEditTransaction = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setShowTransactionModal(true);
+  };
+
+  const handleAddTransaction = () => {
+    setEditingTransaction(null);
+    setShowTransactionModal(true);
+  };
+
+  const handleCloseTransactionModal = () => {
+    setShowTransactionModal(false);
+    setEditingTransaction(null);
   };
 
   const handleDateSelect = (date: Date) => {
@@ -642,10 +660,7 @@ const TransactionsScreen = () => {
               transactions={filteredTransactions}
               categories={categories}
               onTransactionPress={(transaction) => {
-                navigation.navigate('AddTransaction', { 
-                  transactionId: transaction.id!,
-                  isEdit: true
-                });
+                handleEditTransaction(transaction);
               }}
               onTransactionLongPress={(transaction) => handleDeleteTransaction(transaction.id!)}
             />
@@ -1182,11 +1197,18 @@ const TransactionsScreen = () => {
           shadowRadius: 4,
           zIndex: 1000,
         }}
-        onPress={() => (navigation as any).navigate('AddTransaction', {})}
+        onPress={handleAddTransaction}
         activeOpacity={0.8}
       >
         <Ionicons name="add" size={24} color="white" />
       </TouchableOpacity>
+
+      {/* Transaction Modal */}
+      <TransactionModal
+        visible={showTransactionModal}
+        onClose={handleCloseTransactionModal}
+        transaction={editingTransaction}
+      />
     </SafeAreaView>
   );
 };

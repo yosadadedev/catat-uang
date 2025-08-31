@@ -11,7 +11,7 @@ import TransactionsScreen from '../screens/TransactionsScreen';
 import ReportsScreen from '../screens/ReportsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import CategoryManagementScreen from '../screens/CategoryManagementScreen';
-import AddTransactionScreen from '../screens/AddTransactionScreen';
+
 import HelpScreen from '../screens/HelpScreen';
 import AboutScreen from '../screens/AboutScreen';
 
@@ -19,13 +19,6 @@ import AboutScreen from '../screens/AboutScreen';
 // Navigation types
 export type RootStackParamList = {
   MainTabs: undefined;
-  AddTransaction: {
-    type?: 'income' | 'expense';
-    categoryId?: number;
-    transactionId?: number;
-    isEdit?: boolean;
-  };
-
 };
 
 export type DrawerParamList = {
@@ -326,17 +319,7 @@ const AppNavigator = () => {
           component={DrawerNavigator}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="AddTransaction"
-          component={AddTransactionScreen}
-          options={({ route }) => ({
-            title: route.params?.isEdit ? 'Perbarui Transaksi' : 'Tambah Transaksi',
-            presentation: 'modal',
-            headerStyle: {
-              backgroundColor: '#FFFFFF',
-            },
-          })}
-        />
+
 
       </Stack.Navigator>
     </NavigationContainer>
