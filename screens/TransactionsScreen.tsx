@@ -317,12 +317,14 @@ const TransactionsScreen = () => {
           gap: 12
         }}>
           <View style={{
+            flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
             backgroundColor: 'rgba(255,255,255,0.1)',
             borderRadius: 6,
             paddingHorizontal: 8,
-            paddingVertical: 8
+            paddingVertical: 8,
+            justifyContent: 'space-between'
           }}>
             <TouchableOpacity
               onPress={() => navigateDate('prev')}
@@ -331,19 +333,32 @@ const TransactionsScreen = () => {
               <Ionicons name="chevron-back" size={16} color="white" />
             </TouchableOpacity>
             
-            <TouchableOpacity
-              onPress={() => setShowDatePicker(true)}
-              style={{ paddingHorizontal: 12 }}
-            >
-              <Text style={{
-                fontSize: 12,
-                fontWeight: 'bold',
-                color: 'white',
-                textAlign: 'center'
-              }}>
-                {formatDateHeader()}
-              </Text>
-            </TouchableOpacity>
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              flex: 1,
+              justifyContent: 'center',
+              gap: 8
+            }}>
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+              >
+                <Ionicons name="calendar" size={14} color="white" />
+                <Text style={{
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                  color: 'white',
+                  textAlign: 'center'
+                }}>
+                  {formatDateHeader()}
+                </Text>
+              </TouchableOpacity>
+            </View>
             
             <TouchableOpacity
               onPress={() => navigateDate('next')}
