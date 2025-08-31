@@ -282,7 +282,7 @@ const TransactionsScreen = () => {
 
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#3B82F6', paddingTop: 24 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#3B82F6'}}>
       <ScreenHeader
           title="Transaksi"
           onMenuPress={() => navigation.openDrawer()}

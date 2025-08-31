@@ -43,6 +43,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [previousCategories, setPreviousCategories] = useState<{
+    income?: Category;
+    expense?: Category;
+  }>({});
 
   useEffect(() => {
     if (visible) {
@@ -56,6 +60,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         const category = categories.find(c => c.id === transaction.category_id);
         if (category) {
           setSelectedCategory(category);
+          // Initialize previousCategories with current category
+          setPreviousCategories({
+            [category.type]: category
+          });
         }
       } else {
         // Reset for new transaction
@@ -64,6 +72,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         setSelectedCategory(undefined);
         setSelectedDate(new Date());
         setTransactionType(initialType);
+        setPreviousCategories({});
         
         // Set initial category if provided
         if (initialCategoryId) {
@@ -71,6 +80,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           if (category) {
             setSelectedCategory(category);
             setTransactionType(category.type);
+            // Initialize previousCategories with initial category
+            setPreviousCategories({
+              [category.type]: category
+            });
           }
         }
       }
@@ -175,8 +188,16 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                     { backgroundColor: transactionType === 'expense' ? '#EF4444' : '#F3F4F6' }
                   ]}
                   onPress={() => {
+                    // Save current category for income type
+                    if (transactionType === 'income' && selectedCategory) {
+                      setPreviousCategories(prev => ({
+                        ...prev,
+                        income: selectedCategory
+                      }));
+                    }
                     setTransactionType('expense');
-                    setSelectedCategory(undefined);
+                    // Restore previous expense category if exists
+                    setSelectedCategory(previousCategories.expense);
                   }}
                 >
                   <Ionicons 
@@ -199,8 +220,16 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                     { backgroundColor: transactionType === 'income' ? '#10B981' : '#F3F4F6' }
                   ]}
                   onPress={() => {
+                    // Save current category for expense type
+                    if (transactionType === 'expense' && selectedCategory) {
+                      setPreviousCategories(prev => ({
+                        ...prev,
+                        expense: selectedCategory
+                      }));
+                    }
                     setTransactionType('income');
-                    setSelectedCategory(undefined);
+                    // Restore previous income category if exists
+                    setSelectedCategory(previousCategories.income);
                   }}
                 >
                   <Ionicons 
@@ -306,12 +335,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           {/* Save Button - Fixed at bottom */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={[
-                styles.saveButton,
-                (!amount || !selectedCategory) && styles.saveButtonDisabled
-              ]}
+              style={styles.saveButton}
               onPress={handleSaveTransaction}
-              disabled={!amount || !selectedCategory || isLoading}
+              disabled={isLoading}
             >
               <Text style={styles.saveButtonText}>
                 {isLoading ? 'Menyimpan...' : (isEditMode ? 'Perbarui Transaksi' : 'Simpan Transaksi')}
@@ -344,6 +370,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                     onPress={() => {
                       setSelectedCategory(category);
                       setShowCategoryPicker(false);
+                      
+                      // Save selected category to previousCategories
+                      setPreviousCategories(prev => ({
+                        ...prev,
+                        [transactionType]: category
+                      }));
                     }}
                     style={styles.categoryItem}
                   >
