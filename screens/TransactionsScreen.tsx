@@ -21,14 +21,11 @@ import * as Sharing from 'expo-sharing';
 import { useFinanceStore } from '../store/useStore';
 import { TransactionList } from '../components/TransactionCard';
 import TransactionModal from '../components/TransactionModal';
-
+import { ScreenHeader, TabFilter } from '../components/common';
+import { useTransactionFilters, TabType, FilterType, SortType } from '../hooks';
 import { Transaction } from '../database/database';
 import { DrawerParamList, RootStackParamList } from '../navigation/AppNavigator';
 import { DatePicker } from '~/components/DatePicker';
-
-type TabType = 'daily' | 'weekly' | 'monthly' | 'yearly';
-type FilterType = 'all' | 'income' | 'expense';
-type SortType = 'newest' | 'oldest';
 
 type TransactionsScreenNavigationProp = CompositeNavigationProp<
   DrawerNavigationProp<DrawerParamList, 'Transactions'>,
@@ -38,17 +35,30 @@ type TransactionsScreenNavigationProp = CompositeNavigationProp<
 const TransactionsScreen = () => {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
   const { transactions, categories, deleteTransaction } = useFinanceStore();
-  const [activeTab, setActiveTab] = useState<TabType>('daily');
-  const [filterType, setFilterType] = useState<FilterType>('all');
-  const [sortOrder, setSortOrder] = useState<SortType>('newest');
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  
+  // Use custom hook for transaction filtering logic
+  const {
+    activeTab,
+    setActiveTab,
+    filterType,
+    setFilterType,
+    sortOrder,
+    setSortOrder,
+    selectedCategory,
+    setSelectedCategory,
+    selectedDate,
+    setSelectedDate,
+    filteredTransactions,
+    navigateDate,
+    formatDate
+  } = useTransactionFilters({ transactions, categories });
+  
+  // UI state
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [showExportModal, setShowExportModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [tempFilterType, setTempFilterType] = useState<FilterType>('all');
   const [tempSelectedCategory, setTempSelectedCategory] = useState<number | null>(null);
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
@@ -87,39 +97,7 @@ const TransactionsScreen = () => {
     return { start, end };
   };
 
-  useEffect(() => {
-    let filtered = transactions;
-    const { start, end } = getDateRange(activeTab, selectedDate);
-
-    // Filter by date range based on active tab
-    filtered = filtered.filter(transaction => {
-      const transactionDate = new Date(transaction.date);
-      // Handle both ISO string and date string formats
-      if (isNaN(transactionDate.getTime())) {
-        return false;
-      }
-      return transactionDate >= start && transactionDate <= end;
-    });
-
-    // Filter by type
-    if (filterType !== 'all') {
-      filtered = filtered.filter(transaction => transaction.type === filterType);
-    }
-
-    // Filter by category
-    if (selectedCategory) {
-      filtered = filtered.filter(transaction => transaction.category_id === selectedCategory);
-    }
-
-    // Sort by date
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
-    });
-
-    setFilteredTransactions(filtered);
-  }, [transactions, activeTab, selectedDate, filterType, selectedCategory, sortOrder, categories]);
+  // Filter and sort transactions handled by custom hook
 
   const handleDeleteTransaction = (transactionId: number) => {
     Alert.alert(
@@ -156,35 +134,7 @@ const TransactionsScreen = () => {
     setShowDatePicker(false);
   };
 
-  const navigateDate = (direction: 'prev' | 'next') => {
-    const newDate = new Date(selectedDate);
-    
-    switch (activeTab) {
-      case 'daily':
-        newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
-        break;
-      case 'weekly':
-        newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-        break;
-      case 'monthly':
-        newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
-        break;
-      case 'yearly':
-        newDate.setFullYear(newDate.getFullYear() + (direction === 'next' ? 1 : -1));
-        break;
-    }
-    
-    setSelectedDate(newDate);
-  };
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return '';
-    return date.toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  };
 
   const exportToXLS = async () => {
     try {
@@ -331,18 +281,19 @@ const TransactionsScreen = () => {
     }
   };
 
-  const getTabLabel = (tab: TabType) => {
-    switch (tab) {
-      case 'daily': return 'Harian';
-      case 'weekly': return 'Mingguan';
-      case 'monthly': return 'Bulanan';
-      case 'yearly': return 'Tahunan';
-    }
-  };
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#3B82F6', paddingTop: 24 }}>
-      {/* Header */}
+      <ScreenHeader
+          title="Transaksi"
+          onMenuPress={() => navigation.openDrawer()}
+          rightButton={{
+            icon: "add",
+            onPress: () => setShowTransactionModal(true)
+          }}
+        />
+      {/* Filter Toolbar */}
       <View style={{
         backgroundColor: '#3B82F6',
         paddingHorizontal: 16,
@@ -355,17 +306,6 @@ const TransactionsScreen = () => {
           marginBottom: 16,
           gap: 12
         }}>
-          {/* Menu Button */}
-          <TouchableOpacity
-            onPress={() => navigation.openDrawer()}
-            style={{
-              padding: 8,
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              borderRadius: 6
-            }}
-          >
-            <Ionicons name="menu" size={20} color="white" />
-          </TouchableOpacity>
           {/* Filter Toolbar - 2/3 */}
           <View style={{
             flexDirection: 'row',
@@ -467,47 +407,17 @@ const TransactionsScreen = () => {
           </View>
         </View>
 
-        {/* Tab View */}
-        <View style={{ marginBottom: 16 }}>
-          <View style={{
-            flexDirection: 'row',
-            backgroundColor: 'rgba(255, 255, 255, 0.15)',
-            borderRadius: 25,
-            padding: 4,
-          }}>
-            {(['daily', 'weekly', 'monthly', 'yearly'] as TabType[]).map((tab, index) => (
-              <TouchableOpacity
-                key={tab}
-                style={{
-                  flex: 1,
-                  paddingVertical: 10,
-                  borderRadius: 20,
-                  marginHorizontal: 2,
-                  backgroundColor: activeTab === tab ? 'white' : 'transparent',
-                  shadowColor: activeTab === tab ? '#000' : 'transparent',
-                  shadowOffset: {
-                    width: 0,
-                    height: 2,
-                  },
-                  shadowOpacity: activeTab === tab ? 0.1 : 0,
-                  shadowRadius: 4,
-                  elevation: activeTab === tab ? 3 : 0,
-                }}
-                onPress={() => setActiveTab(tab)}
-              >
-                <Text style={{
-                  fontSize: 13,
-                  fontWeight: '600',
-                  color: activeTab === tab ? '#3B82F6' : 'rgba(255, 255, 255, 0.8)',
-                  textAlign: 'center',
-                }}>
-                  {getTabLabel(tab)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
+        {/* Tab Filter */}
+         <TabFilter
+           activeTab={activeTab}
+           onTabChange={(tab: string) => setActiveTab(tab as TabType)}
+           options={[
+             { key: 'daily', label: 'Harian' },
+             { key: 'weekly', label: 'Minggu' },
+             { key: 'monthly', label: 'Bulanan' },
+             { key: 'yearly', label: 'Tahunan' }
+           ]}
+         />
 
       </View>
 
@@ -1212,5 +1122,81 @@ const TransactionsScreen = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
+  dateNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  dateText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+  },
+  navButton: {
+    padding: 8,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#999',
+    marginTop: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    width: '80%',
+    maxWidth: 300,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginVertical: 4,
+  },
+  modalButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  cancelButton: {
+    backgroundColor: '#f0f0f0',
+  },
+  cancelButtonText: {
+    color: '#333',
+  },
+});
 
 export default TransactionsScreen;
