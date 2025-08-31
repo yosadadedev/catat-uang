@@ -1,131 +1,59 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   Modal,
   TextInput,
-  Alert,
   SafeAreaView,
   ScrollView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { useFinanceStore } from '../store/useStore';
 import { useTheme } from '../contexts/ThemeContext';
-import { useNavigation } from '@react-navigation/native';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { ScreenHeader } from '../components/common';
+import { useCategoryManagement } from '../hooks';
+import { iconOptions, iconColors } from '../constants';
 import { DrawerParamList } from '../navigation/AppNavigator';
 
 type CategoryManagementScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Categories'>;
-type TransactionType = 'income' | 'expense';
 
 const CategoryManagementScreen = () => {
   const navigation = useNavigation<CategoryManagementScreenNavigationProp>();
   const { colors } = useTheme();
   const { categories, addCategory, deleteCategory } = useFinanceStore();
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [selectedIcon, setSelectedIcon] = useState('folder-outline');
-  const [selectedType, setSelectedType] = useState<TransactionType>('expense');
-  const [filterType, setFilterType] = useState<TransactionType>('expense');
+  
+  // Use custom hook for category management logic
+  const {
+    showAddModal,
+    setShowAddModal,
+    newCategoryName,
+    setNewCategoryName,
+    selectedIcon,
+    setSelectedIcon,
+    selectedType,
+    setSelectedType,
+    filterType,
+    setFilterType,
+    filteredCategories,
+    handleAddCategory,
+    handleDeleteCategory
+  } = useCategoryManagement({ categories, addCategory, deleteCategory });
 
-  const iconOptions = [
-    'folder-outline', 'home-outline', 'car-outline', 'restaurant-outline',
-    'medical-outline', 'school-outline', 'shirt-outline', 'game-controller-outline',
-    'gift-outline', 'airplane-outline', 'fitness-outline', 'library-outline',
-    'wallet-outline', 'card-outline', 'cash-outline', 'trending-up-outline',
-    'trending-down-outline', 'business-outline', 'briefcase-outline', 'heart-outline'
-  ];
-
-  const iconColors = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD',
-    '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8C471', '#82E0AA',
-    '#F1948A', '#85C1E9', '#F4D03F', '#AED6F1', '#A9DFBF', '#F5B7B1'
-  ];
-
-  const getIconColor = (index: number) => {
-    return iconColors[index % iconColors.length];
-  };
-
-  const filteredCategories = categories.filter(category => category.type === filterType);
-
-  const handleAddCategory = () => {
-    if (newCategoryName.trim()) {
-      const randomColor = getIconColor(Math.floor(Math.random() * iconColors.length));
-      addCategory({
-        name: newCategoryName.trim(),
-        icon: selectedIcon,
-        color: randomColor,
-        type: selectedType
-      });
-      setNewCategoryName('');
-      setSelectedIcon('folder-outline');
-      setSelectedType('expense');
-      setShowAddModal(false);
-    } else {
-      Alert.alert('Error', 'Nama kategori tidak boleh kosong');
-    }
-  };
-
-  const handleDeleteCategory = (categoryId: number, categoryName: string) => {
-    Alert.alert(
-      'Hapus Kategori',
-      `Apakah Anda yakin ingin menghapus kategori "${categoryName}"?`,
-      [
-        { text: 'Batal', style: 'cancel' },
-        {
-          text: 'Hapus',
-          style: 'destructive',
-          onPress: () => deleteCategory(categoryId),
-        },
-      ]
-    );
-  };
+  // Logic handled by custom hook
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Header */}
-      <View style={{
-        backgroundColor: colors.primary,
-        paddingHorizontal: 16,
-        paddingTop: 50,
-        paddingBottom: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity
-            onPress={() => navigation.openDrawer()}
-            style={{
-              padding: 8,
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              borderRadius: 6,
-              marginRight: 12
-            }}
-          >
-            <Ionicons name="menu" size={20} color="white" />
-          </TouchableOpacity>
-          <Text style={{
-            fontSize: 20,
-            fontWeight: 'bold',
-            color: 'white'
-          }}>
-            Manajemen Kategori
-          </Text>
-        </View>
-        
-        <TouchableOpacity
-          onPress={() => setShowAddModal(true)}
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            borderRadius: 6,
-            padding: 8
-          }}
-        >
-          <Ionicons name="add" size={20} color="white" />
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader
+        title="Kelola Kategori"
+        onMenuPress={() => navigation.openDrawer()}
+        rightButton={{
+          icon: "add",
+          onPress: () => setShowAddModal(true)
+        }}
+      />
 
       {/* Transaction Type Filter */}
       <View style={{
@@ -432,7 +360,7 @@ const CategoryManagementScreen = () => {
             >
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 {iconOptions.map((icon, index) => {
-                  const iconColor = getIconColor(index);
+                  const iconColor = iconColors[index % iconColors.length];
                   const isSelected = selectedIcon === icon;
                   return (
                     <TouchableOpacity
@@ -507,5 +435,7 @@ const CategoryManagementScreen = () => {
     </SafeAreaView>
   );
 };
+
+
 
 export default CategoryManagementScreen;

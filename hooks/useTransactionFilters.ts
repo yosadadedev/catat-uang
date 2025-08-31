@@ -1,0 +1,134 @@
+import { useState, useEffect } from 'react';
+import { Transaction } from '../database/database';
+
+export type TabType = 'daily' | 'weekly' | 'monthly' | 'yearly';
+export type FilterType = 'all' | 'income' | 'expense';
+export type SortType = 'newest' | 'oldest';
+
+interface UseTransactionFiltersProps {
+  transactions: Transaction[];
+  categories: any[];
+}
+
+export const useTransactionFilters = ({ transactions, categories }: UseTransactionFiltersProps) => {
+  const [activeTab, setActiveTab] = useState<TabType>('daily');
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [sortOrder, setSortOrder] = useState<SortType>('newest');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
+
+  const getDateRange = (tab: TabType, date: Date) => {
+    const start = new Date(date);
+    const end = new Date(date);
+    
+    switch (tab) {
+      case 'daily':
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'weekly':
+        const dayOfWeek = start.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        start.setDate(start.getDate() - daysToMonday);
+        start.setHours(0, 0, 0, 0);
+        end.setDate(start.getDate() + 6);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'monthly':
+        start.setDate(1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(start.getMonth() + 1, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'yearly':
+        start.setMonth(0, 1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(11, 31);
+        end.setHours(23, 59, 59, 999);
+        break;
+    }
+    
+    return { start, end };
+  };
+
+  const navigateDate = (direction: 'prev' | 'next') => {
+    const newDate = new Date(selectedDate);
+    
+    switch (activeTab) {
+      case 'daily':
+        newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
+        break;
+      case 'weekly':
+        newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+        break;
+      case 'monthly':
+        newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+        break;
+      case 'yearly':
+        newDate.setFullYear(newDate.getFullYear() + (direction === 'next' ? 1 : -1));
+        break;
+    }
+    
+    setSelectedDate(newDate);
+  };
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return '';
+    return date.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  useEffect(() => {
+    let filtered = transactions;
+    const { start, end } = getDateRange(activeTab, selectedDate);
+
+    // Filter by date range based on active tab
+    filtered = filtered.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      if (isNaN(transactionDate.getTime())) {
+        return false;
+      }
+      return transactionDate >= start && transactionDate <= end;
+    });
+
+    // Filter by type
+    if (filterType !== 'all') {
+      filtered = filtered.filter(transaction => transaction.type === filterType);
+    }
+
+    // Filter by category
+    if (selectedCategory) {
+      filtered = filtered.filter(transaction => transaction.category_id === selectedCategory);
+    }
+
+    // Sort by date
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    setFilteredTransactions(filtered);
+  }, [transactions, activeTab, selectedDate, filterType, selectedCategory, sortOrder, categories]);
+
+  return {
+    activeTab,
+    setActiveTab,
+    filterType,
+    setFilterType,
+    sortOrder,
+    setSortOrder,
+    selectedCategory,
+    setSelectedCategory,
+    selectedDate,
+    setSelectedDate,
+    filteredTransactions,
+    navigateDate,
+    formatDate,
+    getDateRange
+  };
+};

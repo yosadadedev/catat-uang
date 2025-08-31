@@ -13,6 +13,7 @@ import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalization } from '../contexts/LocalizationContext';
+import { ScreenHeader, Card, Button } from '../components/common';
 import { DrawerParamList } from '../navigation/AppNavigator';
 import { useFinanceStore } from '../store/useStore';
 
@@ -61,50 +62,17 @@ const SettingsScreen = () => {
 
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
-      {/* Header */}
-      <View style={{
-        backgroundColor: '#3B82F6',
-        paddingTop: 60,
-        paddingBottom: 20,
-        paddingHorizontal: 16,
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24,
-      }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <TouchableOpacity
-              onPress={() => navigation.openDrawer()}
-              style={{
-                marginRight: 12,
-                padding: 8,
-                borderRadius: 8,
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-              }}
-            >
-              <Ionicons name="menu" size={20} color="white" />
-            </TouchableOpacity>
-            <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>{t('settingsTitle')}</Text>
-          </View>
-        </View>
-        <Text style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 16 }}>{t('settingsSubtitle')}</Text>
-      </View>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <ScreenHeader
+        title={t('settingsTitle')}
+        subtitle={t('settingsSubtitle')}
+        onMenuPress={() => navigation.openDrawer()}
+      />
 
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
 
         {/* App Preferences */}
-        <View style={{
-          backgroundColor: 'white',
-          marginHorizontal: 16,
-          marginTop: 16,
-          borderRadius: 12,
-          padding: 16,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.05,
-          shadowRadius: 2,
-          elevation: 1,
-        }}>
+        <Card style={{ marginHorizontal: 16, marginTop: 16 }}>
         <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>{t('appPreferences')}</Text>
         
         <View 
@@ -115,14 +83,14 @@ const SettingsScreen = () => {
               <Text style={{ color: '#111827', fontWeight: '500' }}>{t('notifications')}</Text>
               <Text style={{ color: '#6B7280', fontSize: 14 }}>{t('notificationsDesc')}</Text>
             </View>
-          </View>
-          <Switch
-            value={notifications}
-            onValueChange={setNotifications}
-            trackColor={{ false: '#D1D5DB', true: '#3B82F6' }}
-            thumbColor={notifications ? '#FFFFFF' : '#FFFFFF'}
-          />
-        </View>
+           </View>
+           <Switch
+             value={notifications}
+             onValueChange={setNotifications}
+             trackColor={{ false: '#D1D5DB', true: '#3B82F6' }}
+             thumbColor={notifications ? '#FFFFFF' : '#FFFFFF'}
+           />
+         </View>
 
 
 
@@ -160,7 +128,7 @@ const SettingsScreen = () => {
             <Ionicons name="chevron-forward" size={16} color="#6B7280" />
           </View>
         </TouchableOpacity>
-      </View>
+      </Card>
 
 
 
@@ -279,44 +247,19 @@ const SettingsScreen = () => {
                 flexDirection: 'row',
                 gap: 12
               }}>
-                <TouchableOpacity
+                <Button
+                  title="Batal"
+                  variant="secondary"
                   onPress={() => setShowResetModal(false)}
-                  style={{
-                    flex: 1,
-                    paddingVertical: 12,
-                    paddingHorizontal: 16,
-                    borderRadius: 8,
-                    backgroundColor: '#F3F4F6',
-                    alignItems: 'center'
-                  }}
-                >
-                  <Text style={{
-                    color: '#374151',
-                    fontWeight: '600',
-                    fontSize: 16
-                  }}>
-                    Batal
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                  style={{ flex: 1 }}
+                />
+                
+                <Button
+                  title="Reset Data"
+                  variant="danger"
                   onPress={handleResetData}
-                  style={{
-                    flex: 1,
-                    paddingVertical: 12,
-                    paddingHorizontal: 16,
-                    borderRadius: 8,
-                    backgroundColor: '#DC2626',
-                    alignItems: 'center'
-                  }}
-                >
-                  <Text style={{
-                    color: 'white',
-                    fontWeight: '600',
-                    fontSize: 16
-                  }}>
-                    Reset Data
-                  </Text>
-                </TouchableOpacity>
+                  style={{ flex: 1 }}
+                />
               </View>
             </View>
           </View>
@@ -381,6 +324,7 @@ const SettingsScreen = () => {
                 backgroundColor: colors.surface,
                 padding: 16,
                 borderRadius: 12,
+                marginBottom: 24,
                 borderWidth: locale === 'en' ? 2 : 1,
                 borderColor: locale === 'en' ? colors.primary : colors.border,
                 flexDirection: 'row',
@@ -399,6 +343,12 @@ const SettingsScreen = () => {
                 <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
               )}
             </TouchableOpacity>
+
+            <Button
+              title="Tutup"
+              variant="secondary"
+              onPress={() => setShowLanguageModal(false)}
+            />
           </View>
         </View>
       </Modal>

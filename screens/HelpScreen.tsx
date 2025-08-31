@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -14,7 +13,7 @@ import { DrawerParamList } from '../navigation/AppNavigator';
 
 type HelpScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Help'>;
 
-const { width } = Dimensions.get('window');
+
 
 interface FeatureItem {
   icon: keyof typeof Ionicons.glyphMap;

@@ -3,15 +3,13 @@ import {
   View,
   Text,
   ScrollView,
-  StyleSheet,
-  TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useTheme } from '../contexts/ThemeContext';
-import { useLocalization } from '../contexts/LocalizationContext';
 import { DrawerParamList } from '../navigation/AppNavigator';
 import { Container } from '../components/Container';
+import { ScreenHeader, Card } from '../components/common';
 
 type AboutScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'About'>;
 
@@ -21,39 +19,34 @@ interface Props {
 
 const AboutScreen: React.FC<Props> = ({ navigation }) => {
   const { colors } = useTheme();
-  const { t } = useLocalization();
 
 
 
   return (
     <Container>
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={() => navigation.openDrawer()}
-        >
-          <Ionicons name="menu" size={24} color="white" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Tentang </Text>
-      </View>
+      <ScreenHeader
+        title="Tentang"
+        subtitle="Informasi aplikasi"
+        onMenuPress={() => navigation.openDrawer()}
+      />
 
       <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
         {/* App Info Section */}
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Card>
           <View style={styles.appIconContainer}>
             <View style={[styles.appIcon, { backgroundColor: colors.primary }]}>
               <Ionicons name="wallet" size={40} color="white" />
-            </View>
+             </View>
           </View>
           <Text style={[styles.appName, { color: colors.text }]}>Catat Uang</Text>
           <Text style={[styles.appVersion, { color: colors.textSecondary }]}>Versi 1.0.0</Text>
           <Text style={[styles.appDescription, { color: colors.textSecondary }]}>
             Aplikasi pencatat keuangan pribadi gratis yang membantu Anda mengelola pemasukan dan pengeluaran dengan mudah dan efisien.
           </Text>
-        </View>
+        </Card>
 
         {/* Features Section */}
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Card>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>✨ Fitur Utama</Text>
           <View style={styles.featureList}>
             <View style={styles.featureItem}>
@@ -77,10 +70,10 @@ const AboutScreen: React.FC<Props> = ({ navigation }) => {
               <Text style={[styles.featureText, { color: colors.textSecondary }]}>Dukungan multi bahasa</Text>
             </View>
           </View>
-        </View>
+        </Card>
 
         {/* Changelog Section */}
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Card>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>📝 Changelog</Text>
           
           <View style={styles.changelogItem}>
@@ -97,7 +90,7 @@ const AboutScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
           </View>
-        </View>
+        </Card>
 
 
 
@@ -115,78 +108,49 @@ const AboutScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: 50,
-  },
-  menuButton: {
-    padding: 8,
-    marginRight: 12,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
-  },
+const styles = {
   container: {
     flex: 1,
     padding: 16,
   },
-  section: {
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
   appIconContainer: {
-    alignItems: 'center',
+    alignItems: 'center' as const,
     marginBottom: 16,
   },
   appIcon: {
     width: 80,
     height: 80,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
   },
   appName: {
     fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: 'bold' as const,
+    textAlign: 'center' as const,
     marginBottom: 4,
   },
   appVersion: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: 'center' as const,
     marginBottom: 12,
   },
   appDescription: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: 'center' as const,
     lineHeight: 20,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
     marginBottom: 16,
   },
   featureList: {
     gap: 12,
   },
   featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
     gap: 12,
   },
   featureText: {
@@ -198,7 +162,7 @@ const styles = StyleSheet.create({
   },
   versionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
     marginBottom: 4,
   },
   releaseDate: {
@@ -213,7 +177,7 @@ const styles = StyleSheet.create({
   },
   changelogType: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     marginBottom: 4,
   },
   changelogText: {
@@ -221,16 +185,15 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginLeft: 8,
   },
-
   footer: {
-    alignItems: 'center',
+    alignItems: 'center' as const,
     paddingVertical: 20,
     gap: 4,
   },
   copyright: {
     fontSize: 12,
-    textAlign: 'center',
+    textAlign: 'center' as const,
   },
-});
+};
 
 export default AboutScreen;
