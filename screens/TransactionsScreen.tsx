@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  FlatList,
   Modal,
   Alert,
-  StyleSheet,
   ScrollView,
   SafeAreaView,
 } from 'react-native';
@@ -22,7 +20,7 @@ import { useFinanceStore } from '../store/useStore';
 import { TransactionList } from '../components/TransactionCard';
 import TransactionModal from '../components/TransactionModal';
 import { ScreenHeader, TabFilter } from '../components/common';
-import { useTransactionFilters, TabType, FilterType, SortType } from '../hooks';
+import { useTransactionFilters, TabType, FilterType } from '../hooks';
 import { Transaction } from '../database/database';
 import { DrawerParamList, RootStackParamList } from '../navigation/AppNavigator';
 import { DatePicker } from '~/components/DatePicker';
@@ -162,7 +160,7 @@ const TransactionsScreen = () => {
       
       await Sharing.shareAsync(uri);
       setShowExportModal(false);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Gagal mengexport ke Excel');
     }
   };
@@ -217,7 +215,7 @@ const TransactionsScreen = () => {
       const { uri } = await Print.printToFileAsync({ html: htmlContent });
       await Sharing.shareAsync(uri);
       setShowExportModal(false);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Gagal mengexport ke PDF');
     }
   };
@@ -245,7 +243,7 @@ const TransactionsScreen = () => {
       
       await Sharing.shareAsync(uri);
       setShowExportModal(false);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Gagal mengexport ke CSV');
     }
   };
@@ -297,8 +295,8 @@ const TransactionsScreen = () => {
       <View style={{
         backgroundColor: '#3B82F6',
         paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 0,
+        paddingTop: 0,
+        paddingBottom: 16,
       }}>
         <View style={{
           flexDirection: 'row',
@@ -372,24 +370,26 @@ const TransactionsScreen = () => {
           </View>
           {/* Date Navigation - 1/3 */}
           <View style={{
-            flex: 1,
             flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center'
+            alignItems: 'center',
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderRadius: 6,
+            paddingHorizontal: 8,
+            paddingVertical: 8
           }}>
             <TouchableOpacity
               onPress={() => navigateDate('prev')}
-              style={{ padding: 6 }}
+              style={{ padding: 4 }}
             >
-              <Ionicons name="chevron-back" size={20} color="white" />
+              <Ionicons name="chevron-back" size={16} color="white" />
             </TouchableOpacity>
             
             <TouchableOpacity
               onPress={() => setShowDatePicker(true)}
-              style={{ flex: 1, alignItems: 'center' }}
+              style={{ paddingHorizontal: 12 }}
             >
               <Text style={{
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: 'bold',
                 color: 'white',
                 textAlign: 'center'
@@ -400,11 +400,12 @@ const TransactionsScreen = () => {
             
             <TouchableOpacity
               onPress={() => navigateDate('next')}
-              style={{ padding: 6 }}
+              style={{ padding: 4 }}
             >
-              <Ionicons name="chevron-forward" size={20} color="white" />
+              <Ionicons name="chevron-forward" size={16} color="white" />
             </TouchableOpacity>
           </View>
+          
         </View>
 
         {/* Tab Filter */}
@@ -1123,80 +1124,6 @@ const TransactionsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  dateNavigation: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  dateText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-  },
-  navButton: {
-    padding: 8,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#999',
-    marginTop: 16,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    width: '80%',
-    maxWidth: 300,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  modalButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginVertical: 4,
-  },
-  modalButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  cancelButton: {
-    backgroundColor: '#f0f0f0',
-  },
-  cancelButtonText: {
-    color: '#333',
-  },
-});
+
 
 export default TransactionsScreen;

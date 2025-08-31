@@ -1,12 +1,11 @@
 import React from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Transaction, Category } from '../database/database';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 
-const { width: screenWidth } = Dimensions.get('window');
-const chartWidth = screenWidth - 32; // 16px padding on each side
+
 
 interface ChartData {
   label: string;

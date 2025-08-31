@@ -67,6 +67,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
       </View>
       
       {rightButton && (
+        <View className='flex-row justify-between items-center'>
         <TouchableOpacity
           onPress={rightButton.onPress}
           style={{
@@ -77,6 +78,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
         >
           <Ionicons name={rightButton.icon} size={20} color="white" />
         </TouchableOpacity>
+        </View>
       )}
     </View>
   );

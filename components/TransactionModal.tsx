@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Modal,
   StyleSheet,
@@ -137,7 +136,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           },
         ]
       );
-    } catch (error) {
+    } catch {
       Alert.alert('Error', `Gagal ${isEditMode ? 'memperbarui' : 'menyimpan'} transaksi. Silakan coba lagi.`);
     } finally {
       setIsLoading(false);

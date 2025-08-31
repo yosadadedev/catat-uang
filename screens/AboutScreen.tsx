@@ -7,7 +7,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useTheme } from '../contexts/ThemeContext';
-import { useLocalization } from '../contexts/LocalizationContext';
 import { DrawerParamList } from '../navigation/AppNavigator';
 import { Container } from '../components/Container';
 import { ScreenHeader, Card } from '../components/common';
@@ -20,7 +19,6 @@ interface Props {
 
 const AboutScreen: React.FC<Props> = ({ navigation }) => {
   const { colors } = useTheme();
-  const { t } = useLocalization();
 
 
 

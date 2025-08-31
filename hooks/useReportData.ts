@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Transaction } from '../database/database';
 import { Alert, Share } from 'react-native';
 
@@ -37,7 +37,7 @@ export const useReportData = ({ transactions, categories }: UseReportDataProps) 
     setEndDate(end);
   };
 
-  const filterTransactions = () => {
+  const filterTransactions = useCallback(() => {
     const filtered = transactions.filter(transaction => {
       const transactionDate = new Date(transaction.date);
       transactionDate.setHours(0, 0, 0, 0);
@@ -48,7 +48,7 @@ export const useReportData = ({ transactions, categories }: UseReportDataProps) 
       return transactionDate >= start && transactionDate <= end;
     });
     setFilteredTransactions(filtered);
-  };
+  }, [transactions, startDate, endDate]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('id-ID', {
@@ -153,7 +153,7 @@ ${topIncome.map((item, index) => `${index + 1}. ${item.icon} ${item.category}: $
         message: reportText,
         title: 'Laporan Keuangan',
       });
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Gagal mengekspor laporan');
     }
   };
@@ -164,7 +164,7 @@ ${topIncome.map((item, index) => `${index + 1}. ${item.icon} ${item.category}: $
 
   useEffect(() => {
     filterTransactions();
-  }, [transactions, startDate, endDate]);
+  }, [transactions, startDate, endDate, filterTransactions]);
 
   return {
     selectedPeriod,

@@ -3,19 +3,16 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
-  Alert,
-  Share,
   RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
-import { PieChart, BarChart, MonthlyTrend, prepareChartData } from '../components/ChartComponent';
-import { ScreenHeader, TabFilter, Card, Button } from '../components/common';
+import { PieChart, MonthlyTrend, prepareChartData } from '../components/ChartComponent';
+import { ScreenHeader, TabFilter, Card } from '../components/common';
 import { useReportData } from '../hooks';
 import { useFinanceStore } from '../store/useStore';
-import { Transaction } from '../database/database';
+
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 import { DrawerParamList } from '../navigation/AppNavigator';
@@ -36,12 +33,8 @@ const ReportsScreen = () => {
   const {
      selectedPeriod,
      setSelectedPeriod,
-     startDate,
-     endDate,
      filteredTransactions,
-     updateDateRange,
      formatCurrency,
-     formatDateRange,
      calculateSummary,
      getTopCategories,
      exportReport

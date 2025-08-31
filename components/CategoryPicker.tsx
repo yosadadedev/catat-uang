@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
-  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Category } from '../database/database';
