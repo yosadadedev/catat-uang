@@ -14,27 +14,22 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FF6B6B"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.yosadadev.catatuang"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FF6B6B"
       },
       "package": "com.yosadadev.catatuang"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "6cc04575-006b-4fe7-9bb5-df0beacda52b"
-      }
-    },
-    "owner": "yosadadev"
+    }
   }
 }
