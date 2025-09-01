@@ -29,7 +29,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#3B82F6"
       },
-      "package": "com.yosadadev.catatuang"
+      "package": "com.yosadalabs.catatuang"
     },
     "extra": {
       "eas": {
