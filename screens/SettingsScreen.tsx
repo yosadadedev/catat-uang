@@ -94,7 +94,7 @@ const SettingsScreen = () => {
 
 
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => setShowLanguageModal(true)}
          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}
         >
@@ -111,7 +111,7 @@ const SettingsScreen = () => {
             </Text>
             <Ionicons name="chevron-forward" size={16} color="#6B7280" />
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity 
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 }}

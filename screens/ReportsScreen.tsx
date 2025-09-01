@@ -73,10 +73,10 @@ const ReportsScreen = () => {
       <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
         <TabFilter
            options={[
-             { key: 'today', label: t('today') },
-             { key: 'week', label: t('week') },
-             { key: 'month', label: t('month') },
-             { key: 'year', label: t('year') }
+             { key: 'today', label: 'Harian' },
+             { key: 'week', label: 'Minggu' },
+             { key: 'month', label: 'Bulanan' },
+             { key: 'year', label: 'Tahunan' }
            ]}
            activeTab={selectedPeriod}
            onTabChange={(tab) => setSelectedPeriod(tab as TimePeriod)}

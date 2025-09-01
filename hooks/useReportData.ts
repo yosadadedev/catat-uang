@@ -8,7 +8,7 @@ interface UseReportDataProps {
 }
 
 export const useReportData = ({ transactions, categories }: UseReportDataProps) => {
-  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
+  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('today');
   const [startDate, setStartDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [endDate, setEndDate] = useState(new Date());
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
@@ -141,12 +141,12 @@ ${formatDateRange()}
 • Total Transaksi: ${summary.totalTransactions}
 
 📈 TOP PENGELUARAN:
-${topExpenses.map((item, index) => `${index + 1}. ${item.icon} ${item.category}: ${formatCurrency(item.amount)} (${item.percentage.toFixed(1)}%)`).join('\n')}
+${topExpenses.map((item, index) => `${index + 1}. ${item.category}: ${formatCurrency(item.amount)} (${item.percentage.toFixed(1)}%)`).join('\n')}
 
 📉 TOP PEMASUKAN:
-${topIncome.map((item, index) => `${index + 1}. ${item.icon} ${item.category}: ${formatCurrency(item.amount)} (${item.percentage.toFixed(1)}%)`).join('\n')}
+${topIncome.map((item, index) => `${index + 1}. ${item.category}: ${formatCurrency(item.amount)} (${item.percentage.toFixed(1)}%)`).join('\n')}
 
-📱 Dibuat dengan Catatan Keuangan
+📱 Dibuat dengan Catat Uang
       `;
 
       await Share.share({
