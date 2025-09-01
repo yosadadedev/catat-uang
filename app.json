@@ -2,7 +2,7 @@
   "expo": {
     "name": "Catat Uang",
     "slug": "catat-uang",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "web": {
       "favicon": "./assets/favicon.png"
     },
@@ -25,6 +25,7 @@
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#3B82F6"
