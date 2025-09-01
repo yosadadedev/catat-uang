@@ -91,18 +91,6 @@ const AboutScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </View>
         </Card>
-
-
-
-        {/* Copyright */}
-        <View style={styles.footer}>
-          <Text style={[styles.copyright, { color: colors.textSecondary }]}>
-            © 2025 Catat Uang. All rights reserved.
-          </Text>
-          <Text style={[styles.copyright, { color: colors.textSecondary }]}>
-            Made with ❤️ in Indonesia
-          </Text>
-        </View>
       </ScrollView>
     </Container>
   );

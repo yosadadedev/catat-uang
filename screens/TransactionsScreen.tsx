@@ -389,7 +389,7 @@ const TransactionsScreen = () => {
         {/* Summary Cards */}
         <View style={{
           paddingHorizontal: 16,
-          paddingVertical: 12,
+          paddingTop: 12,
           backgroundColor: '#F9FAFB'
         }}>
           <View style={{
@@ -748,7 +748,7 @@ const TransactionsScreen = () => {
               }}>
                 Kategori
               </Text>
-              <ScrollView style={{ maxHeight: 200 }} showsVerticalScrollIndicator={false}>
+              <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
                 <View style={{ gap: 8 }}>
                   <TouchableOpacity
                     style={{

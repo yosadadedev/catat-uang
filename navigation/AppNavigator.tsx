@@ -250,7 +250,7 @@ const DrawerNavigator = () => {
           },
         }}
       />
-      <Drawer.Screen
+      {/* <Drawer.Screen
         name="Gift"
         component={SettingsScreen}
         options={{
@@ -263,7 +263,7 @@ const DrawerNavigator = () => {
             handleMenuPress('Gift');
           },
         }}
-      />
+      /> */}
       <Drawer.Screen
         name="Rating"
         component={SettingsScreen}
