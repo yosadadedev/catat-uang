@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "catat-uang",
+    "name": "Catat Uang",
     "slug": "catat-uang",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "web": {
       "favicon": "./assets/favicon.png"
     },
