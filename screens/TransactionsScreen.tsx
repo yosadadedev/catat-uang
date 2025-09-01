@@ -389,7 +389,7 @@ const TransactionsScreen = () => {
         {/* Summary Cards */}
         <View style={{
           paddingHorizontal: 16,
-          paddingTop: 12,
+          paddingVertical: 12,
           backgroundColor: '#F9FAFB'
         }}>
           <View style={{
