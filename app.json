@@ -30,6 +30,11 @@
         "backgroundColor": "#FF6B6B"
       },
       "package": "com.yosadadev.catatuang"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6cc04575-006b-4fe7-9bb5-df0beacda52b"
+      }
     }
   }
 }
