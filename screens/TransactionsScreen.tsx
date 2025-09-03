@@ -19,7 +19,7 @@ import * as Sharing from 'expo-sharing';
 import { useFinanceStore } from '../store/useStore';
 import { TransactionList } from '../components/TransactionCard';
 import TransactionModal from '../components/TransactionModal';
-import { ScreenHeader, TabFilter } from '../components/common';
+import { ScreenHeader } from '../components/common';
 import { useTransactionFilters, TabType, FilterType } from '../hooks';
 import { Transaction } from '../database/database';
 import { DrawerParamList, RootStackParamList } from '../navigation/AppNavigator';
@@ -147,18 +147,6 @@ const TransactionsScreen = () => {
     setShowTransactionModal(false);
     setEditingTransaction(null);
   };
-
-  const handleDateSelect = (date: Date) => {
-    setSelectedDate(date);
-    setShowDatePicker(false);
-  };
-
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab as TabType);
-    setUseCustomDateRange(false); // Reset custom date range when changing tabs
-  };
-
-
 
   const exportToXLS = async () => {
     try {
@@ -401,18 +389,7 @@ const TransactionsScreen = () => {
           
         </View>
 
-        {/* Tab Filter */}
-         <TabFilter
-           activeTab={useCustomDateRange ? 'custom' : activeTab}
-           onTabChange={handleTabChange}
-           options={[
-             { key: 'daily', label: 'Harian' },
-             { key: 'weekly', label: 'Minggu' },
-             { key: 'monthly', label: 'Bulanan' },
-             { key: 'yearly', label: 'Tahunan' },
-             ...(useCustomDateRange ? [{ key: 'custom', label: 'Rentang Kustom' }] : [])
-           ]}
-         />
+
 
       </View>
 

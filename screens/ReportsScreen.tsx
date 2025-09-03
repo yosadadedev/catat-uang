@@ -11,7 +11,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { PieChart, MonthlyTrend, prepareChartData } from '../components/ChartComponent';
-import { ScreenHeader, TabFilter, Card } from '../components/common';
+import { ScreenHeader, Card } from '../components/common';
 import { useReportData } from '../hooks';
 import { useFinanceStore } from '../store/useStore';
 import { DateRangePicker } from '../components/DatePicker';
@@ -261,17 +261,7 @@ const ReportsScreen = () => {
           </View>
         </View>
 
-        {/* Period Selector */}
-        <TabFilter
-           options={[
-             { key: 'today', label: 'Hari Ini' },
-             { key: 'week', label: 'Minggu Ini' },
-             { key: 'month', label: 'Bulan Ini' },
-             { key: 'year', label: 'Tahun Ini' }
-           ]}
-           activeTab={selectedPeriod}
-           onTabChange={(tab) => setSelectedPeriod(tab as TimePeriod)}
-         />
+
       </View>
 
       <ScrollView
