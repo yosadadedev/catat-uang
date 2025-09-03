@@ -48,6 +48,7 @@ interface DateRangePickerProps {
   onStartDateChange: (date: Date) => void;
   onEndDateChange: (date: Date) => void;
   onClose?: () => void;
+  onApply?: () => void;
 }
 
 export const DateRangePicker: React.FC<DateRangePickerProps> = ({
@@ -56,6 +57,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   onStartDateChange,
   onEndDateChange,
   onClose,
+  onApply,
 }) => {
   const { colors } = useTheme();
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -182,7 +184,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 const isToday = date && date.toDateString() === new Date().toDateString();
                 
                 return (
-                  <View key={dayIndex} style={{ flex: 1, aspectRatio: 1, padding: 2, width: 40 }}>
+                  <View key={dayIndex} style={{ flex: 1, aspectRatio: 1, padding: 2 }}>
                     {date ? (
                       <TouchableOpacity
                         onPress={() => handleDatePress(date)}
@@ -298,7 +300,10 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       <View style={{ padding: 16, borderTopWidth: 1, borderTopColor: '#e5e7eb' }}>
         {/* Apply Button */}
         <TouchableOpacity
-          onPress={onClose}
+          onPress={() => {
+            onApply?.();
+            onClose?.();
+          }}
           style={{
             backgroundColor: colors.primary,
             paddingVertical: 12,

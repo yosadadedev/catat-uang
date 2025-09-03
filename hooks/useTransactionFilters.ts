@@ -8,9 +8,12 @@ export type SortType = 'newest' | 'oldest';
 interface UseTransactionFiltersProps {
   transactions: Transaction[];
   categories: any[];
+  startDate?: Date;
+  endDate?: Date;
+  useCustomDateRange?: boolean;
 }
 
-export const useTransactionFilters = ({ transactions, categories }: UseTransactionFiltersProps) => {
+export const useTransactionFilters = ({ transactions, categories, startDate, endDate, useCustomDateRange = false }: UseTransactionFiltersProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('daily');
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [sortOrder, setSortOrder] = useState<SortType>('newest');
@@ -84,9 +87,21 @@ export const useTransactionFilters = ({ transactions, categories }: UseTransacti
 
   useEffect(() => {
     let filtered = transactions;
-    const { start, end } = getDateRange(activeTab, selectedDate);
+    
+    // Use custom date range if provided, otherwise use tab-based range
+    let start: Date, end: Date;
+    if (useCustomDateRange && startDate && endDate) {
+      start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+    } else {
+      const dateRange = getDateRange(activeTab, selectedDate);
+      start = dateRange.start;
+      end = dateRange.end;
+    }
 
-    // Filter by date range based on active tab
+    // Filter by date range
     filtered = filtered.filter(transaction => {
       const transactionDate = new Date(transaction.date);
       if (isNaN(transactionDate.getTime())) {
@@ -113,7 +128,7 @@ export const useTransactionFilters = ({ transactions, categories }: UseTransacti
     });
 
     setFilteredTransactions(filtered);
-  }, [transactions, activeTab, selectedDate, filterType, selectedCategory, sortOrder, categories]);
+  }, [transactions, activeTab, selectedDate, filterType, selectedCategory, sortOrder, categories, startDate, endDate, useCustomDateRange]);
 
   return {
     activeTab,

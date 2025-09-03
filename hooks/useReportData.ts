@@ -5,9 +5,12 @@ import { Alert, Share } from 'react-native';
 interface UseReportDataProps {
   transactions: Transaction[];
   categories: any[];
+  customStartDate?: Date;
+  customEndDate?: Date;
+  useCustomDateRange?: boolean;
 }
 
-export const useReportData = ({ transactions, categories }: UseReportDataProps) => {
+export const useReportData = ({ transactions, categories, customStartDate, customEndDate, useCustomDateRange = false }: UseReportDataProps) => {
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('today');
   const [startDate, setStartDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [endDate, setEndDate] = useState(new Date());
@@ -46,12 +49,23 @@ export const useReportData = ({ transactions, categories }: UseReportDataProps) 
   };
 
   const filterTransactions = useCallback(() => {
+    let dateStart = startDate;
+    let dateEnd = endDate;
+    
+    // Use custom date range if provided
+    if (useCustomDateRange && customStartDate && customEndDate) {
+      dateStart = new Date(customStartDate);
+      dateStart.setHours(0, 0, 0, 0);
+      dateEnd = new Date(customEndDate);
+      dateEnd.setHours(23, 59, 59, 999);
+    }
+    
     const filtered = transactions.filter(transaction => {
       const transactionDate = new Date(transaction.date);
-      return transactionDate >= startDate && transactionDate <= endDate;
+      return transactionDate >= dateStart && transactionDate <= dateEnd;
     });
     setFilteredTransactions(filtered);
-  }, [transactions, startDate, endDate]);
+  }, [transactions, startDate, endDate, customStartDate, customEndDate, useCustomDateRange]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('id-ID', {

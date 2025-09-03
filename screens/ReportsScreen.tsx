@@ -35,6 +35,11 @@ const ReportsScreen = () => {
   // Date picker state
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [useCustomDateRange, setUseCustomDateRange] = useState(false);
+  
+  // Custom date range state
+  const [customStartDate, setCustomStartDate] = useState(new Date());
+  const [customEndDate, setCustomEndDate] = useState(new Date());
 
   // Use custom hook for report data logic
   const {
@@ -49,7 +54,13 @@ const ReportsScreen = () => {
      calculateSummary,
      getTopCategories,
      exportReport
-   } = useReportData({ transactions, categories });
+   } = useReportData({ 
+     transactions, 
+     categories,
+     customStartDate: useCustomDateRange ? customStartDate : undefined,
+     customEndDate: useCustomDateRange ? customEndDate : undefined,
+     useCustomDateRange 
+   });
 
   // Date navigation functions
   const getDateRange = useCallback((period: TimePeriod, date: Date) => {
@@ -122,10 +133,12 @@ const ReportsScreen = () => {
   useFocusEffect(
     useCallback(() => {
       const today = new Date();
-      setSelectedDate(today);
       const { start, end } = getDateRange(selectedPeriod, today);
       setStartDate(start);
       setEndDate(end);
+      setCustomStartDate(today);
+      setCustomEndDate(today);
+      setUseCustomDateRange(false);
     }, [selectedPeriod, getDateRange, setStartDate, setEndDate])
   );
 
@@ -499,11 +512,12 @@ const ReportsScreen = () => {
         onRequestClose={() => setShowDatePicker(false)}
       >
         <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
+          startDate={customStartDate}
+          endDate={customEndDate}
+          onStartDateChange={setCustomStartDate}
+          onEndDateChange={setCustomEndDate}
           onClose={() => setShowDatePicker(false)}
+          onApply={() => setUseCustomDateRange(true)}
         />
       </Modal>
     </View>

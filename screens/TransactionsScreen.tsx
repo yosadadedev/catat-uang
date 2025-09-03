@@ -34,6 +34,11 @@ const TransactionsScreen = () => {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
   const { transactions, categories, deleteTransaction } = useFinanceStore();
   
+  // Date range state for DateRangePicker
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [useCustomDateRange, setUseCustomDateRange] = useState(false);
+  
   // Use custom hook for transaction filtering logic
   const {
     activeTab,
@@ -49,7 +54,13 @@ const TransactionsScreen = () => {
     filteredTransactions,
     navigateDate,
     formatDate
-  } = useTransactionFilters({ transactions, categories });
+  } = useTransactionFilters({ 
+    transactions, 
+    categories, 
+    startDate, 
+    endDate, 
+    useCustomDateRange 
+  });
   
   // UI state
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -59,10 +70,6 @@ const TransactionsScreen = () => {
   const [tempSelectedCategory, setTempSelectedCategory] = useState<number | null>(null);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  
-  // Date range state for DateRangePicker
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
 
   // Reset date range to current date when screen is focused
   useFocusEffect(
@@ -70,6 +77,7 @@ const TransactionsScreen = () => {
       const today = new Date();
       setStartDate(today);
       setEndDate(today);
+      setUseCustomDateRange(false);
     }, [])
   );
 
@@ -143,6 +151,11 @@ const TransactionsScreen = () => {
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
     setShowDatePicker(false);
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab as TabType);
+    setUseCustomDateRange(false); // Reset custom date range when changing tabs
   };
 
 
@@ -262,6 +275,13 @@ const TransactionsScreen = () => {
   };
 
   const formatDateHeader = () => {
+    // If using custom date range, show the selected range
+    if (useCustomDateRange) {
+      const startFormatted = startDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+      const endFormatted = endDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+      return `${startFormatted} - ${endFormatted}`;
+    }
+    
     const options: Intl.DateTimeFormatOptions = {
       weekday: 'long',
       year: 'numeric',
@@ -320,8 +340,6 @@ const TransactionsScreen = () => {
       <View style={{
         backgroundColor: '#3B82F6',
         paddingHorizontal: 16,
-        paddingTop: 0,
-        paddingBottom: 16,
       }}>
         <View style={{
           flexDirection: 'row',
@@ -385,13 +403,14 @@ const TransactionsScreen = () => {
 
         {/* Tab Filter */}
          <TabFilter
-           activeTab={activeTab}
-           onTabChange={(tab: string) => setActiveTab(tab as TabType)}
+           activeTab={useCustomDateRange ? 'custom' : activeTab}
+           onTabChange={handleTabChange}
            options={[
              { key: 'daily', label: 'Harian' },
              { key: 'weekly', label: 'Minggu' },
              { key: 'monthly', label: 'Bulanan' },
-             { key: 'yearly', label: 'Tahunan' }
+             { key: 'yearly', label: 'Tahunan' },
+             ...(useCustomDateRange ? [{ key: 'custom', label: 'Rentang Kustom' }] : [])
            ]}
          />
 
@@ -1079,6 +1098,7 @@ const TransactionsScreen = () => {
             onStartDateChange={setStartDate}
             onEndDateChange={setEndDate}
             onClose={() => setShowDatePicker(false)}
+            onApply={() => setUseCustomDateRange(true)}
           />
         </Modal>
       )}
