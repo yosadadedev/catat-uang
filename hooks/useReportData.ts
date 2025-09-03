@@ -21,15 +21,23 @@ export const useReportData = ({ transactions, categories }: UseReportDataProps) 
     switch (period) {
       case 'today':
         start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
         break;
       case 'week':
-        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+        // Mulai dari hari Senin minggu ini
+        const dayOfWeek = now.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Jika Minggu, mundur 6 hari ke Senin
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysToMonday);
+        start.setHours(0, 0, 0, 0);
+        end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59, 999);
         break;
       case 'month':
         start = new Date(now.getFullYear(), now.getMonth(), 1);
+        end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
         break;
       case 'year':
         start = new Date(now.getFullYear(), 0, 1);
+        end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
         break;
     }
 
@@ -40,12 +48,7 @@ export const useReportData = ({ transactions, categories }: UseReportDataProps) 
   const filterTransactions = useCallback(() => {
     const filtered = transactions.filter(transaction => {
       const transactionDate = new Date(transaction.date);
-      transactionDate.setHours(0, 0, 0, 0);
-      const start = new Date(startDate);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999);
-      return transactionDate >= start && transactionDate <= end;
+      return transactionDate >= startDate && transactionDate <= endDate;
     });
     setFilteredTransactions(filtered);
   }, [transactions, startDate, endDate]);
