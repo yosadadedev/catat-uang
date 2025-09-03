@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
+  Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -12,13 +14,14 @@ import { PieChart, MonthlyTrend, prepareChartData } from '../components/ChartCom
 import { ScreenHeader, TabFilter, Card } from '../components/common';
 import { useReportData } from '../hooks';
 import { useFinanceStore } from '../store/useStore';
+import { DatePicker } from '../components/DatePicker';
 
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 import { DrawerParamList } from '../navigation/AppNavigator';
 
 type ReportsScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Reports'>;
-type TimePeriod = 'week' | 'month' | 'year';
+type TimePeriod = 'today' | 'week' | 'month' | 'year';
 
 const ReportsScreen = () => {
   const navigation = useNavigation<ReportsScreenNavigationProp>();
@@ -29,10 +32,18 @@ const ReportsScreen = () => {
   const loading = useFinanceStore((state) => state.loading);
   const { loadTransactions } = useFinanceStore();
 
+  // Date picker state
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   // Use custom hook for report data logic
   const {
      selectedPeriod,
      setSelectedPeriod,
+     startDate,
+     endDate,
+     setStartDate,
+     setEndDate,
      filteredTransactions,
      formatCurrency,
      calculateSummary,
@@ -40,7 +51,103 @@ const ReportsScreen = () => {
      exportReport
    } = useReportData({ transactions, categories });
 
-  // Date range and filtering logic now handled by custom hook
+  // Date navigation functions
+  const getDateRange = useCallback((period: TimePeriod, date: Date) => {
+    const start = new Date(date);
+    const end = new Date(date);
+    
+    switch (period) {
+      case 'today':
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'week':
+        const dayOfWeek = start.getDay();
+        const diff = start.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+        start.setDate(diff);
+        start.setHours(0, 0, 0, 0);
+        end.setDate(start.getDate() + 6);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'month':
+        start.setDate(1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(start.getMonth() + 1, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'year':
+        start.setMonth(0, 1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(11, 31);
+        end.setHours(23, 59, 59, 999);
+        break;
+    }
+    
+    return { start, end };
+  }, []);
+
+  const navigateDate = useCallback((direction: 'prev' | 'next') => {
+    const newDate = new Date(selectedDate);
+    
+    switch (selectedPeriod) {
+      case 'today':
+        newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
+        break;
+      case 'week':
+        newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+        break;
+      case 'month':
+        newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+        break;
+      case 'year':
+        newDate.setFullYear(newDate.getFullYear() + (direction === 'next' ? 1 : -1));
+        break;
+    }
+    
+    setSelectedDate(newDate);
+  }, [selectedDate, selectedPeriod]);
+
+  const updateDateRangeFromSelectedDate = useCallback(() => {
+    const { start, end } = getDateRange(selectedPeriod, selectedDate);
+    setStartDate(start);
+    setEndDate(end);
+  }, [selectedDate, selectedPeriod, getDateRange, setStartDate, setEndDate]);
+
+  // Update date range when selectedDate or selectedPeriod changes
+  useEffect(() => {
+    updateDateRangeFromSelectedDate();
+  }, [updateDateRangeFromSelectedDate]);
+
+  const formatDateHeader = () => {
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    
+    switch (selectedPeriod) {
+      case 'today':
+        return selectedDate.toLocaleDateString('id-ID', options);
+      case 'week':
+        const { start, end } = getDateRange('week', selectedDate);
+        const startMonth = start.toLocaleDateString('id-ID', { month: 'long' });
+        const endMonth = end.toLocaleDateString('id-ID', { month: 'long' });
+        const year = end.getFullYear();
+        
+        if (start.getMonth() === end.getMonth()) {
+          return `${start.getDate()} - ${end.getDate()} ${endMonth} ${year}`;
+        } else {
+          return `${start.getDate()} ${startMonth} - ${end.getDate()} ${endMonth} ${year}`;
+        }
+      case 'month':
+        return selectedDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+      case 'year':
+        return selectedDate.getFullYear().toString();
+      default:
+        return '';
+    }
+  };
 
   const handleRefresh = async () => {
     await loadTransactions();
@@ -69,8 +176,68 @@ const ReportsScreen = () => {
          }}
       />
       
-      {/* Period Selector */}
-      <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
+      {/* Date Navigation */}
+      <View style={{
+        backgroundColor: 'transparent',
+        paddingHorizontal: 16,
+        paddingVertical: 8
+      }}>
+        <View style={{
+          backgroundColor: '#3B82F6',
+          borderRadius: 12,
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+          marginBottom: 12
+        }}>
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <TouchableOpacity
+              onPress={() => navigateDate('prev')}
+              style={{ padding: 4 }}
+            >
+              <Ionicons name="chevron-back" size={16} color="white" />
+            </TouchableOpacity>
+            
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              flex: 1,
+              justifyContent: 'center',
+              gap: 8
+            }}>
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+              >
+                <Ionicons name="calendar" size={14} color="white" />
+                <Text style={{
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                  color: 'white',
+                  textAlign: 'center'
+                }}>
+                  {formatDateHeader()}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            
+            <TouchableOpacity
+              onPress={() => navigateDate('next')}
+              style={{ padding: 4 }}
+            >
+              <Ionicons name="chevron-forward" size={16} color="white" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Period Selector */}
         <TabFilter
            options={[
              { key: 'today', label: 'Hari Ini' },
@@ -312,10 +479,24 @@ const ReportsScreen = () => {
         {/* Bottom Spacing */}
         <View style={{ height: 32 }} />
       </ScrollView>
+
+      {/* Date Picker Modal */}
+      <Modal
+        visible={showDatePicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowDatePicker(false)}
+      >
+        <DatePicker
+           date={selectedDate}
+           onDateChange={(date) => {
+             setSelectedDate(date);
+             setShowDatePicker(false);
+           }}
+         />
+      </Modal>
     </View>
   );
 };
-
-
 
 export default ReportsScreen;
