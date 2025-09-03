@@ -14,11 +14,12 @@ import { PieChart, MonthlyTrend, prepareChartData } from '../components/ChartCom
 import { ScreenHeader, Card } from '../components/common';
 import { useReportData } from '../hooks';
 import { useFinanceStore } from '../store/useStore';
-import { DateRangePicker } from '../components/DatePicker';
+
 
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 import { DrawerParamList } from '../navigation/AppNavigator';
+import { DateRangePicker } from '~/components/DatePicker';
 
 type ReportsScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Reports'>;
 type TimePeriod = 'today' | 'week' | 'month' | 'year';
@@ -32,14 +33,10 @@ const ReportsScreen = () => {
   const loading = useFinanceStore((state) => state.loading);
   const { loadTransactions } = useFinanceStore();
 
-  // Date picker state
+  // Date navigation state
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [useCustomDateRange, setUseCustomDateRange] = useState(false);
-  
-  // Custom date range state
-  const [customStartDate, setCustomStartDate] = useState(new Date());
-  const [customEndDate, setCustomEndDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Use custom hook for report data logic
   const {
@@ -56,10 +53,7 @@ const ReportsScreen = () => {
      exportReport
    } = useReportData({ 
      transactions, 
-     categories,
-     customStartDate: useCustomDateRange ? customStartDate : undefined,
-     customEndDate: useCustomDateRange ? customEndDate : undefined,
-     useCustomDateRange 
+     categories
    });
 
   // Date navigation functions
@@ -129,20 +123,33 @@ const ReportsScreen = () => {
     updateDateRangeFromSelectedDate();
   }, [updateDateRangeFromSelectedDate]);
 
+  // Update date range when period changes
+  useEffect(() => {
+    const { start, end } = getDateRange(selectedPeriod, selectedDate);
+    setStartDate(start);
+    setEndDate(end);
+  }, [selectedPeriod, selectedDate, getDateRange, setStartDate, setEndDate]);
+
   // Reset date range to current date when screen is focused
   useFocusEffect(
     useCallback(() => {
       const today = new Date();
       const { start, end } = getDateRange(selectedPeriod, today);
+      setSelectedDate(today);
       setStartDate(start);
       setEndDate(end);
-      setCustomStartDate(today);
-      setCustomEndDate(today);
       setUseCustomDateRange(false);
     }, [selectedPeriod, getDateRange, setStartDate, setEndDate])
   );
 
   const formatDateHeader = () => {
+    // If using custom date range, show the selected range
+    if (useCustomDateRange) {
+      const startFormatted = startDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+      const endFormatted = endDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+      return `${startFormatted} - ${endFormatted}`;
+    }
+    
     const options: Intl.DateTimeFormatOptions = {
       weekday: 'long',
       year: 'numeric',
@@ -199,23 +206,30 @@ const ReportsScreen = () => {
            onPress: exportReport
          }}
       />
-      
-      {/* Date Navigation */}
-      <View style={{
-        backgroundColor: 'transparent',
-        paddingHorizontal: 16,
-        paddingVertical: 8
-      }}>
+
+      <ScrollView
+        style={{ flex: 1 }}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
+        }
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Period Selector */}
         <View style={{
           backgroundColor: '#3B82F6',
-          borderRadius: 12,
-          paddingVertical: 12,
           paddingHorizontal: 16,
-          marginBottom: 12
+          paddingVertical: 12,
+          marginBottom: 8
         }}>
+          {/* Date Navigation */}
           <View style={{
+       flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderRadius: 6,
+            paddingHorizontal: 8,
+            paddingVertical: 8,
             justifyContent: 'space-between'
           }}>
             <TouchableOpacity
@@ -260,17 +274,6 @@ const ReportsScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
-
-
-      </View>
-
-      <ScrollView
-        style={{ flex: 1 }}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
-        }
-        showsVerticalScrollIndicator={false}
-      >
 
         {/* Summary Cards */}
         <View style={{
@@ -493,8 +496,8 @@ const ReportsScreen = () => {
         {/* Bottom Spacing */}
         <View style={{ height: 32 }} />
       </ScrollView>
-
-      {/* Date Picker Modal */}
+      
+      {/* Date Range Picker Modal */}
       <Modal
         visible={showDatePicker}
         transparent={true}
@@ -502,13 +505,16 @@ const ReportsScreen = () => {
         onRequestClose={() => setShowDatePicker(false)}
       >
         <DateRangePicker
-          startDate={customStartDate}
-          endDate={customEndDate}
-          onStartDateChange={setCustomStartDate}
-          onEndDateChange={setCustomEndDate}
-          onClose={() => setShowDatePicker(false)}
-          onApply={() => setUseCustomDateRange(true)}
-        />
+           startDate={startDate}
+           endDate={endDate}
+           onStartDateChange={setStartDate}
+           onEndDateChange={setEndDate}
+           onClose={() => setShowDatePicker(false)}
+           onApply={() => {
+             setUseCustomDateRange(true);
+             setShowDatePicker(false);
+           }}
+         />
       </Modal>
     </View>
   );
