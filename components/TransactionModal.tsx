@@ -165,8 +165,16 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
+      <TouchableOpacity 
+        style={styles.modalContainer}
+        activeOpacity={1}
+        onPress={onClose}
+      >
+        <TouchableOpacity 
+          activeOpacity={1} 
+          onPress={() => {}}
+          style={styles.modalContent}
+        >
           <View style={styles.header}>
             <Text style={styles.title}>
               {isEditMode ? 'Edit Transaksi' : 'Tambah Transaksi'}
@@ -344,8 +352,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
 
       {/* Category Picker Modal */}
       {showCategoryPicker && (
@@ -404,19 +412,19 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       )}
 
       {/* Date Picker Modal */}
-{showDatePicker && (
-                <DateTimePicker
-                value={selectedDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={(event, date) => {
-                  if (date) {
-                    setSelectedDate(date);
-                    setShowDatePicker(false)
-                  }
-                }}
-              />
-)}
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={(event, date) => {
+            if (date) {
+              setSelectedDate(date);
+              setShowDatePicker(false);
+            }
+          }}
+        />
+      )}
     </Modal>
   );
 };

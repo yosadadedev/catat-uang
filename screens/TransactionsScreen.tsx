@@ -890,11 +890,19 @@ const TransactionsScreen = () => {
         animationType="slide"
         onRequestClose={() => setShowExportModal(false)}
       >
-        <View style={{
-          flex: 1,
-          justifyContent: 'flex-end',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)'
-        }}>
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            justifyContent: 'flex-end',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          }}
+          activeOpacity={1}
+          onPress={() => setShowExportModal(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
           <View style={{
             backgroundColor: 'white',
             borderTopLeftRadius: 24,
@@ -1041,7 +1049,8 @@ const TransactionsScreen = () => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
 
       {showDatePicker && (

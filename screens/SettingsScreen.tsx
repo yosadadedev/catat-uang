@@ -139,13 +139,21 @@ const SettingsScreen = () => {
           transparent={true}
           onRequestClose={() => setShowResetModal(false)}
         >
-          <View style={{
-            flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 20
-          }}>
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: 20
+            }}
+            activeOpacity={1}
+            onPress={() => setShowResetModal(false)}
+          >
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={(e) => e.stopPropagation()}
+            >
             <View style={{
               backgroundColor: 'white',
               borderRadius: 16,
@@ -262,7 +270,8 @@ const SettingsScreen = () => {
                 />
               </View>
             </View>
-          </View>
+            </TouchableOpacity>
+          </TouchableOpacity>
         </Modal>
 
         {/* Language Selection Modal */}

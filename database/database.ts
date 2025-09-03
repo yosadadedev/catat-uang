@@ -149,6 +149,7 @@ export class DatabaseManager {
       { name: 'Kesehatan', icon: 'medical', color: '#FFEAA7' },
       { name: 'Pendidikan', icon: 'school', color: '#DDA0DD' },
       { name: 'Tagihan', icon: 'receipt', color: '#98D8C8' },
+      { name: 'Hobi', icon: 'heart', color: '#FF9FF3' },
       { name: 'Lainnya', icon: 'ellipsis-horizontal', color: '#F7DC6F' }
     ];
 
