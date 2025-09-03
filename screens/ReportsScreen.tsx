@@ -206,24 +206,14 @@ const ReportsScreen = () => {
            onPress: exportReport
          }}
       />
-
-      <ScrollView
-        style={{ flex: 1 }}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
-        }
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Period Selector */}
+              {/* Period Selector */}
         <View style={{
           backgroundColor: '#3B82F6',
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          marginBottom: 8
+          padding: 16,
+          paddingTop: 0,
         }}>
           {/* Date Navigation */}
           <View style={{
-       flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
             backgroundColor: 'rgba(255,255,255,0.1)',
@@ -275,6 +265,14 @@ const ReportsScreen = () => {
           </View>
         </View>
 
+
+      <ScrollView
+        style={{ flex: 1 }}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
+        }
+        showsVerticalScrollIndicator={false}
+      >
         {/* Summary Cards */}
         <View style={{
           paddingHorizontal: 16,
@@ -327,7 +325,7 @@ const ReportsScreen = () => {
           </View>
           
           {/* Net Income Card */}
-          <Card style={{ marginTop: 8 }}>
+          <Card style={{ marginTop: 0 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <View>
                 <Text style={{ fontSize: 12, color: '#6B7280', fontWeight: '500', marginBottom: 4 }}>Saldo</Text>
@@ -362,7 +360,7 @@ const ReportsScreen = () => {
           <>
             {/* Expense Pie Chart */}
              {summary.expense > 0 && (
-               <Card style={{ marginHorizontal: 16, marginTop: 16 }}>
+               <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>Distribusi Pengeluaran</Text>
                  <PieChart
                    data={prepareChartData(
@@ -378,7 +376,7 @@ const ReportsScreen = () => {
 
             {/* Income Pie Chart */}
              {summary.income > 0 && (
-               <Card style={{ marginHorizontal: 16, marginTop: 16 }}>
+               <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>Distribusi Pemasukan</Text>
                  <PieChart
                    data={prepareChartData(
@@ -393,14 +391,14 @@ const ReportsScreen = () => {
              )}
 
             {/* Monthly Trend */}
-            <Card style={{ marginHorizontal: 16, marginTop: 16 }}>
+            <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
               <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>Tren Bulanan</Text>
               <MonthlyTrend transactions={transactions} />
             </Card>
 
             {/* Top Expenses */}
             {topExpenses.length > 0 && (
-              <Card style={{ marginHorizontal: 16, marginTop: 16 }}>
+              <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
                 <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>Top Pengeluaran</Text>
                  {topExpenses.map((item, index) => (
                    <View key={index} style={{
