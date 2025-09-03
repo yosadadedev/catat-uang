@@ -7,14 +7,14 @@ import {
   TouchableOpacity,
   Modal,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { PieChart, MonthlyTrend, prepareChartData } from '../components/ChartComponent';
 import { ScreenHeader, TabFilter, Card } from '../components/common';
 import { useReportData } from '../hooks';
 import { useFinanceStore } from '../store/useStore';
-import { DatePicker } from '../components/DatePicker';
+import { DateRangePicker } from '../components/DatePicker';
 
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalization } from '../contexts/LocalizationContext';
@@ -117,6 +117,17 @@ const ReportsScreen = () => {
   useEffect(() => {
     updateDateRangeFromSelectedDate();
   }, [updateDateRangeFromSelectedDate]);
+
+  // Reset date range to current date when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      const today = new Date();
+      setSelectedDate(today);
+      const { start, end } = getDateRange(selectedPeriod, today);
+      setStartDate(start);
+      setEndDate(end);
+    }, [selectedPeriod, getDateRange, setStartDate, setEndDate])
+  );
 
   const formatDateHeader = () => {
     const options: Intl.DateTimeFormatOptions = {
@@ -487,13 +498,13 @@ const ReportsScreen = () => {
         animationType="slide"
         onRequestClose={() => setShowDatePicker(false)}
       >
-        <DatePicker
-           date={selectedDate}
-           onDateChange={(date) => {
-             setSelectedDate(date);
-             setShowDatePicker(false);
-           }}
-         />
+        <DateRangePicker
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={setStartDate}
+          onEndDateChange={setEndDate}
+          onClose={() => setShowDatePicker(false)}
+        />
       </Modal>
     </View>
   );

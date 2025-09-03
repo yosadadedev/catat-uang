@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import { useNavigation, CompositeNavigationProp } from '@react-navigation/native';
+import { useNavigation, CompositeNavigationProp, useFocusEffect } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,7 +23,7 @@ import { ScreenHeader, TabFilter } from '../components/common';
 import { useTransactionFilters, TabType, FilterType } from '../hooks';
 import { Transaction } from '../database/database';
 import { DrawerParamList, RootStackParamList } from '../navigation/AppNavigator';
-import { DatePicker } from '~/components/DatePicker';
+import { DateRangePicker } from '~/components/DatePicker';
 
 type TransactionsScreenNavigationProp = CompositeNavigationProp<
   DrawerNavigationProp<DrawerParamList, 'Transactions'>,
@@ -59,6 +59,19 @@ const TransactionsScreen = () => {
   const [tempSelectedCategory, setTempSelectedCategory] = useState<number | null>(null);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  
+  // Date range state for DateRangePicker
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+
+  // Reset date range to current date when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      const today = new Date();
+      setStartDate(today);
+      setEndDate(today);
+    }, [])
+  );
 
   const getDateRange = (tab: TabType, date: Date) => {
     const start = new Date(date);
@@ -1054,10 +1067,20 @@ const TransactionsScreen = () => {
       </Modal>
 
       {showDatePicker && (
-        <DatePicker
-          date={selectedDate}
-          onDateChange={handleDateSelect}
-        />
+        <Modal
+          visible={showDatePicker}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowDatePicker(false)}
+        >
+          <DateRangePicker
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+            onClose={() => setShowDatePicker(false)}
+          />
+        </Modal>
       )}
     
       {/* Floating Action Button */}
