@@ -260,16 +260,14 @@ const CategoryManagementScreen = () => {
           activeOpacity={1}
           onPress={() => setShowAddModal(false)}
         >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
-          >
+      
           <View style={{
             backgroundColor: colors.surface,
             borderRadius: 16,
-            padding: 20,
+            padding: 24,
+            paddingHorizontal: 28,
             width: '100%',
-            maxWidth: 400
+            maxWidth: 'auto'
           }}>
             <Text style={{
               fontSize: 18,
@@ -609,7 +607,6 @@ const CategoryManagementScreen = () => {
               </TouchableOpacity>
             </View>
           </View>
-          </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
 
@@ -620,7 +617,7 @@ const CategoryManagementScreen = () => {
         animationType="slide"
         onRequestClose={() => setShowEditModal(false)}
       >
-        <TouchableOpacity
+        <View
           style={{
             flex: 1,
             backgroundColor: 'rgba(0,0,0,0.5)',
@@ -628,20 +625,15 @@ const CategoryManagementScreen = () => {
             alignItems: 'center',
             padding: 20
           }}
-          activeOpacity={1}
-          onPress={() => setShowEditModal(false)}
         >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
-          >
           <View style={{
-            backgroundColor: colors.surface,
-            borderRadius: 16,
-            padding: 20,
-            width: '100%',
-            maxWidth: 400
-          }}>
+             backgroundColor: colors.surface,
+             borderRadius: 16,
+             padding: 24,
+             paddingHorizontal: 28,
+             width: '100%',
+             maxWidth: 650
+           }}>
             <Text style={{
               fontSize: 18,
               fontWeight: 'bold',
@@ -980,8 +972,7 @@ const CategoryManagementScreen = () => {
               </TouchableOpacity>
             </View>
           </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </View>
       </Modal>
     </SafeAreaView>
   );
