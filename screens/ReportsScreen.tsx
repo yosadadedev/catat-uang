@@ -61,7 +61,7 @@ const ReportsScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScreenHeader
-        title={t('financialReport')}
+        title="Laporan Keuangan"
         onMenuPress={() => navigation.openDrawer()}
         rightButton={{
            icon: "share-outline",
@@ -73,10 +73,10 @@ const ReportsScreen = () => {
       <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
         <TabFilter
            options={[
-             { key: 'today', label: 'Harian' },
-             { key: 'week', label: 'Minggu' },
-             { key: 'month', label: 'Bulanan' },
-             { key: 'year', label: 'Tahunan' }
+             { key: 'today', label: 'Hari Ini' },
+             { key: 'week', label: 'Minggu Ini' },
+             { key: 'month', label: 'Bulan Ini' },
+             { key: 'year', label: 'Tahun Ini' }
            ]}
            activeTab={selectedPeriod}
            onTabChange={(tab) => setSelectedPeriod(tab as TimePeriod)}
@@ -115,7 +115,7 @@ const ReportsScreen = () => {
                 }}>
                   <Ionicons name="trending-up" size={16} color="#16A34A" />
                 </View>
-                <Text style={{ fontSize: 12, color: '#6B7280', fontWeight: '500' }}>{t('income')}</Text>
+                <Text style={{ fontSize: 12, color: '#6B7280', fontWeight: '500' }}>Pemasukan</Text>
               </View>
               <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#16A34A' }}>{formatCurrency(summary.income)}</Text>
               <Text style={{ fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>{summary.incomeCount} transaksi</Text>
@@ -135,7 +135,7 @@ const ReportsScreen = () => {
                 }}>
                   <Ionicons name="trending-down" size={16} color="#DC2626" />
                 </View>
-                <Text style={{ fontSize: 12, color: '#6B7280', fontWeight: '500' }}>{t('expense')}</Text>
+                <Text style={{ fontSize: 12, color: '#6B7280', fontWeight: '500' }}>Pengeluaran</Text>
               </View>
               <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#DC2626' }}>{formatCurrency(summary.expense)}</Text>
               <Text style={{ fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>{summary.expenseCount} transaksi</Text>
@@ -146,7 +146,7 @@ const ReportsScreen = () => {
           <Card style={{ marginTop: 8 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <View>
-                <Text style={{ fontSize: 12, color: '#6B7280', fontWeight: '500', marginBottom: 4 }}>{t('balance')}</Text>
+                <Text style={{ fontSize: 12, color: '#6B7280', fontWeight: '500', marginBottom: 4 }}>Saldo</Text>
                 <Text style={{
                   fontSize: 20,
                   fontWeight: 'bold',
@@ -179,12 +179,28 @@ const ReportsScreen = () => {
             {/* Expense Pie Chart */}
              {summary.expense > 0 && (
                <Card style={{ marginHorizontal: 16, marginTop: 16 }}>
-                 <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>{t('expenseDistribution')}</Text>
+                 <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>Distribusi Pengeluaran</Text>
                  <PieChart
                    data={prepareChartData(
                      filteredTransactions.filter(t => t.type === 'expense'),
                      categories,
                      'expense'
+                   )}
+                   size={200}
+                   showLegend={true}
+                 />
+               </Card>
+             )}
+
+            {/* Income Pie Chart */}
+             {summary.income > 0 && (
+               <Card style={{ marginHorizontal: 16, marginTop: 16 }}>
+                 <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>Distribusi Pemasukan</Text>
+                 <PieChart
+                   data={prepareChartData(
+                     filteredTransactions.filter(t => t.type === 'income'),
+                     categories,
+                     'income'
                    )}
                    size={200}
                    showLegend={true}
@@ -198,7 +214,7 @@ const ReportsScreen = () => {
               <MonthlyTrend transactions={transactions} />
             </Card>
 
-            {/* Top Categories */}
+            {/* Top Expenses */}
             {topExpenses.length > 0 && (
               <Card style={{ marginHorizontal: 16, marginTop: 16 }}>
                 <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>Top Pengeluaran</Text>
