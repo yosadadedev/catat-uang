@@ -544,7 +544,7 @@ const TransactionsScreen = () => {
               onTransactionPress={(transaction) => {
                 handleEditTransaction(transaction);
               }}
-              onTransactionLongPress={(transaction) => handleDeleteTransaction(transaction.id!)}
+              onTransactionSwipeDelete={(transaction) => handleDeleteTransaction(transaction.id!)}
             />
           ) : (
             <View style={{

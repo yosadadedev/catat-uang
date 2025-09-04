@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, FlatList, PanResponder, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Transaction, Category } from '../database/database';
 
@@ -7,7 +7,7 @@ interface TransactionCardProps {
   transaction: Transaction;
   category?: Category;
   onPress?: () => void;
-  onLongPress?: () => void;
+  onSwipeDelete?: () => void;
 }
 
 const formatCurrency = (amount: number): string => {
@@ -44,19 +44,88 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
   transaction,
   category,
   onPress,
-  onLongPress,
+  onSwipeDelete,
 }) => {
   const isIncome = transaction.type === 'income';
   const iconName = category?.icon as keyof typeof Ionicons.glyphMap || 'ellipsis-horizontal';
   const categoryColor = category?.color || '#6B7280';
+  
+  const translateX = useRef(new Animated.Value(0)).current;
+  const [isSwipeActive, setIsSwipeActive] = useState(false);
+  const screenWidth = Dimensions.get('window').width;
+  const swipeThreshold = -80;
+
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gestureState) => {
+      return Math.abs(gestureState.dx) > 10 && Math.abs(gestureState.dy) < 50;
+    },
+    onPanResponderMove: (_, gestureState) => {
+      if (gestureState.dx < 0) {
+        translateX.setValue(Math.max(gestureState.dx, swipeThreshold));
+      }
+    },
+    onPanResponderRelease: (_, gestureState) => {
+      if (gestureState.dx < swipeThreshold / 2) {
+        // Show delete button
+        Animated.spring(translateX, {
+          toValue: swipeThreshold,
+          useNativeDriver: true,
+        }).start();
+        setIsSwipeActive(true);
+      } else {
+        // Reset position
+        Animated.spring(translateX, {
+          toValue: 0,
+          useNativeDriver: true,
+        }).start();
+        setIsSwipeActive(false);
+      }
+    },
+  });
+
+  const resetSwipe = () => {
+    Animated.spring(translateX, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
+    setIsSwipeActive(false);
+  };
 
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      onLongPress={onLongPress}
-      className="bg-white rounded-xl p-2 mx-4 mb-2 shadow-sm border border-gray-100"
-      activeOpacity={0.7}
-    >
+    <View className="mx-4 mb-2 relative">
+      {/* Delete Button Background */}
+      {isSwipeActive && (
+        <View className="absolute right-3 top-4 bottom-0 w-16 h-14 bg-red-500 rounded-xl items-center justify-center">
+          <TouchableOpacity
+            onPress={() => {
+              resetSwipe();
+              onSwipeDelete?.();
+            }}
+            className="w-full h-full items-center justify-center"
+          >
+            <Ionicons name="trash" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      )}
+      
+      {/* Main Card */}
+      <Animated.View
+        {...panResponder.panHandlers}
+        style={{
+          transform: [{ translateX }],
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => {
+            if (isSwipeActive) {
+              resetSwipe();
+            } else {
+              onPress?.();
+            }
+          }}
+          className="bg-white rounded-xl p-2 shadow-sm border border-gray-100"
+          activeOpacity={0.7}
+        >
       <View className="flex-row items-center justify-between">
         {/* Left side - Icon and details */}
         <View className="flex-row items-center flex-1">
@@ -112,7 +181,9 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
           </View>
         </View>
       </View>
-    </TouchableOpacity>
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
   );
 };
 
@@ -121,7 +192,7 @@ interface TransactionListProps {
   transactions: Transaction[];
   categories: Category[];
   onTransactionPress?: (transaction: Transaction) => void;
-  onTransactionLongPress?: (transaction: Transaction) => void;
+  onTransactionSwipeDelete?: (transaction: Transaction) => void;
   emptyMessage?: string;
 }
 
@@ -129,7 +200,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   transactions,
   categories,
   onTransactionPress,
-  onTransactionLongPress,
+  onTransactionSwipeDelete,
   emptyMessage = 'Belum ada transaksi',
 }) => {
   if (transactions.length === 0) {
@@ -153,7 +224,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         transaction={transaction}
         category={category}
         onPress={() => onTransactionPress?.(transaction)}
-        onLongPress={() => onTransactionLongPress?.(transaction)}
+        onSwipeDelete={() => onTransactionSwipeDelete?.(transaction)}
       />
     );
   };
