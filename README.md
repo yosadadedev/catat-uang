@@ -100,14 +100,8 @@ Onboarding → List Transaksi → Tambah Transaksi → Lihat Laporan → Filter 
 - AI-powered insights
 
 ## Future Enhancements
-
-- **Cloud Sync**: Firebase integration untuk backup
-- **Budget Tracking**: Set dan monitor budget bulanan
-- **Recurring Transactions**: Transaksi otomatis berulang
-- **AI Insights**: Analisis pola pengeluaran dengan ML
-- **Multi-Currency**: Support mata uang internasional
-- **Financial Goals**: Tracking target tabungan
-- **Expense Predictions**: Prediksi pengeluaran masa depan
+- **Google Drive Backup**: Backup data ke Google Drive untuk keamanan ekstra
+- **UI/UX Improvements**: Peningkatan antarmuka pengguna yang lebih modern dan intuitif
 
 
 ## Demo
