@@ -109,30 +109,18 @@ Onboarding → List Transaksi → Tambah Transaksi → Lihat Laporan → Filter 
 - **Financial Goals**: Tracking target tabungan
 - **Expense Predictions**: Prediksi pengeluaran masa depan
 
-## Installation & Setup
-
-```bash
-# Clone repository
-git clone https://github.com/username/catat-uang.git
-
-# Install dependencies
-cd catat-uang
-npm install
-
-# Start development server
-npm start
-
-# Run on iOS simulator
-npm run ios
-
-# Run on Android emulator
-npm run android
-```
 
 ## Demo
 
-🚀 **Live Demo**: [Download APK](link-to-apk)  
-📱 **QR Code**: Scan untuk install aplikasi
+🚀 **Live Demo**: [Download APK](https://expo.dev/accounts/yosadadev/projects/catat-uang/builds/c2697af4-fe7c-4a54-bdb0-eba41087aa6a)  
+📱 **QR Code**: Scan QR code di link APK untuk install aplikasi  
+🎥 **Video Demo**: [Lihat Demo di YouTube](https://youtube.com/shorts/-jJyWbXOiVo?si=cuXDyss0GrksuCJT)
+
+### Cara Install Aplikasi:
+1. Buka link APK di atas
+2. Scan QR code dengan kamera HP atau
+3. Download dan install aplikasi
+4. Mulai gunakan Catat Uang!
 
 ## Lessons Learned
 
@@ -191,6 +179,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 📧 **Email**: masyosad@gmail.com  
 💼 **LinkedIn**: [linkedin.com/in/yosadade](https://linkedin.com/in/yosadade)  
 🐙 **GitHub**: [github.com/yosadadedev/catat-uang](https://github.com/yosadadedev/catat-uang)  
+📱 **APK Download**: [Expo Build](https://expo.dev/accounts/yosadadev/projects/catat-uang/builds/c2697af4-fe7c-4a54-bdb0-eba41087aa6a)  
+🎥 **Demo Video**: [YouTube Demo](https://youtube.com/shorts/-jJyWbXOiVo?si=cuXDyss0GrksuCJT)  
 
 ---
 
