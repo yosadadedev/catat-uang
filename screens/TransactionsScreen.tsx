@@ -1277,6 +1277,4 @@ const TransactionsScreen = () => {
   );
 };
 
-
-
 export default TransactionsScreen;
