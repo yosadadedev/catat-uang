@@ -52,7 +52,6 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
   
   const translateX = useRef(new Animated.Value(0)).current;
   const [isSwipeActive, setIsSwipeActive] = useState(false);
-  const screenWidth = Dimensions.get('window').width;
   const swipeThreshold = -80;
 
   const panResponder = PanResponder.create({
@@ -92,7 +91,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
   };
 
   return (
-    <View className="mx-4 mb-2 relative">
+    <View className="mx-0 mb-2 relative">
       {/* Delete Button Background */}
       {isSwipeActive && (
         <View className="absolute right-3 top-4 bottom-0 w-16 h-14 bg-red-500 rounded-xl items-center justify-center">
@@ -160,7 +159,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
         {/* Right side - Amount */}
         <View className="items-end">
           <Text
-            className={`font-bold text-lg ${
+            className={`font-bold ${
               isIncome ? 'text-green-600' : 'text-red-600'
             }`}
           >
@@ -230,13 +229,19 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   };
 
   return (
-    <FlatList
-      data={transactions}
-      renderItem={renderTransaction}
-      keyExtractor={(item) => item.id!.toString()}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingVertical: 8 }}
-      ItemSeparatorComponent={() => <View style={{ height: 0 }} />}
-    />
+    <View style={{ paddingVertical: 8 }}>
+      {transactions.map((transaction) => {
+        const category = categories.find(cat => cat.id === transaction.category_id);
+        return (
+          <TransactionCard
+            key={transaction.id!.toString()}
+            transaction={transaction}
+            category={category}
+            onPress={() => onTransactionPress?.(transaction)}
+            onSwipeDelete={() => onTransactionSwipeDelete?.(transaction)}
+          />
+        );
+      })}
+    </View>
   );
 };

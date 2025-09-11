@@ -19,7 +19,8 @@ import { useFinanceStore } from '../store/useStore';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 import { DrawerParamList } from '../navigation/AppNavigator';
-import { DateRangePicker } from '~/components/DatePicker';
+import { MonthYearPicker } from '../components/MonthYearPicker';
+import { useTransactionFilters, TabType } from '../hooks/useTransactionFilters';
 
 type ReportsScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Reports'>;
 type TimePeriod = 'today' | 'week' | 'month' | 'year';
@@ -36,7 +37,7 @@ const ReportsScreen = () => {
   // Date navigation state
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [useCustomDateRange, setUseCustomDateRange] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
 
   // Use custom hook for report data logic
   const {
@@ -55,6 +56,25 @@ const ReportsScreen = () => {
      transactions, 
      categories
    });
+  
+  // Use transaction filters hook for consistency
+  const {
+    activeTab,
+    setActiveTab,
+    selectedMonth,
+    setSelectedMonth,
+    selectedYear,
+    setSelectedYear,
+    navigateToToday,
+    getMonthName,
+    filteredTransactions: tabFilteredTransactions
+  } = useTransactionFilters({ 
+    transactions, 
+    categories, 
+    startDate, 
+    endDate, 
+    useCustomDateRange 
+  });
 
   // Date navigation functions
   const getDateRange = useCallback((period: TimePeriod, date: Date) => {
@@ -192,9 +212,21 @@ const ReportsScreen = () => {
 
   // Export report function now handled by custom hook
 
-  const summary = calculateSummary();
-  const topExpenses = getTopCategories('expense');
-  const topIncome = getTopCategories('income');
+  // Use filtered transactions from tab filter instead of date range filter
+   const finalFilteredTransactions = tabFilteredTransactions.length > 0 ? tabFilteredTransactions : filteredTransactions;
+   
+   // Create a separate report data hook instance for tab-filtered data
+   const tabReportData = useReportData({ 
+     transactions: finalFilteredTransactions, 
+     categories,
+     customStartDate: startDate,
+     customEndDate: endDate,
+     useCustomDateRange: true
+   });
+   
+   const summary = tabReportData.calculateSummary();
+   const topExpenses = tabReportData.getTopCategories('expense');
+   const topIncome = tabReportData.getTopCategories('income');
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -206,6 +238,52 @@ const ReportsScreen = () => {
            onPress: exportReport
          }}
       />
+      
+        {/* Tab Bar */}
+        <View style={{
+          flexDirection: 'row',
+          backgroundColor: '#3B82F6',
+          paddingHorizontal: 16,
+          paddingTop: 12,
+          paddingBottom: 0,
+        }}>
+          <View style={{
+            flexDirection: 'row',
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderRadius: 8,
+            padding: 4,
+            flex: 1
+          }}>
+            {[
+              { key: 'daily', label: 'Harian' },
+              { key: 'weekly', label: 'Mingguan' },
+              { key: 'monthly', label: 'Bulanan' },
+              { key: 'yearly', label: 'Tahunan' }
+            ].map((tab) => (
+              <TouchableOpacity
+                key={tab.key}
+                onPress={() => setActiveTab(tab.key as TabType)}
+                style={{
+                  flex: 1,
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  borderRadius: 6,
+                  backgroundColor: activeTab === tab.key ? 'white' : 'transparent'
+                }}
+              >
+                <Text style={{
+                  fontSize: 12,
+                  fontWeight: '600',
+                  color: activeTab === tab.key ? '#3B82F6' : 'white',
+                  textAlign: 'center'
+                }}>
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
               {/* Period Selector */}
         <View style={{
           backgroundColor: '#3B82F6',
@@ -237,7 +315,7 @@ const ReportsScreen = () => {
               gap: 8
             }}>
               <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
+                onPress={() => setShowMonthYearPicker(true)}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -356,7 +434,7 @@ const ReportsScreen = () => {
         </View>
 
         {/* Charts Section */}
-        {filteredTransactions.length > 0 ? (
+        {finalFilteredTransactions.length > 0 ? (
           <>
             {/* Expense Pie Chart */}
              {summary.expense > 0 && (
@@ -364,7 +442,7 @@ const ReportsScreen = () => {
                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>Distribusi Pengeluaran</Text>
                  <PieChart
                    data={prepareChartData(
-                     filteredTransactions.filter(t => t.type === 'expense'),
+                     finalFilteredTransactions.filter(t => t.type === 'expense'),
                      categories,
                      'expense'
                    )}
@@ -380,7 +458,7 @@ const ReportsScreen = () => {
                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>Distribusi Pemasukan</Text>
                  <PieChart
                    data={prepareChartData(
-                     filteredTransactions.filter(t => t.type === 'income'),
+                     finalFilteredTransactions.filter(t => t.type === 'income'),
                      categories,
                      'income'
                    )}
@@ -495,24 +573,24 @@ const ReportsScreen = () => {
         <View style={{ height: 32 }} />
       </ScrollView>
       
-      {/* Date Range Picker Modal */}
+      {/* Month Year Picker Modal */}
       <Modal
-        visible={showDatePicker}
+        visible={showMonthYearPicker}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowDatePicker(false)}
+        onRequestClose={() => setShowMonthYearPicker(false)}
       >
-        <DateRangePicker
-           startDate={startDate}
-           endDate={endDate}
-           onStartDateChange={setStartDate}
-           onEndDateChange={setEndDate}
-           onClose={() => setShowDatePicker(false)}
-           onApply={() => {
-             setUseCustomDateRange(true);
-             setShowDatePicker(false);
-           }}
-         />
+        <MonthYearPicker
+            visible={showMonthYearPicker}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onClose={() => setShowMonthYearPicker(false)}
+            onMonthYearChange={(month: number, year: number) => {
+              setSelectedMonth(month);
+              setSelectedYear(year);
+              setShowMonthYearPicker(false);
+            }}
+          />
       </Modal>
     </View>
   );

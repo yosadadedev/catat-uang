@@ -23,7 +23,7 @@ import { ScreenHeader } from '../components/common';
 import { useTransactionFilters, TabType, FilterType } from '../hooks';
 import { Transaction } from '../database/database';
 import { DrawerParamList, RootStackParamList } from '../navigation/AppNavigator';
-import { DateRangePicker } from '~/components/DatePicker';
+import { DateRangePicker } from '../components/DatePicker';
 
 type TransactionsScreenNavigationProp = CompositeNavigationProp<
   DrawerNavigationProp<DrawerParamList, 'Transactions'>,
@@ -51,9 +51,19 @@ const TransactionsScreen = () => {
     setSelectedCategory,
     selectedDate,
     setSelectedDate,
+    selectedMonth,
+    setSelectedMonth,
+    selectedYear,
+    setSelectedYear,
     filteredTransactions,
+    dailyData,
+    weeklyData,
+    monthlyData,
+    yearlyData,
     navigateDate,
-    formatDate
+    navigateToToday,
+    formatDate,
+    getMonthName
   } = useTransactionFilters({ 
     transactions, 
     categories, 
@@ -63,7 +73,7 @@ const TransactionsScreen = () => {
   });
   
   // UI state
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [tempFilterType, setTempFilterType] = useState<FilterType>('all');
@@ -270,31 +280,18 @@ const TransactionsScreen = () => {
       return `${startFormatted} - ${endFormatted}`;
     }
     
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    };
-    
+    // Adjust format based on filter: daily/weekly -> monthly, monthly -> yearly, yearly -> total
     switch (activeTab) {
       case 'daily':
-        return selectedDate.toLocaleDateString('id-ID', options);
       case 'weekly':
-        const { start, end } = getDateRange('weekly', selectedDate);
-        const startMonth = start.toLocaleDateString('id-ID', { month: 'long' });
-        const endMonth = end.toLocaleDateString('id-ID', { month: 'long' });
-        const year = end.getFullYear();
-        
-        if (start.getMonth() === end.getMonth()) {
-          return `${start.getDate()} - ${end.getDate()} ${endMonth} ${year}`;
-        } else {
-          return `${start.getDate()} ${startMonth} - ${end.getDate()} ${endMonth} ${year}`;
-        }
-      case 'monthly':
+        // Show monthly format for daily and weekly filters
         return selectedDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-      case 'yearly':
+      case 'monthly':
+        // Show yearly format for monthly filter
         return selectedDate.getFullYear().toString();
+      case 'yearly':
+        // Show 'Total' for yearly filter
+        return 'Total';
       default:
         return '';
     }
@@ -324,257 +321,423 @@ const TransactionsScreen = () => {
           },
         ]}
         />
-      {/* Filter Toolbar */}
+      {/* Tab Bar */}
       <View style={{
         backgroundColor: '#3B82F6',
         paddingHorizontal: 16,
+        paddingBottom: 8
       }}>
         <View style={{
           flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: 16,
-          gap: 12
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          borderRadius: 8,
+          padding: 4,
+          marginBottom: 12
         }}>
+          {[
+            { key: 'daily', label: 'Harian' },
+            { key: 'weekly', label: 'Mingguan' },
+            { key: 'monthly', label: 'Bulanan' },
+            { key: 'yearly', label: 'Tahunan' }
+          ].map((tab) => (
+            <TouchableOpacity
+              key={tab.key}
+              onPress={() => setActiveTab(tab.key as TabType)}
+              style={{
+                flex: 1,
+                paddingVertical: 8,
+                paddingHorizontal: 12,
+                borderRadius: 6,
+                backgroundColor: activeTab === tab.key ? 'white' : 'transparent'
+              }}
+            >
+              <Text style={{
+                fontSize: 12,
+                fontWeight: '600',
+                color: activeTab === tab.key ? '#3B82F6' : 'white',
+                textAlign: 'center'
+              }}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Date Navigation */}
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          borderRadius: 6,
+          paddingHorizontal: 8,
+          paddingVertical: 8,
+          justifyContent: 'space-between',
+          marginBottom: 16
+        }}>
+          <TouchableOpacity
+            onPress={() => navigateDate('prev')}
+            style={{ padding: 4 }}
+          >
+            <Ionicons name="chevron-back" size={16} color="white" />
+          </TouchableOpacity>
+          
           <View style={{
-            flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            borderRadius: 6,
-            paddingHorizontal: 8,
-            paddingVertical: 8,
-            justifyContent: 'space-between'
+            flex: 1,
+            justifyContent: 'center',
+            gap: 8
           }}>
             <TouchableOpacity
-              onPress={() => navigateDate('prev')}
-              style={{ padding: 4 }}
+              onPress={() => setShowMonthYearPicker(true)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6
+              }}
             >
-              <Ionicons name="chevron-back" size={16} color="white" />
+              <Ionicons name="calendar" size={14} color="white" />
+              <Text style={{
+                fontSize: 12,
+                fontWeight: 'bold',
+                color: 'white',
+                textAlign: 'center'
+              }}>
+                {formatDateHeader()}
+              </Text>
             </TouchableOpacity>
             
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              flex: 1,
-              justifyContent: 'center',
-              gap: 8
-            }}>
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 6
-                }}
-              >
-                <Ionicons name="calendar" size={14} color="white" />
-                <Text style={{
-                  fontSize: 12,
-                  fontWeight: 'bold',
-                  color: 'white',
-                  textAlign: 'center'
-                }}>
-                  {formatDateHeader()}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            
             <TouchableOpacity
-              onPress={() => navigateDate('next')}
-              style={{ padding: 4 }}
+              onPress={navigateToToday}
+              style={{
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: 4
+              }}
             >
-              <Ionicons name="chevron-forward" size={16} color="white" />
+              <Text style={{
+                fontSize: 10,
+                color: 'white',
+                fontWeight: '500'
+              }}>
+                Hari Ini
+              </Text>
             </TouchableOpacity>
           </View>
           
+          <TouchableOpacity
+            onPress={() => navigateDate('next')}
+            style={{ padding: 4 }}
+          >
+            <Ionicons name="chevron-forward" size={16} color="white" />
+          </TouchableOpacity>
         </View>
-
-
-
       </View>
 
       {/* Content */}
       <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
         {/* Summary Cards */}
-        <View style={{
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          backgroundColor: '#F9FAFB'
-        }}>
-          <View style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            gap: 8
-          }}>
-            {/* Total Pemasukan */}
-            <View style={{
-              flex: 1,
-              backgroundColor: 'white',
-              borderRadius: 12,
-              padding: 12,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
-              shadowRadius: 2,
-              elevation: 2
-            }}>
-              <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 4
-              }}>
-                <Ionicons name="trending-up" size={12} color="#10B981" style={{ marginRight: 4 }} />
-                <Text style={{
-                  fontSize: 10,
-                  color: '#6B7280',
-                  fontWeight: '500'
-                }}>
-                  Total Pemasukan
-                </Text>
-              </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: 'bold',
-                color: '#10B981'
-              }}>
-                Rp {filteredTransactions
-                  .filter(t => t.type === 'income')
-                  .reduce((sum, t) => sum + t.amount, 0)
-                  .toLocaleString('id-ID')}
-              </Text>
-            </View>
 
-            {/* Total Pengeluaran */}
-            <View style={{
-              flex: 1,
-              backgroundColor: 'white',
-              borderRadius: 12,
-              padding: 12,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
-              shadowRadius: 2,
-              elevation: 2
-            }}>
-              <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 4
-              }}>
-                <Ionicons name="trending-down" size={12} color="#EF4444" style={{ marginRight: 4 }} />
-                <Text style={{
-                  fontSize: 10,
-                  color: '#6B7280',
-                  fontWeight: '500'
-                }}>
-                  Total Pengeluaran
-                </Text>
-              </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: 'bold',
-                color: '#EF4444'
-              }}>
-                Rp {filteredTransactions
-                  .filter(t => t.type === 'expense')
-                  .reduce((sum, t) => sum + t.amount, 0)
-                  .toLocaleString('id-ID')}
-              </Text>
-            </View>
-
-            {/* Saldo */}
-            <View style={{
-              flex: 1,
-              backgroundColor: 'white',
-              borderRadius: 12,
-              padding: 12,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
-              shadowRadius: 2,
-              elevation: 2
-            }}>
-              <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 4
-              }}>
-                <Ionicons name="wallet" size={12} color="#6B7280" style={{ marginRight: 4 }} />
-                <Text style={{
-                  fontSize: 10,
-                  color: '#6B7280',
-                  fontWeight: '500'
-                }}>
-                  Saldo
-                </Text>
-              </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: 'bold',
-                color: (() => {
-                  const balance = filteredTransactions
-                    .filter(t => t.type === 'income')
-                    .reduce((sum, t) => sum + t.amount, 0) -
-                    filteredTransactions
-                    .filter(t => t.type === 'expense')
-                    .reduce((sum, t) => sum + t.amount, 0);
-                  return balance >= 0 ? '#10B981' : '#EF4444';
-                })()
-              }}>
-                Rp {(() => {
-                  const balance = filteredTransactions
-                    .filter(t => t.type === 'income')
-                    .reduce((sum, t) => sum + t.amount, 0) -
-                    filteredTransactions
-                    .filter(t => t.type === 'expense')
-                    .reduce((sum, t) => sum + t.amount, 0);
-                  return Math.abs(balance).toLocaleString('id-ID');
-                })()}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Transaction List */}
-        <View style={{ flex: 1, marginTop: 0 }}>
-          {filteredTransactions.length > 0 ? (
-            <TransactionList
-              transactions={filteredTransactions}
-              categories={categories}
-              onTransactionPress={(transaction) => {
-                handleEditTransaction(transaction);
-              }}
-              onTransactionSwipeDelete={(transaction) => handleDeleteTransaction(transaction.id!)}
-            />
-          ) : (
-            <View style={{
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingVertical: 64
-            }}>
-              <Ionicons name="receipt-outline" size={64} color="#D1D5DB" />
-              <Text style={{
-                fontSize: 18,
-                fontWeight: '600',
-                color: '#6B7280',
-                marginTop: 16,
-                marginBottom: 8
-              }}>
-                {selectedCategory ? 'Tidak ada transaksi ditemukan' : 'Belum ada transaksi'}
-              </Text>
-              <Text style={{
-                fontSize: 14,
-                color: '#9CA3AF',
-                textAlign: 'center',
-                paddingHorizontal: 32
-              }}>
-                {selectedCategory
-                  ? 'Coba ubah filter yang dipilih'
-                  : 'Mulai tambahkan transaksi pertama Anda'}
-              </Text>
-            </View>
+        {/* Content based on active tab */}
+        <View style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
+          {activeTab === 'daily' && (
+            <ScrollView style={{ flex: 1, padding: 16 }}>
+              {dailyData.reverse()
+                .filter(day => {
+                  const dayTransactions = filteredTransactions.filter(t => {
+                    const transactionDate = new Date(t.date);
+                    return transactionDate.toDateString() === day.date.toDateString();
+                  });
+                  return dayTransactions.length > 0;
+                })
+                .map((day, index) => {
+                const dayTransactions = filteredTransactions.filter(t => {
+                  const transactionDate = new Date(t.date);
+                  return transactionDate.toDateString() === day.date.toDateString();
+                });
+                
+                return (
+                  <View key={index} style={{
+                    backgroundColor: 'white',
+                    padding: 16,
+                    marginBottom: 15,
+                    borderRadius: 12,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}>
+                    <View style={{ marginBottom: 10 }}>
+                      <Text style={{ 
+                        fontSize: 16, 
+                        fontWeight: '700',
+                        color: '#1F2937',
+                        marginBottom: 10
+                      }}>
+                        {day.date.toLocaleDateString('id-ID', { 
+                          day: 'numeric', 
+                          month: 'long'
+                        })}
+                      </Text>
+                      
+                      <TransactionList
+                        transactions={dayTransactions}
+                        categories={categories}
+                        onTransactionPress={handleEditTransaction}
+                        onTransactionSwipeDelete={(transaction) => handleDeleteTransaction(transaction.id!)}
+                        emptyMessage="Tidak ada transaksi hari ini"
+                      />
+                    </View>
+                      
+                    <View style={{
+                      marginTop: 10,
+                      paddingTop: 10,
+                      borderTopWidth: 1,
+                      borderTopColor: '#E5E7EB',
+                    }}>
+                      {[
+                        { label: 'Pemasukan', value: day.income, color: '#10B981' },
+                        { label: 'Pengeluaran', value: day.expense, color: '#EF4444' },
+                        { label: 'Saldo', value: Math.abs(day.balance), color: day.balance >= 0 ? '#10B981' : '#EF4444', isBold: true }
+                      ].map((item, idx) => (
+                        <View key={idx} style={{ 
+                          flexDirection: 'row', 
+                          justifyContent: 'space-between', 
+                          marginBottom: idx === 2 ? 0 : 4 
+                        }}>
+                          <Text style={{ 
+                            color: item.isBold ? '#1F2937' : '#6B7280', 
+                            fontSize: item.isBold ? 14 : 13,
+                            fontWeight: item.isBold ? '600' : '500'
+                          }}>
+                            {item.label}:
+                          </Text>
+                          <Text style={{ 
+                            color: item.color, 
+                            fontSize: item.isBold ? 14 : 13, 
+                            fontWeight: item.isBold ? '600' : '500'
+                          }}>
+                            Rp {item.value.toLocaleString('id-ID')}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                    </View>
+                );
+              })}
+            </ScrollView>
           )}
+          
+          {activeTab === 'weekly' && (
+            <ScrollView style={{ flex: 1, padding: 16 }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 15, color: '#1F2937' }}>
+                Data Mingguan - {getMonthName(selectedMonth)} {selectedYear}
+              </Text>
+              {weeklyData.sort((a, b) => b.week - a.week).map((week, index) => {
+                const startDate = new Date(selectedYear, selectedMonth - 1, (week.week - 1) * 7 + 1);
+                const endDate = new Date(selectedYear, selectedMonth - 1, week.week * 7);
+                
+                return (
+                  <View key={index} style={{
+                    backgroundColor: 'white',
+                    padding: 16,
+                    marginBottom: 12,
+                    borderRadius: 12,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                    borderLeftWidth: 4,
+                    borderLeftColor: '#3B82F6',
+                  }}>
+                    <View style={{ 
+                      flexDirection: 'row', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      marginBottom: 12
+                    }}>
+                      <Text style={{ 
+                        color: '#1F2937', 
+                        fontSize: 16, 
+                        fontWeight: '700'
+                      }}>
+                        Minggu {week.week}
+                      </Text>
+                      <Text style={{ 
+                        color: '#6B7280', 
+                        fontSize: 12,
+                        fontWeight: '500'
+                      }}>
+                        {startDate.getDate()}-{endDate.getDate()} {getMonthName(selectedMonth)}
+                      </Text>
+                    </View>
+                    
+                    <View style={{
+                      backgroundColor: '#F8FAFC',
+                      padding: 12,
+                      borderRadius: 8,
+                    }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <Text style={{ color: '#6B7280', fontSize: 13, fontWeight: '500' }}>Pemasukan:</Text>
+                        <Text style={{ color: '#10B981', fontSize: 14, fontWeight: '600' }}>
+                          Rp {week.income.toLocaleString('id-ID')}
+                        </Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <Text style={{ color: '#6B7280', fontSize: 13, fontWeight: '500' }}>Pengeluaran:</Text>
+                        <Text style={{ color: '#EF4444', fontSize: 14, fontWeight: '600' }}>
+                          Rp {week.expense.toLocaleString('id-ID')}
+                        </Text>
+                      </View>
+                      <View style={{ 
+                        flexDirection: 'row', 
+                        justifyContent: 'space-between',
+                        paddingTop: 8,
+                        borderTopWidth: 1,
+                        borderTopColor: '#E2E8F0'
+                      }}>
+                        <Text style={{ color: '#1F2937', fontSize: 14, fontWeight: '700' }}>Saldo:</Text>
+                        <Text style={{ 
+                          color: week.balance >= 0 ? '#10B981' : '#EF4444', 
+                          fontSize: 15, 
+                          fontWeight: '700'
+                        }}>
+                          Rp {Math.abs(week.balance).toLocaleString('id-ID')}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          )}
+          
+          {activeTab === 'monthly' && (
+            <ScrollView style={{ flex: 1, padding: 16 }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 15, color: '#1F2937' }}>
+                Data Bulanan - {selectedYear}
+              </Text>
+              {Array.from({ length: 12 }, (_, index) => {
+                const monthIndex = index; // Use 0-based index to match hook
+                const monthData = monthlyData.find(m => m.month === monthIndex) || {
+                  month: monthIndex,
+                  income: 0,
+                  expense: 0,
+                  balance: 0,
+                  isCurrentMonth: false
+                };
+                const isCurrentMonth = monthData.isCurrentMonth; // Use from hook instead of recalculating
+                const hasData = monthData.income > 0 || monthData.expense > 0;
+                
+                return (
+                  <View key={index} style={{
+                    backgroundColor: isCurrentMonth ? '#FEF3C7' : 'white',
+                    padding: 16,
+                    marginBottom: 15,
+                    borderRadius: 12,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3
+                }}>
+                  <Text style={{ 
+                    fontSize: 14, 
+                    fontWeight: isCurrentMonth ? 'bold' : '500', 
+                    color: isCurrentMonth ? '#3B82F6' : '#374151' 
+                  }}>
+                    {getMonthName(monthIndex)} {isCurrentMonth && '(Bulan Ini)'}
+                  </Text>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={{ fontSize: 12, color: '#10B981' }}>+{monthData.income.toLocaleString('id-ID')}</Text>
+                     <Text style={{ fontSize: 12, color: '#EF4444' }}>-{monthData.expense.toLocaleString('id-ID')}</Text>
+                     <Text style={{ fontSize: 14, fontWeight: 'bold', color: monthData.balance >= 0 ? '#10B981' : '#EF4444' }}>
+                       {monthData.balance.toLocaleString('id-ID')}
+                     </Text>
+                   </View>
+                 </View>
+              )})}
+            </ScrollView>
+          )}
+          
+          {activeTab === 'yearly' && (
+            <ScrollView style={{ flex: 1, padding: 16 }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 15, color: '#1F2937' }}>
+                Data Tahunan
+              </Text>
+    {yearlyData.map((year, index) => {
+  const currentYear = new Date().getFullYear();
+  const isCurrentYear = year.year === currentYear;
+  const hasData = year.income > 0 || year.expense > 0;
+
+  return (
+    <View
+      key={index}
+      style={{
+        backgroundColor: isCurrentYear ? '#FEF3C7' : 'white',
+        padding: 16,
+        marginBottom: 15,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: 'bold',
+          marginBottom: 12,
+          color: '#1F2937',
+        }}
+      >
+        {year.year}
+      </Text>
+
+      <View
+        style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}
+      >
+        <Text style={{ fontSize: 14, color: '#6B7280' }}>Total Pemasukan:</Text>
+        <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#10B981' }}>
+          +{year.income.toLocaleString('id-ID')}
+        </Text>
+      </View>
+
+      <View
+        style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}
+      >
+        <Text style={{ fontSize: 14, color: '#6B7280' }}>Total Pengeluaran:</Text>
+        <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#EF4444' }}>
+          -{year.expense.toLocaleString('id-ID')}
+        </Text>
+      </View>
+
+      <View style={{ height: 1, backgroundColor: '#E5E7EB', marginVertical: 8 }} />
+
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#1F2937' }}>Saldo:</Text>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: year.balance >= 0 ? '#10B981' : '#EF4444',
+          }}
+        >
+          {year.balance.toLocaleString('id-ID')}
+        </Text>
+      </View>
+    </View>
+  );
+})}
+
+            </ScrollView>
+          )}
+
         </View>
       </View>
 
@@ -792,7 +955,7 @@ const TransactionsScreen = () => {
                       <Ionicons name="checkmark-circle" size={18} color="#3B82F6" />
                     )}
                   </TouchableOpacity>
-                  {categories.filter(category => category.type === tempFilterType)
+                  {categories.filter(category => tempFilterType === 'all' || category.type === tempFilterType)
                     .map((category) => (
                     <TouchableOpacity
                       key={category.id}
@@ -1062,23 +1225,22 @@ const TransactionsScreen = () => {
         </TouchableOpacity>
       </Modal>
 
-      {showDatePicker && (
-        <Modal
-          visible={showDatePicker}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowDatePicker(false)}
-        >
-          <DateRangePicker
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            onClose={() => setShowDatePicker(false)}
-            onApply={() => setUseCustomDateRange(true)}
-          />
-        </Modal>
-      )}
+      {/* Date Range Picker Modal */}
+      <Modal
+        visible={showMonthYearPicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowMonthYearPicker(false)}
+      >
+        <DateRangePicker
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={(date) => setStartDate(date)}
+          onEndDateChange={(date) => setEndDate(date)}
+          onClose={() => setShowMonthYearPicker(false)}
+          onApply={() => setShowMonthYearPicker(false)}
+        />
+      </Modal>
     
       {/* Floating Action Button */}
       <TouchableOpacity
