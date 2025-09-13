@@ -38,6 +38,11 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
   const [selectedIcon, setSelectedIcon] = useState('help-circle');
   const [selectedIconColor, setSelectedIconColor] = useState('#3B82F6');
 
+  // Update selectedType when transactionType prop changes
+  React.useEffect(() => {
+    setSelectedType(transactionType);
+  }, [transactionType]);
+
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
       Alert.alert('Error', 'Nama kategori tidak boleh kosong');
