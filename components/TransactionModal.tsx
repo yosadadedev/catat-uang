@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFinanceStore } from '../store/useStore';
 import { Category, Transaction } from '../database/database';
-import { iconOptions, iconColors } from '../constants';
+import AddCategoryModal from './AddCategoryModal';
 
 interface TransactionModalProps {
   visible: boolean;
@@ -45,9 +45,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [selectedIcon, setSelectedIcon] = useState('help-circle');
-  const [selectedIconColor, setSelectedIconColor] = useState('#3B82F6');
   const [previousCategories, setPreviousCategories] = useState<{
     income?: Category;
     expense?: Category;
@@ -185,37 +182,24 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   };
 
-  const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) {
-      Alert.alert('Error', 'Nama kategori tidak boleh kosong');
-      return;
-    }
-
+  const handleAddCategory = async (categoryData: {
+    name: string;
+    icon: string;
+    color: string;
+    type: 'income' | 'expense';
+  }) => {
     try {
-      const newCategory = {
-        name: newCategoryName.trim(),
-        icon: selectedIcon,
-        color: selectedIconColor,
-        type: transactionType,
-      };
-
-      await addCategory(newCategory);
+      await addCategory(categoryData);
       
       // Find the newly added category
       const updatedCategories = categories.filter(c => c.type === transactionType);
-      const addedCategory = updatedCategories.find(c => c.name === newCategoryName.trim());
+      const addedCategory = updatedCategories.find(c => c.name === categoryData.name);
       
       if (addedCategory) {
         setSelectedCategory(addedCategory);
       }
       
-      setShowAddCategoryModal(false);
       setShowCategoryPicker(false);
-      
-      // Reset form
-      setNewCategoryName('');
-      setSelectedIcon('help-circle');
-      setSelectedIconColor('#3B82F6');
     } catch (error) {
       Alert.alert('Error', 'Gagal menambah kategori');
     }
@@ -515,84 +499,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       )}
 
       {/* Add Category Modal */}
-      <Modal
+      <AddCategoryModal
         visible={showAddCategoryModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowAddCategoryModal(false)}
-      >
-        <TouchableOpacity 
-          style={styles.modalContainer}
-          activeOpacity={1}
-          onPress={() => setShowAddCategoryModal(false)}
-        >
-          <TouchableOpacity 
-            activeOpacity={1} 
-            onPress={(e) => e.stopPropagation()}
-            style={styles.addCategoryModalContent}
-          >
-            <View style={styles.addCategoryHeader}>
-              <Text style={styles.addCategoryTitle}>Tambah Kategori Baru</Text>
-              <TouchableOpacity onPress={() => setShowAddCategoryModal(false)}>
-                <Ionicons name="close" size={24} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.addCategoryForm}>
-              <Text style={styles.addCategoryLabel}>Nama Kategori</Text>
-              <TextInput
-                style={styles.addCategoryInput}
-                value={newCategoryName}
-                onChangeText={setNewCategoryName}
-                placeholder="Masukkan nama kategori"
-                placeholderTextColor="#9CA3AF"
-              />
-
-              <Text style={styles.addCategoryLabel}>Pilih Icon</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.iconScrollView}>
-                {iconOptions.map((icon) => (
-                  <TouchableOpacity
-                    key={icon}
-                    style={[
-                      styles.iconOption,
-                      selectedIcon === icon && styles.selectedIconOption
-                    ]}
-                    onPress={() => setSelectedIcon(icon)}
-                  >
-                    <Ionicons name={icon as any} size={24} color={selectedIcon === icon ? 'white' : '#6B7280'} />
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              <Text style={styles.addCategoryLabel}>Pilih Warna</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.colorScrollView}>
-                {iconColors.map((color) => (
-                  <TouchableOpacity
-                    key={color}
-                    style={[
-                      styles.colorOption,
-                      { backgroundColor: color },
-                      selectedIconColor === color && styles.selectedColorOption
-                    ]}
-                    onPress={() => setSelectedIconColor(color)}
-                  >
-                    {selectedIconColor === color && (
-                      <Ionicons name="checkmark" size={16} color="white" />
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              <TouchableOpacity
-                style={styles.addCategoryButton}
-                onPress={handleAddCategory}
-              >
-                <Text style={styles.addCategoryButtonText}>Tambah Kategori</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
+        onClose={() => setShowAddCategoryModal(false)}
+        onAddCategory={handleAddCategory}
+        transactionType={transactionType}
+      />
     </Modal>
   );
 };

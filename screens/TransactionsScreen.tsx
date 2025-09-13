@@ -324,11 +324,57 @@ const TransactionsScreen = () => {
           },
         ]}
         />
-      {/* Filter Toolbar */}
+      {/* Time Filter Tabs */}
       <View style={{
         backgroundColor: '#3B82F6',
         paddingHorizontal: 16,
+        paddingTop: 8
       }}>
+        <View style={{
+          flexDirection: 'row',
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          borderRadius: 8,
+          padding: 4,
+          marginBottom: 12
+        }}>
+          {(['daily', 'weekly', 'monthly', 'yearly'] as TabType[]).map((tab) => {
+            const isActive = activeTab === tab;
+            const getTabLabel = () => {
+              switch (tab) {
+                case 'daily': return 'Harian';
+                case 'weekly': return 'Mingguan';
+                case 'monthly': return 'Bulanan';
+                case 'yearly': return 'Tahunan';
+                default: return tab;
+              }
+            };
+            
+            return (
+              <TouchableOpacity
+                key={tab}
+                onPress={() => setActiveTab(tab)}
+                style={{
+                  flex: 1,
+                  backgroundColor: isActive ? 'white' : 'transparent',
+                  borderRadius: 6,
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  alignItems: 'center'
+                }}
+              >
+                <Text style={{
+                  fontSize: 12,
+                  fontWeight: '600',
+                  color: isActive ? '#3B82F6' : 'white'
+                }}>
+                  {getTabLabel()}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        
+        {/* Date Navigation */}
         <View style={{
           flexDirection: 'row',
           alignItems: 'center',
