@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFinanceStore } from '../store/useStore';
 import { Category, Transaction } from '../database/database';
+import { iconOptions, iconColors } from '../constants';
 
 interface TransactionModalProps {
   visible: boolean;
@@ -31,7 +32,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   initialCategoryId,
 }) => {
   const categories = useFinanceStore((state) => state.categories);
-  const { addTransaction, updateTransaction } = useFinanceStore();
+  const { addTransaction, updateTransaction, deleteTransaction, addCategory } = useFinanceStore();
   
   const isEditMode = !!transaction;
 
@@ -43,6 +44,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [selectedIcon, setSelectedIcon] = useState('help-circle');
+  const [selectedIconColor, setSelectedIconColor] = useState('#3B82F6');
   const [previousCategories, setPreviousCategories] = useState<{
     income?: Category;
     expense?: Category;
@@ -156,6 +161,66 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   };
 
+  const handleDeleteTransaction = () => {
+    if (transaction && transaction.id) {
+      Alert.alert(
+        'Hapus Transaksi',
+        'Apakah Anda yakin ingin menghapus transaksi ini?',
+        [
+          { text: 'Batal', style: 'cancel' },
+          {
+            text: 'Hapus',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await deleteTransaction(transaction.id!);
+                onClose();
+              } catch (error) {
+                Alert.alert('Error', 'Gagal menghapus transaksi');
+              }
+            },
+          },
+        ]
+      );
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) {
+      Alert.alert('Error', 'Nama kategori tidak boleh kosong');
+      return;
+    }
+
+    try {
+      const newCategory = {
+        name: newCategoryName.trim(),
+        icon: selectedIcon,
+        color: selectedIconColor,
+        type: transactionType,
+      };
+
+      await addCategory(newCategory);
+      
+      // Find the newly added category
+      const updatedCategories = categories.filter(c => c.type === transactionType);
+      const addedCategory = updatedCategories.find(c => c.name === newCategoryName.trim());
+      
+      if (addedCategory) {
+        setSelectedCategory(addedCategory);
+      }
+      
+      setShowAddCategoryModal(false);
+      setShowCategoryPicker(false);
+      
+      // Reset form
+      setNewCategoryName('');
+      setSelectedIcon('help-circle');
+      setSelectedIconColor('#3B82F6');
+    } catch (error) {
+      Alert.alert('Error', 'Gagal menambah kategori');
+    }
+  };
+
   const filteredCategories = categories.filter(c => c.type === transactionType);
 
   return (
@@ -172,7 +237,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       >
         <TouchableOpacity 
           activeOpacity={1} 
-          onPress={() => {}}
+          onPress={(e) => e.stopPropagation()}
           style={styles.modalContent}
         >
           <View style={styles.header}>
@@ -342,8 +407,17 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 
           {/* Save Button - Fixed at bottom */}
           <View style={styles.buttonContainer}>
+            {isEditMode && (
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={handleDeleteTransaction}
+              >
+                <Ionicons name="trash" size={20} color="white" />
+                <Text style={styles.deleteButtonText}>Hapus</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
-              style={styles.saveButton}
+              style={[styles.saveButton, isEditMode && styles.saveButtonWithDelete]}
               onPress={handleSaveTransaction}
               disabled={isLoading}
             >
@@ -405,7 +479,21 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                     )}
                   </TouchableOpacity>
                 ))}
+                
               </ScrollView>
+                              {/* Add Category Option */}
+                <TouchableOpacity
+                  style={styles.addCategoryOption}
+                  onPress={() => {
+                    setShowCategoryPicker(false);
+                    setShowAddCategoryModal(true);
+                  }}
+                >
+                  <View style={styles.addCategoryIcon}>
+                    <Ionicons name="add" size={24} color="#3B82F6" />
+                  </View>
+                  <Text style={styles.addCategoryText}>Tambah Kategori Baru</Text>
+                </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -425,6 +513,86 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           }}
         />
       )}
+
+      {/* Add Category Modal */}
+      <Modal
+        visible={showAddCategoryModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowAddCategoryModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalContainer}
+          activeOpacity={1}
+          onPress={() => setShowAddCategoryModal(false)}
+        >
+          <TouchableOpacity 
+            activeOpacity={1} 
+            onPress={(e) => e.stopPropagation()}
+            style={styles.addCategoryModalContent}
+          >
+            <View style={styles.addCategoryHeader}>
+              <Text style={styles.addCategoryTitle}>Tambah Kategori Baru</Text>
+              <TouchableOpacity onPress={() => setShowAddCategoryModal(false)}>
+                <Ionicons name="close" size={24} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.addCategoryForm}>
+              <Text style={styles.addCategoryLabel}>Nama Kategori</Text>
+              <TextInput
+                style={styles.addCategoryInput}
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+                placeholder="Masukkan nama kategori"
+                placeholderTextColor="#9CA3AF"
+              />
+
+              <Text style={styles.addCategoryLabel}>Pilih Icon</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.iconScrollView}>
+                {iconOptions.map((icon) => (
+                  <TouchableOpacity
+                    key={icon}
+                    style={[
+                      styles.iconOption,
+                      selectedIcon === icon && styles.selectedIconOption
+                    ]}
+                    onPress={() => setSelectedIcon(icon)}
+                  >
+                    <Ionicons name={icon as any} size={24} color={selectedIcon === icon ? 'white' : '#6B7280'} />
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <Text style={styles.addCategoryLabel}>Pilih Warna</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.colorScrollView}>
+                {iconColors.map((color) => (
+                  <TouchableOpacity
+                    key={color}
+                    style={[
+                      styles.colorOption,
+                      { backgroundColor: color },
+                      selectedIconColor === color && styles.selectedColorOption
+                    ]}
+                    onPress={() => setSelectedIconColor(color)}
+                  >
+                    {selectedIconColor === color && (
+                      <Ionicons name="checkmark" size={16} color="white" />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <TouchableOpacity
+                style={styles.addCategoryButton}
+                onPress={handleAddCategory}
+              >
+                <Text style={styles.addCategoryButtonText}>Tambah Kategori</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </Modal>
   );
 };
@@ -584,6 +752,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   buttonContainer: {
+    flexDirection: 'row' as const,
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderTopWidth: 1,
@@ -591,12 +760,32 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    gap: 12,
   },
   saveButton: {
     backgroundColor: '#3B82F6',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center' as const,
+    flex: 1,
+  },
+  saveButtonWithDelete: {
+    flex: 2,
+  },
+  deleteButton: {
+    backgroundColor: '#EF4444',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    flexDirection: 'row' as const,
+    gap: 8,
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600' as const,
   },
   saveButtonDisabled: {
     backgroundColor: '#9CA3AF',
@@ -648,7 +837,6 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   categoryList: {
-    maxHeight: 400,
     padding: 16,
   },
   categoryItem: {
@@ -717,6 +905,129 @@ const styles = StyleSheet.create({
   datePickerContainer: {
     paddingVertical: 20,
     alignItems: 'center' as const,
+  },
+  addCategoryOption: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    marginTop: 8,
+  },
+  addCategoryIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EBF4FF',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    marginRight: 12,
+  },
+  addCategoryText: {
+    fontSize: 16,
+    color: '#3B82F6',
+    fontWeight: '500' as const,
+  },
+  addCategoryModalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    width: '100%' as const,
+    maxHeight: '80%' as const,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -5,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  addCategoryHeader: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  addCategoryTitle: {
+    fontSize: 18,
+    fontWeight: '600' as const,
+    color: '#111827',
+  },
+  addCategoryForm: {
+    padding: 20,
+  },
+  addCategoryLabel: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#374151',
+    marginBottom: 8,
+    marginTop: 16,
+  },
+  addCategoryInput: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    padding: 12,
+    fontSize: 16,
+    color: '#111827',
+  },
+  iconScrollView: {
+    marginBottom: 8,
+  },
+  iconOption: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedIconOption: {
+    backgroundColor: '#3B82F6',
+    borderColor: '#1D4ED8',
+  },
+  colorScrollView: {
+    marginBottom: 24,
+  },
+  colorOption: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    borderWidth: 3,
+    borderColor: 'transparent',
+  },
+  selectedColorOption: {
+    borderColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  addCategoryButton: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center' as const,
+  },
+  addCategoryButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600' as const,
   },
 });
 
