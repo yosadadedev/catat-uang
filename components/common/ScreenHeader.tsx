@@ -157,7 +157,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
               backgroundColor: 'rgba(255,255,255,0.15)',
               borderRadius: 8,
               paddingVertical: 4,
-              marginLeft: 6,
+              marginLeft: 8,
               justifyContent: 'space-between',
             }}>
             <TouchableOpacity

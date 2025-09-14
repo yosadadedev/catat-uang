@@ -286,7 +286,6 @@ const TransactionsScreen = () => {
         style={{
           backgroundColor: '#3B82F6',
           paddingHorizontal: 16,
-          paddingTop: 8,
         }}>
         <View
           style={{
