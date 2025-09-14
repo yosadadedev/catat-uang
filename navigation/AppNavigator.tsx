@@ -235,7 +235,7 @@ const DrawerNavigator = () => {
           headerShown: false,
         }}
       />
-      <Drawer.Screen
+      {/* <Drawer.Screen
         name="Share"
         component={SettingsScreen}
         options={{
@@ -248,7 +248,7 @@ const DrawerNavigator = () => {
             handleMenuPress('Share');
           },
         }}
-      />
+      /> */}
       {/* <Drawer.Screen
         name="Gift"
         component={SettingsScreen}
@@ -263,7 +263,7 @@ const DrawerNavigator = () => {
           },
         }}
       /> */}
-      <Drawer.Screen
+      {/* <Drawer.Screen
         name="Rating"
         component={SettingsScreen}
         options={{
@@ -276,7 +276,7 @@ const DrawerNavigator = () => {
             handleMenuPress('Rating');
           },
         }}
-      />
+      /> */}
       <Drawer.Screen
         name="About"
         component={AboutScreen}
