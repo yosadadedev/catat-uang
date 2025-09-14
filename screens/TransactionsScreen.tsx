@@ -336,8 +336,6 @@ const TransactionsScreen = () => {
             );
           })}
         </View>
-
-        {/* Date Navigation */}
       </View>
 
       {/* Content */}

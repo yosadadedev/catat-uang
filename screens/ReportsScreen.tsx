@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,6 +15,7 @@ import { DateRangePicker } from '~/components/DatePicker';
 
 type ReportsScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Reports'>;
 type TimePeriod = 'today' | 'week' | 'month' | 'year';
+type TabType = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 const ReportsScreen = () => {
   const navigation = useNavigation<ReportsScreenNavigationProp>();
@@ -29,6 +30,7 @@ const ReportsScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [useCustomDateRange, setUseCustomDateRange] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('monthly');
 
   // Use custom hook for report data logic
   const {
@@ -46,6 +48,24 @@ const ReportsScreen = () => {
     transactions,
     categories,
   });
+
+  // Convert activeTab to selectedPeriod format
+  const getSelectedPeriod = (tab: TabType): TimePeriod => {
+    switch (tab) {
+      case 'daily':
+        return 'today';
+      case 'weekly':
+        return 'week';
+      case 'monthly':
+        return 'month';
+      case 'yearly':
+        return 'year';
+      default:
+        return 'month';
+    }
+  };
+
+  const currentSelectedPeriod = getSelectedPeriod(activeTab);
 
   // Date navigation functions
   const getDateRange = useCallback((period: TimePeriod, date: Date) => {
@@ -86,7 +106,7 @@ const ReportsScreen = () => {
     (direction: 'prev' | 'next') => {
       const newDate = new Date(selectedDate);
 
-      switch (selectedPeriod) {
+      switch (currentSelectedPeriod) {
         case 'today':
           newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
           break;
@@ -103,14 +123,14 @@ const ReportsScreen = () => {
 
       setSelectedDate(newDate);
     },
-    [selectedDate, selectedPeriod]
+    [selectedDate, currentSelectedPeriod]
   );
 
   const updateDateRangeFromSelectedDate = useCallback(() => {
-    const { start, end } = getDateRange(selectedPeriod, selectedDate);
+    const { start, end } = getDateRange(currentSelectedPeriod, selectedDate);
     setStartDate(start);
     setEndDate(end);
-  }, [selectedDate, selectedPeriod, getDateRange, setStartDate, setEndDate]);
+  }, [selectedDate, currentSelectedPeriod, getDateRange, setStartDate, setEndDate]);
 
   // Update date range when selectedDate or selectedPeriod changes
   useEffect(() => {
@@ -119,24 +139,24 @@ const ReportsScreen = () => {
 
   // Update date range when period changes
   useEffect(() => {
-    const { start, end } = getDateRange(selectedPeriod, selectedDate);
+    const { start, end } = getDateRange(currentSelectedPeriod, selectedDate);
     setStartDate(start);
     setEndDate(end);
-  }, [selectedPeriod, selectedDate, getDateRange, setStartDate, setEndDate]);
+  }, [currentSelectedPeriod, selectedDate, getDateRange, setStartDate, setEndDate]);
 
   // Reset date range to current date when screen is focused
   useFocusEffect(
     useCallback(() => {
       const today = new Date();
-      const { start, end } = getDateRange(selectedPeriod, today);
+      const { start, end } = getDateRange(currentSelectedPeriod, today);
       setSelectedDate(today);
       setStartDate(start);
       setEndDate(end);
       setUseCustomDateRange(false);
-    }, [selectedPeriod, getDateRange, setStartDate, setEndDate])
+    }, [currentSelectedPeriod, getDateRange, setStartDate, setEndDate])
   );
 
-  const formatDateHeader = () => {
+  const formatDateHeader = (date: Date, period: TimePeriod) => {
     // If using custom date range, show the selected range
     if (useCustomDateRange) {
       const startFormatted = startDate.toLocaleDateString('id-ID', {
@@ -158,11 +178,11 @@ const ReportsScreen = () => {
       day: 'numeric',
     };
 
-    switch (selectedPeriod) {
+    switch (period) {
       case 'today':
-        return selectedDate.toLocaleDateString('id-ID', options);
+        return date.toLocaleDateString('id-ID', options);
       case 'week':
-        const { start, end } = getDateRange('week', selectedDate);
+        const { start, end } = getDateRange('week', date);
         const startMonth = start.toLocaleDateString('id-ID', { month: 'long' });
         const endMonth = end.toLocaleDateString('id-ID', { month: 'long' });
         const year = end.getFullYear();
@@ -173,9 +193,9 @@ const ReportsScreen = () => {
           return `${start.getDate()} ${startMonth} - ${end.getDate()} ${endMonth} ${year}`;
         }
       case 'month':
-        return selectedDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+        return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
       case 'year':
-        return selectedDate.getFullYear().toString();
+        return date.getFullYear().toString();
       default:
         return '';
     }
@@ -198,70 +218,80 @@ const ReportsScreen = () => {
   const topIncome = getTopCategories('income');
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#3B82F6' }}>
       <ScreenHeader
-        title="Laporan Keuangan"
+        title=""
         onMenuPress={() => navigation.openDrawer()}
         rightButton={{
           icon: 'share-outline',
           onPress: exportReport,
         }}
+        dateNavigation={{
+          currentDate: formatDateHeader(selectedDate, currentSelectedPeriod),
+          onPrevious: () => navigateDate('prev'),
+          onNext: () => navigateDate('next'),
+          onDatePress: () => setShowDatePicker(true),
+        }}
       />
-      {/* Period Selector */}
+      {/* Time Filter Tabs */}
       <View
         style={{
           backgroundColor: '#3B82F6',
-          padding: 16,
-          paddingTop: 0,
+          paddingHorizontal: 16,
         }}>
-        {/* Date Navigation */}
         <View
           style={{
             flexDirection: 'row',
-            alignItems: 'center',
             backgroundColor: 'rgba(255,255,255,0.1)',
-            borderRadius: 6,
-            paddingHorizontal: 8,
-            paddingVertical: 8,
-            justifyContent: 'space-between',
+            borderRadius: 8,
+            padding: 4,
+            marginBottom: 12,
           }}>
-          <TouchableOpacity onPress={() => navigateDate('prev')} style={{ padding: 4 }}>
-            <Ionicons name="chevron-back" size={16} color="white" />
-          </TouchableOpacity>
+          {(['daily', 'weekly', 'monthly', 'yearly'] as TabType[]).map((tab) => {
+            const isActive = activeTab === tab;
+            const getTabLabel = () => {
+              switch (tab) {
+                case 'daily':
+                  return 'Harian';
+                case 'weekly':
+                  return 'Mingguan';
+                case 'monthly':
+                  return 'Bulanan';
+                case 'yearly':
+                  return 'Tahunan';
+                default:
+                  return tab;
+              }
+            };
 
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              flex: 1,
-              justifyContent: 'center',
-              gap: 8,
-            }}>
-            <TouchableOpacity
-              onPress={() => setShowDatePicker(true)}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 6,
-              }}>
-              <Ionicons name="calendar" size={14} color="white" />
-              <Text
+            return (
+              <TouchableOpacity
+                key={tab}
+                onPress={() => setActiveTab(tab)}
                 style={{
-                  fontSize: 12,
-                  fontWeight: 'bold',
-                  color: 'white',
-                  textAlign: 'center',
+                  flex: 1,
+                  backgroundColor: isActive ? 'white' : 'transparent',
+                  borderRadius: 6,
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  alignItems: 'center',
                 }}>
-                {formatDateHeader()}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity onPress={() => navigateDate('next')} style={{ padding: 4 }}>
-            <Ionicons name="chevron-forward" size={16} color="white" />
-          </TouchableOpacity>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontWeight: '600',
+                    color: isActive ? '#3B82F6' : 'white',
+                  }}>
+                  {getTabLabel()}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
+
+      {/* Content */}
+      <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
 
       <ScrollView
         style={{ flex: 1 }}
@@ -559,7 +589,8 @@ const ReportsScreen = () => {
           }}
         />
       </Modal>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
