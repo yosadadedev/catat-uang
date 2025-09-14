@@ -10,9 +10,19 @@ interface UseReportDataProps {
   useCustomDateRange?: boolean;
 }
 
-export const useReportData = ({ transactions, categories, customStartDate, customEndDate, useCustomDateRange = false }: UseReportDataProps) => {
-  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('today');
-  const [startDate, setStartDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+export const useReportData = ({
+  transactions,
+  categories,
+  customStartDate,
+  customEndDate,
+  useCustomDateRange = false,
+}: UseReportDataProps) => {
+  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>(
+    'today'
+  );
+  const [startDate, setStartDate] = useState(
+    new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  );
   const [endDate, setEndDate] = useState(new Date());
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
 
@@ -51,7 +61,7 @@ export const useReportData = ({ transactions, categories, customStartDate, custo
   const filterTransactions = useCallback(() => {
     let dateStart = startDate;
     let dateEnd = endDate;
-    
+
     // Use custom date range if provided
     if (useCustomDateRange && customStartDate && customEndDate) {
       dateStart = new Date(customStartDate);
@@ -59,8 +69,8 @@ export const useReportData = ({ transactions, categories, customStartDate, custo
       dateEnd = new Date(customEndDate);
       dateEnd.setHours(23, 59, 59, 999);
     }
-    
-    const filtered = transactions.filter(transaction => {
+
+    const filtered = transactions.filter((transaction) => {
       const transactionDate = new Date(transaction.date);
       return transactionDate >= dateStart && transactionDate <= dateEnd;
     });
@@ -86,16 +96,16 @@ export const useReportData = ({ transactions, categories, customStartDate, custo
 
   const calculateSummary = () => {
     const income = filteredTransactions
-      .filter(t => t.type === 'income')
+      .filter((t) => t.type === 'income')
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    
+
     const expense = filteredTransactions
-      .filter(t => t.type === 'expense')
+      .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    
-    const incomeCount = filteredTransactions.filter(t => t.type === 'income').length;
-    const expenseCount = filteredTransactions.filter(t => t.type === 'expense').length;
-    
+
+    const incomeCount = filteredTransactions.filter((t) => t.type === 'income').length;
+    const expenseCount = filteredTransactions.filter((t) => t.type === 'expense').length;
+
     return {
       income,
       expense,
@@ -104,39 +114,39 @@ export const useReportData = ({ transactions, categories, customStartDate, custo
       incomeCount,
       expenseCount,
       averageIncome: incomeCount > 0 ? income / incomeCount : 0,
-      averageExpense: expenseCount > 0 ? expense / expenseCount : 0
+      averageExpense: expenseCount > 0 ? expense / expenseCount : 0,
     };
   };
 
   const getTopCategories = (type: 'income' | 'expense', limit: number = 5) => {
     const categoryTotals = new Map<number, { amount: number; count: number }>();
-    
+
     filteredTransactions
-      .filter(t => t.type === type)
-      .forEach(transaction => {
+      .filter((t) => t.type === type)
+      .forEach((transaction) => {
         const current = categoryTotals.get(transaction.category_id) || { amount: 0, count: 0 };
         categoryTotals.set(transaction.category_id, {
           amount: current.amount + Math.abs(transaction.amount),
-          count: current.count + 1
+          count: current.count + 1,
         });
       });
 
     const totalAmount = type === 'income' ? calculateSummary().income : calculateSummary().expense;
-    const totalCount = filteredTransactions.filter(t => t.type === type).length;
+    const totalCount = filteredTransactions.filter((t) => t.type === type).length;
 
     return Array.from(categoryTotals.entries())
-       .map(([categoryId, data]) => {
-         const category = categories.find(c => c.id === categoryId);
-         return {
-           category: category?.name || 'Lainnya',
-           icon: category?.icon || 'help-circle',
-           color: category?.color || '#6B7280',
-           amount: data.amount,
-           count: data.count,
-           percentage: totalAmount > 0 ? (data.amount / totalAmount) * 100 : 0,
-           transactionPercentage: totalCount > 0 ? (data.count / totalCount) * 100 : 0,
-         };
-       })
+      .map(([categoryId, data]) => {
+        const category = categories.find((c) => c.id === categoryId);
+        return {
+          category: category?.name || 'Lainnya',
+          icon: category?.icon || 'help-circle',
+          color: category?.color || '#6B7280',
+          amount: data.amount,
+          count: data.count,
+          percentage: totalAmount > 0 ? (data.amount / totalAmount) * 100 : 0,
+          transactionPercentage: totalCount > 0 ? (data.count / totalCount) * 100 : 0,
+        };
+      })
       .sort((a, b) => b.amount - a.amount)
       .slice(0, limit);
   };
@@ -197,6 +207,6 @@ ${topIncome.map((item, index) => `${index + 1}. ${item.category}: ${formatCurren
     formatDateRange,
     calculateSummary,
     getTopCategories,
-    exportReport
+    exportReport,
   };
 };

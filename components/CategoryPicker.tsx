@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Category } from '../database/database';
 
@@ -26,7 +20,7 @@ export const CategoryPicker: React.FC<CategoryPickerProps> = ({
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const filteredCategories = categories.filter(cat => cat.type === type);
+  const filteredCategories = categories.filter((cat) => cat.type === type);
 
   const handleSelectCategory = (category: Category) => {
     onSelectCategory(category);
@@ -38,32 +32,28 @@ export const CategoryPicker: React.FC<CategoryPickerProps> = ({
       {/* Category Selector Button */}
       <TouchableOpacity
         onPress={() => setIsModalVisible(true)}
-        className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex-row items-center justify-between"
-        activeOpacity={0.7}
-      >
-        <View className="flex-row items-center flex-1">
+        className="flex-row items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-4"
+        activeOpacity={0.7}>
+        <View className="flex-1 flex-row items-center">
           {selectedCategory ? (
             <>
               <View
-                className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                style={{ backgroundColor: selectedCategory.color + '20' }}
-              >
+                className="mr-3 h-10 w-10 items-center justify-center rounded-full"
+                style={{ backgroundColor: selectedCategory.color + '20' }}>
                 <Ionicons
                   name={selectedCategory.icon as keyof typeof Ionicons.glyphMap}
                   size={20}
                   color={selectedCategory.color}
                 />
               </View>
-              <Text className="text-gray-900 font-medium text-base">
-                {selectedCategory.name}
-              </Text>
+              <Text className="text-base font-medium text-gray-900">{selectedCategory.name}</Text>
             </>
           ) : (
             <>
-              <View className="w-10 h-10 rounded-full bg-gray-200 items-center justify-center mr-3">
+              <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-gray-200">
                 <Ionicons name="apps" size={20} color="#9CA3AF" />
               </View>
-              <Text className="text-gray-500 text-base">{placeholder}</Text>
+              <Text className="text-base text-gray-500">{placeholder}</Text>
             </>
           )}
         </View>
@@ -75,18 +65,16 @@ export const CategoryPicker: React.FC<CategoryPickerProps> = ({
         visible={isModalVisible}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setIsModalVisible(false)}
-      >
+        onRequestClose={() => setIsModalVisible(false)}>
         <View className="flex-1 bg-white">
           {/* Header */}
-          <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
+          <View className="flex-row items-center justify-between border-b border-gray-200 p-4">
             <Text className="text-xl font-bold text-gray-900">
               Pilih Kategori {type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
             </Text>
             <TouchableOpacity
               onPress={() => setIsModalVisible(false)}
-              className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center"
-            >
+              className="h-8 w-8 items-center justify-center rounded-full bg-gray-100">
               <Ionicons name="close" size={20} color="#6B7280" />
             </TouchableOpacity>
           </View>
@@ -98,18 +86,16 @@ export const CategoryPicker: React.FC<CategoryPickerProps> = ({
                 <TouchableOpacity
                   key={category.id}
                   onPress={() => handleSelectCategory(category)}
-                  className={`w-[48%] mb-4 p-4 rounded-xl border-2 ${
+                  className={`mb-4 w-[48%] rounded-xl border-2 p-4 ${
                     selectedCategory?.id === category.id
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 bg-white'
                   }`}
-                  activeOpacity={0.7}
-                >
+                  activeOpacity={0.7}>
                   <View className="items-center">
                     <View
-                      className="w-16 h-16 rounded-full items-center justify-center mb-3"
-                      style={{ backgroundColor: category.color + '20' }}
-                    >
+                      className="mb-3 h-16 w-16 items-center justify-center rounded-full"
+                      style={{ backgroundColor: category.color + '20' }}>
                       <Ionicons
                         name={category.icon as keyof typeof Ionicons.glyphMap}
                         size={28}
@@ -118,11 +104,8 @@ export const CategoryPicker: React.FC<CategoryPickerProps> = ({
                     </View>
                     <Text
                       className={`text-center font-medium ${
-                        selectedCategory?.id === category.id
-                          ? 'text-blue-700'
-                          : 'text-gray-900'
-                      }`}
-                    >
+                        selectedCategory?.id === category.id ? 'text-blue-700' : 'text-gray-900'
+                      }`}>
                       {category.name}
                     </Text>
                   </View>
@@ -132,16 +115,13 @@ export const CategoryPicker: React.FC<CategoryPickerProps> = ({
 
             {/* Add New Category Button */}
             <TouchableOpacity
-              className="w-full p-4 border-2 border-dashed border-gray-300 rounded-xl items-center justify-center mt-4"
-              activeOpacity={0.7}
-            >
+              className="mt-4 w-full items-center justify-center rounded-xl border-2 border-dashed border-gray-300 p-4"
+              activeOpacity={0.7}>
               <View className="items-center">
-                <View className="w-16 h-16 rounded-full bg-gray-100 items-center justify-center mb-3">
+                <View className="mb-3 h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                   <Ionicons name="add" size={28} color="#6B7280" />
                 </View>
-                <Text className="text-gray-600 font-medium">
-                  Tambah Kategori Baru
-                </Text>
+                <Text className="font-medium text-gray-600">Tambah Kategori Baru</Text>
               </View>
             </TouchableOpacity>
           </ScrollView>
@@ -168,9 +148,7 @@ export const QuickCategoryGrid: React.FC<QuickCategoryGridProps> = ({
   type,
   maxItems = 8,
 }) => {
-  const filteredCategories = categories
-    .filter(cat => cat.type === type)
-    .slice(0, maxItems);
+  const filteredCategories = categories.filter((cat) => cat.type === type).slice(0, maxItems);
 
   return (
     <View className="flex-row flex-wrap justify-between px-4">
@@ -178,20 +156,18 @@ export const QuickCategoryGrid: React.FC<QuickCategoryGridProps> = ({
         <TouchableOpacity
           key={category.id}
           onPress={() => onSelectCategory(category)}
-          className="w-[22%] items-center mb-4"
-          activeOpacity={0.7}
-        >
+          className="mb-4 w-[22%] items-center"
+          activeOpacity={0.7}>
           <View
-            className="w-14 h-14 rounded-full items-center justify-center mb-2"
-            style={{ backgroundColor: category.color + '20' }}
-          >
+            className="mb-2 h-14 w-14 items-center justify-center rounded-full"
+            style={{ backgroundColor: category.color + '20' }}>
             <Ionicons
               name={category.icon as keyof typeof Ionicons.glyphMap}
               size={24}
               color={category.color}
             />
           </View>
-          <Text className="text-xs text-gray-700 text-center font-medium" numberOfLines={1}>
+          <Text className="text-center text-xs font-medium text-gray-700" numberOfLines={1}>
             {category.name}
           </Text>
         </TouchableOpacity>

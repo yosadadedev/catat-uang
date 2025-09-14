@@ -15,7 +15,6 @@ import CategoryManagementScreen from '../screens/CategoryManagementScreen';
 import HelpScreen from '../screens/HelpScreen';
 import AboutScreen from '../screens/AboutScreen';
 
-
 // Navigation types
 export type RootStackParamList = {
   MainTabs: undefined;
@@ -39,7 +38,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 // Drawer Navigator Component
 const DrawerNavigator = () => {
   const { colors } = useTheme();
-  
+
   const handleMenuPress = (menuType: string) => {
     switch (menuType) {
       case 'Share':
@@ -49,31 +48,31 @@ const DrawerNavigator = () => {
         Alert.alert('Hadiah untuk Developer', 'Terima kasih atas dukungan Anda!');
         break;
       case 'Rating':
-         Alert.alert(
-           'Rating Aplikasi',
-           'Terima kasih telah menggunakan Catat Uang. Bantu kami berkembang dengan memberi rating ⭐⭐⭐⭐⭐ di Play Store 🙏',
-           [
-             { text: 'Nanti Saja', style: 'cancel' },
-             {
-               text: 'Beri Rating ⭐',
-               onPress: () => {
-                 const storeUrl = 'https://play.google.com/store/apps/details?id=com.catatuang.app';
-                 Linking.canOpenURL(storeUrl)
-                   .then((supported) => {
-                     if (supported) {
-                       Linking.openURL(storeUrl);
-                     } else {
-                       Alert.alert('Error', 'Tidak dapat membuka store');
-                     }
-                   })
-                   .catch(() => {
-                     Alert.alert('Error', 'Gagal membuka store');
-                   });
-               },
-             },
-           ]
-         );
-         break;
+        Alert.alert(
+          'Rating Aplikasi',
+          'Terima kasih telah menggunakan Catat Uang. Bantu kami berkembang dengan memberi rating ⭐⭐⭐⭐⭐ di Play Store 🙏',
+          [
+            { text: 'Nanti Saja', style: 'cancel' },
+            {
+              text: 'Beri Rating ⭐',
+              onPress: () => {
+                const storeUrl = 'https://play.google.com/store/apps/details?id=com.catatuang.app';
+                Linking.canOpenURL(storeUrl)
+                  .then((supported) => {
+                    if (supported) {
+                      Linking.openURL(storeUrl);
+                    } else {
+                      Alert.alert('Error', 'Tidak dapat membuka store');
+                    }
+                  })
+                  .catch(() => {
+                    Alert.alert('Error', 'Gagal membuka store');
+                  });
+              },
+            },
+          ]
+        );
+        break;
     }
   };
 
@@ -138,25 +137,26 @@ const DrawerNavigator = () => {
           }
 
           return (
-            <View style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              backgroundColor: backgroundColor,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginRight: 8,
-              opacity: focused ? 1 : 0.8,
-              transform: [{ scale: focused ? 1.05 : 1 }],
-              shadowColor: focused ? backgroundColor : 'transparent',
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: focused ? 0.3 : 0,
-              shadowRadius: 4,
-              elevation: focused ? 4 : 0,
-            }}>
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                backgroundColor: backgroundColor,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginRight: 8,
+                opacity: focused ? 1 : 0.8,
+                transform: [{ scale: focused ? 1.05 : 1 }],
+                shadowColor: focused ? backgroundColor : 'transparent',
+                shadowOffset: {
+                  width: 0,
+                  height: 2,
+                },
+                shadowOpacity: focused ? 0.3 : 0,
+                shadowRadius: 4,
+                elevation: focused ? 4 : 0,
+              }}>
               <Ionicons name={iconName} size={size - 4} color={iconColor} />
             </View>
           );
@@ -194,8 +194,7 @@ const DrawerNavigator = () => {
           color: colors.text,
         },
         headerTintColor: colors.primary,
-      })}
-    >
+      })}>
       <Drawer.Screen
         name="Transactions"
         component={TransactionsScreen}
@@ -312,15 +311,12 @@ const AppNavigator = () => {
           cardStyle: {
             backgroundColor: '#F9FAFB',
           },
-        }}
-      >
+        }}>
         <Stack.Screen
           name="MainTabs"
           component={DrawerNavigator}
           options={{ headerShown: false }}
         />
-
-
       </Stack.Navigator>
     </NavigationContainer>
   );

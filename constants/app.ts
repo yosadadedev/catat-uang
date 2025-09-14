@@ -1,7 +1,8 @@
 export const APP_INFO = {
   name: 'Catat Uang',
   version: '1.0.0',
-  description: 'Aplikasi pencatat keuangan pribadi gratis yang membantu Anda mengelola pemasukan dan pengeluaran dengan mudah dan efisien.'
+  description:
+    'Aplikasi pencatat keuangan pribadi gratis yang membantu Anda mengelola pemasukan dan pengeluaran dengan mudah dan efisien.',
 };
 
 export const APP_FEATURES = [
@@ -11,7 +12,7 @@ export const APP_FEATURES = [
   'Filter dan pencarian transaksi yang fleksibel',
   'Ekspor data ke format CSV',
   'Dukungan tema gelap dan terang',
-  'Dukungan multi bahasa (Indonesia & English)'
+  'Dukungan multi bahasa (Indonesia & English)',
 ];
 
 export const CHANGELOG = {
@@ -24,7 +25,7 @@ export const CHANGELOG = {
       'Filter dan pencarian transaksi yang fleksibel',
       'Ekspor data ke format CSV',
       'Dukungan tema gelap dan terang',
-      'Dukungan multi bahasa (Indonesia & English)'
-    ]
-  }
+      'Dukungan multi bahasa (Indonesia & English)',
+    ],
+  },
 };

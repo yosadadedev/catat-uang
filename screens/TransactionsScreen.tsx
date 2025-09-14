@@ -1,13 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  Alert,
-  ScrollView,
-  SafeAreaView,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Alert, ScrollView, SafeAreaView } from 'react-native';
 import { useNavigation, CompositeNavigationProp, useFocusEffect } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -33,12 +25,12 @@ type TransactionsScreenNavigationProp = CompositeNavigationProp<
 const TransactionsScreen = () => {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
   const { transactions, categories, deleteTransaction } = useFinanceStore();
-  
+
   // Date range state for DateRangePicker
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [useCustomDateRange, setUseCustomDateRange] = useState(false);
-  
+
   // Use custom hook for transaction filtering logic
   const {
     activeTab,
@@ -50,18 +42,17 @@ const TransactionsScreen = () => {
     selectedCategory,
     setSelectedCategory,
     selectedDate,
-    setSelectedDate,
     filteredTransactions,
     navigateDate,
-    formatDate
-  } = useTransactionFilters({ 
-    transactions, 
-    categories, 
-    startDate, 
-    endDate, 
-    useCustomDateRange 
+    formatDate,
+  } = useTransactionFilters({
+    transactions,
+    categories,
+    startDate,
+    endDate,
+    useCustomDateRange,
   });
-  
+
   // UI state
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
@@ -84,7 +75,7 @@ const TransactionsScreen = () => {
   const getDateRange = (tab: TabType, date: Date) => {
     const start = new Date(date);
     const end = new Date(date);
-    
+
     switch (tab) {
       case 'daily':
         start.setHours(0, 0, 0, 0);
@@ -112,25 +103,21 @@ const TransactionsScreen = () => {
         end.setHours(23, 59, 59, 999);
         break;
     }
-    
+
     return { start, end };
   };
 
   // Filter and sort transactions handled by custom hook
 
   const handleDeleteTransaction = (transactionId: number) => {
-    Alert.alert(
-      'Hapus Transaksi',
-      'Apakah Anda yakin ingin menghapus transaksi ini?',
-      [
-        { text: 'Batal', style: 'cancel' },
-        {
-          text: 'Hapus',
-          style: 'destructive',
-          onPress: () => deleteTransaction(transactionId),
-        },
-      ]
-    );
+    Alert.alert('Hapus Transaksi', 'Apakah Anda yakin ingin menghapus transaksi ini?', [
+      { text: 'Batal', style: 'cancel' },
+      {
+        text: 'Hapus',
+        style: 'destructive',
+        onPress: () => deleteTransaction(transactionId),
+      },
+    ]);
   };
 
   const handleEditTransaction = (transaction: Transaction) => {
@@ -150,28 +137,28 @@ const TransactionsScreen = () => {
 
   const exportToXLS = async () => {
     try {
-      const data = filteredTransactions.map(transaction => {
-        const category = categories.find(cat => cat.id === transaction.category_id);
+      const data = filteredTransactions.map((transaction) => {
+        const category = categories.find((cat) => cat.id === transaction.category_id);
         return {
-          'Tanggal': formatDate(new Date(transaction.date)),
-          'Deskripsi': transaction.description,
-          'Kategori': category?.name || '',
-          'Jenis': transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
-          'Jumlah': transaction.amount
+          Tanggal: formatDate(new Date(transaction.date)),
+          Deskripsi: transaction.description,
+          Kategori: category?.name || '',
+          Jenis: transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
+          Jumlah: transaction.amount,
         };
       });
 
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Transaksi');
-      
+
       const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
       const uri = FileSystem.documentDirectory + 'transaksi.xlsx';
-      
+
       await FileSystem.writeAsStringAsync(uri, wbout, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      
+
       await Sharing.shareAsync(uri);
       setShowExportModal(false);
     } catch {
@@ -207,10 +194,11 @@ const TransactionsScreen = () => {
                 </tr>
               </thead>
               <tbody>
-                ${filteredTransactions.map(transaction => {
-                  const category = categories.find(cat => cat.id === transaction.category_id);
-                  const isIncome = transaction.type === 'income';
-                  return `
+                ${filteredTransactions
+                  .map((transaction) => {
+                    const category = categories.find((cat) => cat.id === transaction.category_id);
+                    const isIncome = transaction.type === 'income';
+                    return `
                     <tr>
                       <td>${formatDate(new Date(transaction.date))}</td>
                       <td>${transaction.description}</td>
@@ -219,7 +207,8 @@ const TransactionsScreen = () => {
                       <td class="${isIncome ? 'income' : 'expense'}">Rp ${transaction.amount.toLocaleString('id-ID')}</td>
                     </tr>
                   `;
-                }).join('')}
+                  })
+                  .join('')}
               </tbody>
             </table>
           </body>
@@ -237,24 +226,26 @@ const TransactionsScreen = () => {
   const exportToCSV = async () => {
     try {
       const csvHeader = 'Tanggal,Deskripsi,Kategori,Jenis,Jumlah\n';
-      const csvData = filteredTransactions.map(transaction => {
-        const category = categories.find(cat => cat.id === transaction.category_id);
-        return [
-          formatDate(new Date(transaction.date)),
-          `"${transaction.description}"`,
-          `"${category?.name || ''}"`,
-          transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
-          transaction.amount
-        ].join(',');
-      }).join('\n');
-      
+      const csvData = filteredTransactions
+        .map((transaction) => {
+          const category = categories.find((cat) => cat.id === transaction.category_id);
+          return [
+            formatDate(new Date(transaction.date)),
+            `"${transaction.description}"`,
+            `"${category?.name || ''}"`,
+            transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
+            transaction.amount,
+          ].join(',');
+        })
+        .join('\n');
+
       const csvContent = csvHeader + csvData;
       const uri = FileSystem.documentDirectory + 'transaksi.csv';
-      
+
       await FileSystem.writeAsStringAsync(uri, csvContent, {
         encoding: FileSystem.EncodingType.UTF8,
       });
-      
+
       await Sharing.shareAsync(uri);
       setShowExportModal(false);
     } catch {
@@ -262,99 +253,66 @@ const TransactionsScreen = () => {
     }
   };
 
-  const formatDateHeader = () => {
-    // If using custom date range, show the selected range
-    if (useCustomDateRange) {
-      const startFormatted = startDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-      const endFormatted = endDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-      return `${startFormatted} - ${endFormatted}`;
-    }
-    
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    };
-    
-    switch (activeTab) {
-      case 'daily':
-        return selectedDate.toLocaleDateString('id-ID', options);
-      case 'weekly':
-        const { start, end } = getDateRange('weekly', selectedDate);
-        const startMonth = start.toLocaleDateString('id-ID', { month: 'long' });
-        const endMonth = end.toLocaleDateString('id-ID', { month: 'long' });
-        const year = end.getFullYear();
-        
-        if (start.getMonth() === end.getMonth()) {
-          return `${start.getDate()} - ${end.getDate()} ${endMonth} ${year}`;
-        } else {
-          return `${start.getDate()} ${startMonth} - ${end.getDate()} ${endMonth} ${year}`;
-        }
-      case 'monthly':
-        return selectedDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-      case 'yearly':
-        return selectedDate.getFullYear().toString();
-      default:
-        return '';
-    }
-  };
-
-
-
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#3B82F6'}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#3B82F6' }}>
       <ScreenHeader
-          title=""
-          onMenuPress={() => navigation.openDrawer()}
-          rightButton={[
+        title=""
+        onMenuPress={() => navigation.openDrawer()}
+        rightButton={[
           {
             icon: sortOrder === 'newest' ? 'arrow-down' : 'arrow-up',
-            onPress: () => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')
+            onPress: () => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest'),
           },
           {
-            icon: "download",
+            icon: 'download',
             onPress: () => setShowExportModal(true),
-            size: 20
+            size: 20,
           },
           {
-            icon: "filter",
+            icon: 'filter',
             onPress: () => setShowFilterModal(true),
-            backgroundColor:  selectedCategory !== null ? '#10B981' : 'rgba(255,255,255,0.2)'
+            backgroundColor: selectedCategory !== null ? '#10B981' : 'rgba(255,255,255,0.2)',
           },
         ]}
         dateNavigation={{
           currentDate: formatDate(selectedDate, activeTab),
           onPrevious: () => navigateDate('prev'),
           onNext: () => navigateDate('next'),
-          onDatePress: () => setShowDatePicker(true)
+          onDatePress: () => setShowDatePicker(true),
         }}
-        />
+      />
       {/* Time Filter Tabs */}
-      <View style={{
-        backgroundColor: '#3B82F6',
-        paddingHorizontal: 16,
-        paddingTop: 8
-      }}>
-        <View style={{
-          flexDirection: 'row',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          borderRadius: 8,
-          padding: 4,
-          marginBottom: 12
+      <View
+        style={{
+          backgroundColor: '#3B82F6',
+          paddingHorizontal: 16,
+          paddingTop: 8,
         }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderRadius: 8,
+            padding: 4,
+            marginBottom: 12,
+          }}>
           {(['daily', 'weekly', 'monthly', 'yearly'] as TabType[]).map((tab) => {
             const isActive = activeTab === tab;
             const getTabLabel = () => {
               switch (tab) {
-                case 'daily': return 'Harian';
-                case 'weekly': return 'Mingguan';
-                case 'monthly': return 'Bulanan';
-                case 'yearly': return 'Tahunan';
-                default: return tab;
+                case 'daily':
+                  return 'Harian';
+                case 'weekly':
+                  return 'Mingguan';
+                case 'monthly':
+                  return 'Bulanan';
+                case 'yearly':
+                  return 'Tahunan';
+                default:
+                  return tab;
               }
             };
-            
+
             return (
               <TouchableOpacity
                 key={tab}
@@ -365,163 +323,183 @@ const TransactionsScreen = () => {
                   borderRadius: 6,
                   paddingVertical: 8,
                   paddingHorizontal: 12,
-                  alignItems: 'center'
-                }}
-              >
-                <Text style={{
-                  fontSize: 12,
-                  fontWeight: '600',
-                  color: isActive ? '#3B82F6' : 'white'
+                  alignItems: 'center',
                 }}>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontWeight: '600',
+                    color: isActive ? '#3B82F6' : 'white',
+                  }}>
                   {getTabLabel()}
                 </Text>
               </TouchableOpacity>
             );
           })}
         </View>
-        
+
         {/* Date Navigation */}
-
-
-
-
       </View>
 
       {/* Content */}
       <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
         {/* Summary Cards */}
-        <View style={{
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          backgroundColor: '#F9FAFB'
-        }}>
-          <View style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            gap: 8
+        <View
+          style={{
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            backgroundColor: '#F9FAFB',
           }}>
-            {/* Total Pemasukan */}
-            <View style={{
-              flex: 1,
-              backgroundColor: 'white',
-              borderRadius: 12,
-              padding: 12,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
-              shadowRadius: 2,
-              elevation: 2
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              gap: 8,
             }}>
-              <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 4
+            {/* Total Pemasukan */}
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: 'white',
+                borderRadius: 12,
+                padding: 12,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 2,
               }}>
-                <Ionicons name="trending-up" size={12} color="#10B981" style={{ marginRight: 4 }} />
-                <Text style={{
-                  fontSize: 10,
-                  color: '#6B7280',
-                  fontWeight: '500'
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 4,
                 }}>
+                <Ionicons name="trending-up" size={12} color="#10B981" style={{ marginRight: 4 }} />
+                <Text
+                  style={{
+                    fontSize: 10,
+                    color: '#6B7280',
+                    fontWeight: '500',
+                  }}>
                   Total Pemasukan
                 </Text>
               </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: 'bold',
-                color: '#10B981'
-              }}>
-                Rp {filteredTransactions
-                  .filter(t => t.type === 'income')
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: 'bold',
+                  color: '#10B981',
+                }}>
+                Rp{' '}
+                {filteredTransactions
+                  .filter((t) => t.type === 'income')
                   .reduce((sum, t) => sum + t.amount, 0)
                   .toLocaleString('id-ID')}
               </Text>
             </View>
 
             {/* Total Pengeluaran */}
-            <View style={{
-              flex: 1,
-              backgroundColor: 'white',
-              borderRadius: 12,
-              padding: 12,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
-              shadowRadius: 2,
-              elevation: 2
-            }}>
-              <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 4
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: 'white',
+                borderRadius: 12,
+                padding: 12,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 2,
               }}>
-                <Ionicons name="trending-down" size={12} color="#EF4444" style={{ marginRight: 4 }} />
-                <Text style={{
-                  fontSize: 10,
-                  color: '#6B7280',
-                  fontWeight: '500'
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 4,
                 }}>
+                <Ionicons
+                  name="trending-down"
+                  size={12}
+                  color="#EF4444"
+                  style={{ marginRight: 4 }}
+                />
+                <Text
+                  style={{
+                    fontSize: 10,
+                    color: '#6B7280',
+                    fontWeight: '500',
+                  }}>
                   Total Pengeluaran
                 </Text>
               </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: 'bold',
-                color: '#EF4444'
-              }}>
-                Rp {filteredTransactions
-                  .filter(t => t.type === 'expense')
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: 'bold',
+                  color: '#EF4444',
+                }}>
+                Rp{' '}
+                {filteredTransactions
+                  .filter((t) => t.type === 'expense')
                   .reduce((sum, t) => sum + t.amount, 0)
                   .toLocaleString('id-ID')}
               </Text>
             </View>
 
             {/* Saldo */}
-            <View style={{
-              flex: 1,
-              backgroundColor: 'white',
-              borderRadius: 12,
-              padding: 12,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
-              shadowRadius: 2,
-              elevation: 2
-            }}>
-              <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 4
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: 'white',
+                borderRadius: 12,
+                padding: 12,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 2,
               }}>
-                <Ionicons name="wallet" size={12} color="#6B7280" style={{ marginRight: 4 }} />
-                <Text style={{
-                  fontSize: 10,
-                  color: '#6B7280',
-                  fontWeight: '500'
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 4,
                 }}>
+                <Ionicons name="wallet" size={12} color="#6B7280" style={{ marginRight: 4 }} />
+                <Text
+                  style={{
+                    fontSize: 10,
+                    color: '#6B7280',
+                    fontWeight: '500',
+                  }}>
                   Saldo
                 </Text>
               </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: 'bold',
-                color: (() => {
-                  const balance = filteredTransactions
-                    .filter(t => t.type === 'income')
-                    .reduce((sum, t) => sum + t.amount, 0) -
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: 'bold',
+                  color: (() => {
+                    const balance =
+                      filteredTransactions
+                        .filter((t) => t.type === 'income')
+                        .reduce((sum, t) => sum + t.amount, 0) -
+                      filteredTransactions
+                        .filter((t) => t.type === 'expense')
+                        .reduce((sum, t) => sum + t.amount, 0);
+                    return balance >= 0 ? '#10B981' : '#EF4444';
+                  })(),
+                }}>
+                Rp{' '}
+                {(() => {
+                  const balance =
                     filteredTransactions
-                    .filter(t => t.type === 'expense')
-                    .reduce((sum, t) => sum + t.amount, 0);
-                  return balance >= 0 ? '#10B981' : '#EF4444';
-                })()
-              }}>
-                Rp {(() => {
-                  const balance = filteredTransactions
-                    .filter(t => t.type === 'income')
-                    .reduce((sum, t) => sum + t.amount, 0) -
+                      .filter((t) => t.type === 'income')
+                      .reduce((sum, t) => sum + t.amount, 0) -
                     filteredTransactions
-                    .filter(t => t.type === 'expense')
-                    .reduce((sum, t) => sum + t.amount, 0);
+                      .filter((t) => t.type === 'expense')
+                      .reduce((sum, t) => sum + t.amount, 0);
                   return Math.abs(balance).toLocaleString('id-ID');
                 })()}
               </Text>
@@ -541,28 +519,31 @@ const TransactionsScreen = () => {
               onTransactionSwipeDelete={(transaction) => handleDeleteTransaction(transaction.id!)}
             />
           ) : (
-            <View style={{
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingVertical: 64
-            }}>
-              <Ionicons name="receipt-outline" size={64} color="#D1D5DB" />
-              <Text style={{
-                fontSize: 18,
-                fontWeight: '600',
-                color: '#6B7280',
-                marginTop: 16,
-                marginBottom: 8
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingVertical: 64,
               }}>
+              <Ionicons name="receipt-outline" size={64} color="#D1D5DB" />
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: '600',
+                  color: '#6B7280',
+                  marginTop: 16,
+                  marginBottom: 8,
+                }}>
                 {selectedCategory ? 'Tidak ada transaksi ditemukan' : 'Belum ada transaksi'}
               </Text>
-              <Text style={{
-                fontSize: 14,
-                color: '#9CA3AF',
-                textAlign: 'center',
-                paddingHorizontal: 32
-              }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: '#9CA3AF',
+                  textAlign: 'center',
+                  paddingHorizontal: 32,
+                }}>
                 {selectedCategory
                   ? 'Coba ubah filter yang dipilih'
                   : 'Mulai tambahkan transaksi pertama Anda'}
@@ -577,43 +558,44 @@ const TransactionsScreen = () => {
         visible={showFilterModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowFilterModal(false)}
-      >
-        <TouchableOpacity 
-           style={{
-             flex: 1,
-             justifyContent: 'flex-end',
-             backgroundColor: 'rgba(0, 0, 0, 0.5)'
-           }}
-           activeOpacity={1}
-           onPress={() => {
-             setTempFilterType(filterType);
-             setTempSelectedCategory(selectedCategory);
-             setShowFilterModal(false);
-           }}
-         >
-           <TouchableOpacity activeOpacity={1} onPress={() => {}}
-             style={{
-               backgroundColor: 'white',
-               borderTopLeftRadius: 24,
-               borderTopRightRadius: 24,
-               paddingHorizontal: 16,
-               paddingTop: 16,
-               paddingBottom: 8,
-               maxHeight: '80%',
-             }}
-           >
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 24
+        onRequestClose={() => setShowFilterModal(false)}>
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            justifyContent: 'flex-end',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          }}
+          activeOpacity={1}
+          onPress={() => {
+            setTempFilterType(filterType);
+            setTempSelectedCategory(selectedCategory);
+            setShowFilterModal(false);
+          }}>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => {}}
+            style={{
+              backgroundColor: 'white',
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              paddingHorizontal: 16,
+              paddingTop: 16,
+              paddingBottom: 8,
+              maxHeight: '80%',
             }}>
-              <Text style={{
-                fontSize: 18,
-                fontWeight: 'bold',
-                color: '#111827'
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 24,
               }}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  color: '#111827',
+                }}>
                 Filter Transaksi
               </Text>
               <TouchableOpacity
@@ -625,29 +607,30 @@ const TransactionsScreen = () => {
                 style={{
                   padding: 8,
                   borderRadius: 20,
-                  backgroundColor: '#F3F4F6'
-                }}
-              >
+                  backgroundColor: '#F3F4F6',
+                }}>
                 <Ionicons name="close" size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
-            
+
             {/* Type Filter Section */}
             <View style={{ marginBottom: 24 }}>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#111827',
-                marginBottom: 12
-              }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '600',
+                  color: '#111827',
+                  marginBottom: 12,
+                }}>
                 Jenis Transaksi
               </Text>
-              <View style={{
-                flexDirection: 'row',
-                backgroundColor: '#F3F4F6',
-                borderRadius: 8,
-                padding: 4
-              }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  backgroundColor: '#F3F4F6',
+                  borderRadius: 8,
+                  padding: 4,
+                }}>
                 <TouchableOpacity
                   onPress={() => {
                     setTempFilterType('all');
@@ -661,20 +644,20 @@ const TransactionsScreen = () => {
                     paddingHorizontal: 12,
                     flexDirection: 'row',
                     alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <Ionicons 
-                    name="list" 
-                    size={14} 
-                    color={tempFilterType === 'all' ? 'white' : '#6B7280'} 
+                    justifyContent: 'center',
+                  }}>
+                  <Ionicons
+                    name="list"
+                    size={14}
+                    color={tempFilterType === 'all' ? 'white' : '#6B7280'}
                     style={{ marginRight: 4 }}
                   />
-                  <Text style={{
-                    fontSize: 12,
-                    fontWeight: '600',
-                    color: tempFilterType === 'all' ? 'white' : '#6B7280'
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: '600',
+                      color: tempFilterType === 'all' ? 'white' : '#6B7280',
+                    }}>
                     Semua
                   </Text>
                 </TouchableOpacity>
@@ -691,20 +674,20 @@ const TransactionsScreen = () => {
                     paddingHorizontal: 12,
                     flexDirection: 'row',
                     alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <Ionicons 
-                    name="trending-up" 
-                    size={14} 
-                    color={tempFilterType === 'income' ? 'white' : '#6B7280'} 
+                    justifyContent: 'center',
+                  }}>
+                  <Ionicons
+                    name="trending-up"
+                    size={14}
+                    color={tempFilterType === 'income' ? 'white' : '#6B7280'}
                     style={{ marginRight: 4 }}
                   />
-                  <Text style={{
-                    fontSize: 12,
-                    fontWeight: '600',
-                    color: tempFilterType === 'income' ? 'white' : '#6B7280'
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: '600',
+                      color: tempFilterType === 'income' ? 'white' : '#6B7280',
+                    }}>
                     Pemasukan
                   </Text>
                 </TouchableOpacity>
@@ -721,20 +704,20 @@ const TransactionsScreen = () => {
                     paddingHorizontal: 12,
                     flexDirection: 'row',
                     alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <Ionicons 
-                    name="trending-down" 
-                    size={14} 
-                    color={tempFilterType === 'expense' ? 'white' : '#6B7280'} 
+                    justifyContent: 'center',
+                  }}>
+                  <Ionicons
+                    name="trending-down"
+                    size={14}
+                    color={tempFilterType === 'expense' ? 'white' : '#6B7280'}
                     style={{ marginRight: 4 }}
                   />
-                  <Text style={{
-                    fontSize: 12,
-                    fontWeight: '600',
-                    color: tempFilterType === 'expense' ? 'white' : '#6B7280'
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: '600',
+                      color: tempFilterType === 'expense' ? 'white' : '#6B7280',
+                    }}>
                     Pengeluaran
                   </Text>
                 </TouchableOpacity>
@@ -743,12 +726,13 @@ const TransactionsScreen = () => {
 
             {/* Category Filter Section */}
             <View style={{ marginBottom: 0 }}>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#111827',
-                marginBottom: 12
-              }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '600',
+                  color: '#111827',
+                  marginBottom: 12,
+                }}>
                 Kategori
               </Text>
               <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
@@ -761,24 +745,25 @@ const TransactionsScreen = () => {
                       borderRadius: 10,
                       padding: 12,
                       borderWidth: !tempSelectedCategory ? 2 : 1,
-                      borderColor: !tempSelectedCategory ? '#3B82F6' : '#E5E7EB'
+                      borderColor: !tempSelectedCategory ? '#3B82F6' : '#E5E7EB',
                     }}
-                    onPress={() => setTempSelectedCategory(null)}
-                  >
-                    <View style={{
-                      backgroundColor: '#6B7280',
-                      borderRadius: 6,
-                      padding: 6,
-                      marginRight: 10
-                    }}>
+                    onPress={() => setTempSelectedCategory(null)}>
+                    <View
+                      style={{
+                        backgroundColor: '#6B7280',
+                        borderRadius: 6,
+                        padding: 6,
+                        marginRight: 10,
+                      }}>
                       <Ionicons name="apps" size={16} color="white" />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{
-                        fontSize: 14,
-                        fontWeight: '600',
-                        color: '#111827'
-                      }}>
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: '600',
+                          color: '#111827',
+                        }}>
                         Semua Kategori
                       </Text>
                     </View>
@@ -786,61 +771,61 @@ const TransactionsScreen = () => {
                       <Ionicons name="checkmark-circle" size={18} color="#3B82F6" />
                     )}
                   </TouchableOpacity>
-                  {categories.filter(category => category.type === tempFilterType)
+                  {categories
+                    .filter((category) => category.type === tempFilterType)
                     .map((category) => (
-                    <TouchableOpacity
-                      key={category.id}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        backgroundColor: tempSelectedCategory === category.id ? '#F0F9FF' : '#F9FAFB',
-                        borderRadius: 10,
-                        padding: 12,
-                        borderWidth: tempSelectedCategory === category.id ? 2 : 1,
-                        borderColor: tempSelectedCategory === category.id ? '#3B82F6' : '#E5E7EB'
-                      }}
-                      onPress={() => setTempSelectedCategory(category.id!)}
-                    >
-                      <View style={{
-                         marginRight: 10
-                       }}>
-                         <Ionicons 
-                           name={category.icon as any} 
-                           size={20} 
-                           color={category.color} 
-                         />
-                       </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{
-                          fontSize: 14,
-                          fontWeight: '600',
-                          color: '#111827'
-                        }}>
-                          {category.name}
-                        </Text>
-                      </View>
-                      {tempSelectedCategory === category.id && (
-                        <Ionicons name="checkmark-circle" size={18} color="#3B82F6" />
-                      )}
-                    </TouchableOpacity>
-                  ))}
+                      <TouchableOpacity
+                        key={category.id}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          backgroundColor:
+                            tempSelectedCategory === category.id ? '#F0F9FF' : '#F9FAFB',
+                          borderRadius: 10,
+                          padding: 12,
+                          borderWidth: tempSelectedCategory === category.id ? 2 : 1,
+                          borderColor: tempSelectedCategory === category.id ? '#3B82F6' : '#E5E7EB',
+                        }}
+                        onPress={() => setTempSelectedCategory(category.id!)}>
+                        <View
+                          style={{
+                            marginRight: 10,
+                          }}>
+                          <Ionicons name={category.icon as any} size={20} color={category.color} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              fontWeight: '600',
+                              color: '#111827',
+                            }}>
+                            {category.name}
+                          </Text>
+                        </View>
+                        {tempSelectedCategory === category.id && (
+                          <Ionicons name="checkmark-circle" size={18} color="#3B82F6" />
+                        )}
+                      </TouchableOpacity>
+                    ))}
                 </View>
               </ScrollView>
             </View>
 
             {/* Action Buttons */}
-            <View style={{
-              flexDirection: 'row',
-              gap: 12,
-              marginTop: 16,
-            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 12,
+                marginTop: 16,
+              }}>
               <TouchableOpacity
                 style={{
                   flex: 1,
                   backgroundColor: '#FEE2E2',
                   borderRadius: 10,
                   padding: 12,
-                  alignItems: 'center'
+                  alignItems: 'center',
                 }}
                 onPress={() => {
                   setTempFilterType('all');
@@ -848,36 +833,36 @@ const TransactionsScreen = () => {
                   setFilterType('all');
                   setSelectedCategory(null);
                   setShowFilterModal(false);
-                }}
-              >
-                <Text style={{
-                  fontSize: 14,
-                  fontWeight: '600',
-                  color: '#DC2626'
                 }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: '#DC2626',
+                  }}>
                   Reset
                 </Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={{
                   flex: 1,
                   backgroundColor: '#3B82F6',
                   borderRadius: 10,
                   padding: 12,
-                  alignItems: 'center'
+                  alignItems: 'center',
                 }}
                 onPress={() => {
                   setFilterType(tempFilterType);
                   setSelectedCategory(tempSelectedCategory);
                   setShowFilterModal(false);
-                }}
-              >
-                <Text style={{
-                  fontSize: 14,
-                  fontWeight: '600',
-                  color: 'white'
                 }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: 'white',
+                  }}>
                   Terapkan
                 </Text>
               </TouchableOpacity>
@@ -891,167 +876,170 @@ const TransactionsScreen = () => {
         visible={showExportModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowExportModal(false)}
-      >
+        onRequestClose={() => setShowExportModal(false)}>
         <TouchableOpacity
           style={{
             flex: 1,
             justifyContent: 'flex-end',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
           }}
           activeOpacity={1}
-          onPress={() => setShowExportModal(false)}
-        >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
-          >
-          <View style={{
-            backgroundColor: 'white',
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            paddingHorizontal: 16,
-            paddingTop: 16,
-            paddingBottom: 32
-          }}>
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 24
-            }}>
-              <Text style={{
-                fontSize: 18,
-                fontWeight: 'bold',
-                color: '#111827'
+          onPress={() => setShowExportModal(false)}>
+          <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+            <View
+              style={{
+                backgroundColor: 'white',
+                borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+                paddingHorizontal: 16,
+                paddingTop: 16,
+                paddingBottom: 32,
               }}>
-                Export Transaksi
-              </Text>
-              <TouchableOpacity
-                onPress={() => setShowExportModal(false)}
+              <View
                 style={{
-                  padding: 8,
-                  borderRadius: 20,
-                  backgroundColor: '#F3F4F6'
-                }}
-              >
-                <Ionicons name="close" size={20} color="#6B7280" />
-              </TouchableOpacity>
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 24,
+                }}>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    color: '#111827',
+                  }}>
+                  Export Transaksi
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setShowExportModal(false)}
+                  style={{
+                    padding: 8,
+                    borderRadius: 20,
+                    backgroundColor: '#F3F4F6',
+                  }}>
+                  <Ionicons name="close" size={20} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ gap: 12 }}>
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: 12,
+                    padding: 16,
+                  }}
+                  onPress={exportToXLS}>
+                  <View
+                    style={{
+                      backgroundColor: '#10B981',
+                      borderRadius: 8,
+                      padding: 8,
+                      marginRight: 12,
+                    }}>
+                    <Ionicons name="document-outline" size={20} color="white" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '600',
+                        color: '#111827',
+                        marginBottom: 2,
+                      }}>
+                      Export ke Excel (XLS)
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: '#6B7280',
+                      }}>
+                      Format spreadsheet untuk analisis data
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: 12,
+                    padding: 16,
+                  }}
+                  onPress={exportToPDF}>
+                  <View
+                    style={{
+                      backgroundColor: '#EF4444',
+                      borderRadius: 8,
+                      padding: 8,
+                      marginRight: 12,
+                    }}>
+                    <Ionicons name="document-text-outline" size={20} color="white" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '600',
+                        color: '#111827',
+                        marginBottom: 2,
+                      }}>
+                      Export ke PDF
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: '#6B7280',
+                      }}>
+                      Format dokumen untuk laporan
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: 12,
+                    padding: 16,
+                  }}
+                  onPress={exportToCSV}>
+                  <View
+                    style={{
+                      backgroundColor: '#3B82F6',
+                      borderRadius: 8,
+                      padding: 8,
+                      marginRight: 12,
+                    }}>
+                    <Ionicons name="grid-outline" size={20} color="white" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '600',
+                        color: '#111827',
+                        marginBottom: 2,
+                      }}>
+                      Export ke CSV
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: '#6B7280',
+                      }}>
+                      Format data terpisah koma
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
             </View>
-            
-            <View style={{ gap: 12 }}>
-              <TouchableOpacity
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  backgroundColor: '#F3F4F6',
-                  borderRadius: 12,
-                  padding: 16
-                }}
-                onPress={exportToXLS}
-              >
-                <View style={{
-                  backgroundColor: '#10B981',
-                  borderRadius: 8,
-                  padding: 8,
-                  marginRight: 12
-                }}>
-                  <Ionicons name="document-outline" size={20} color="white" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{
-                    fontSize: 16,
-                    fontWeight: '600',
-                    color: '#111827',
-                    marginBottom: 2
-                  }}>
-                    Export ke Excel (XLS)
-                  </Text>
-                  <Text style={{
-                    fontSize: 14,
-                    color: '#6B7280'
-                  }}>
-                    Format spreadsheet untuk analisis data
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  backgroundColor: '#F3F4F6',
-                  borderRadius: 12,
-                  padding: 16
-                }}
-                onPress={exportToPDF}
-              >
-                <View style={{
-                  backgroundColor: '#EF4444',
-                  borderRadius: 8,
-                  padding: 8,
-                  marginRight: 12
-                }}>
-                  <Ionicons name="document-text-outline" size={20} color="white" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{
-                    fontSize: 16,
-                    fontWeight: '600',
-                    color: '#111827',
-                    marginBottom: 2
-                  }}>
-                    Export ke PDF
-                  </Text>
-                  <Text style={{
-                    fontSize: 14,
-                    color: '#6B7280'
-                  }}>
-                    Format dokumen untuk laporan
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  backgroundColor: '#F3F4F6',
-                  borderRadius: 12,
-                  padding: 16
-                }}
-                onPress={exportToCSV}
-              >
-                <View style={{
-                  backgroundColor: '#3B82F6',
-                  borderRadius: 8,
-                  padding: 8,
-                  marginRight: 12
-                }}>
-                  <Ionicons name="grid-outline" size={20} color="white" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{
-                    fontSize: 16,
-                    fontWeight: '600',
-                    color: '#111827',
-                    marginBottom: 2
-                  }}>
-                    Export ke CSV
-                  </Text>
-                  <Text style={{
-                    fontSize: 14,
-                    color: '#6B7280'
-                  }}>
-                    Format data terpisah koma
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-          </View>
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
@@ -1061,8 +1049,7 @@ const TransactionsScreen = () => {
           visible={showDatePicker}
           transparent={true}
           animationType="slide"
-          onRequestClose={() => setShowDatePicker(false)}
-        >
+          onRequestClose={() => setShowDatePicker(false)}>
           <DateRangePicker
             startDate={startDate}
             endDate={endDate}
@@ -1073,7 +1060,7 @@ const TransactionsScreen = () => {
           />
         </Modal>
       )}
-    
+
       {/* Floating Action Button */}
       <TouchableOpacity
         style={{
@@ -1094,8 +1081,7 @@ const TransactionsScreen = () => {
           zIndex: 1000,
         }}
         onPress={handleAddTransaction}
-        activeOpacity={0.8}
-      >
+        activeOpacity={0.8}>
         <Ionicons name="add" size={24} color="white" />
       </TouchableOpacity>
 
@@ -1108,7 +1094,5 @@ const TransactionsScreen = () => {
     </SafeAreaView>
   );
 };
-
-
 
 export default TransactionsScreen;

@@ -14,7 +14,7 @@ const HeaderWithSingleButton = () => (
       icon: 'add',
       onPress: () => Alert.alert('Add pressed'),
       color: 'white',
-      size: 24
+      size: 24,
     }}
   />
 );
@@ -28,18 +28,18 @@ const HeaderWithMultipleButtons = () => (
       {
         icon: 'filter',
         onPress: () => Alert.alert('Filter pressed'),
-        size: 20
+        size: 20,
       },
       {
         icon: 'share',
         onPress: () => Alert.alert('Share pressed'),
-        size: 20
+        size: 20,
       },
       {
         icon: 'download',
         onPress: () => Alert.alert('Download pressed'),
-        size: 20
-      }
+        size: 20,
+      },
     ]}
   />
 );
@@ -54,7 +54,7 @@ const HeaderWithConditionalButton = ({ isLoading }: { isLoading: boolean }) => (
       onPress: () => Alert.alert('Save pressed'),
       disabled: isLoading,
       backgroundColor: isLoading ? 'rgba(255,255,255,0.1)' : 'rgba(34,197,94,0.3)',
-      color: isLoading ? 'rgba(255,255,255,0.5)' : 'white'
+      color: isLoading ? 'rgba(255,255,255,0.5)' : 'white',
     }}
   />
 );
@@ -80,15 +80,15 @@ const HeaderWithCustomStyling = () => (
         onPress: () => Alert.alert('Edit pressed'),
         backgroundColor: 'rgba(255,255,255,0.3)',
         color: '#FBBF24',
-        size: 22
+        size: 22,
       },
       {
         icon: 'trash',
         onPress: () => Alert.alert('Delete pressed'),
         backgroundColor: 'rgba(239,68,68,0.3)',
         color: '#FCA5A5',
-        size: 20
-      }
+        size: 20,
+      },
     ]}
   />
 );
@@ -98,5 +98,5 @@ export {
   HeaderWithMultipleButtons,
   HeaderWithConditionalButton,
   HeaderWithoutButton,
-  HeaderWithCustomStyling
+  HeaderWithCustomStyling,
 };

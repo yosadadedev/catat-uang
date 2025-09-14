@@ -19,33 +19,36 @@ export const Card: React.FC<CardProps> = ({
   margin = 16,
   borderRadius = 12,
   backgroundColor,
-  shadow = true
+  shadow = true,
 }) => {
   const { colors } = useTheme();
   const bgColor = backgroundColor || colors.surface;
 
-  const shadowStyle = shadow ? {
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  } : {};
+  const shadowStyle = shadow
+    ? {
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+      }
+    : {};
 
   return (
-    <View style={[
-      {
-        backgroundColor: bgColor,
-        borderRadius,
-        padding,
-        marginBottom: margin,
-        ...shadowStyle
-      },
-      style
-    ]}>
+    <View
+      style={[
+        {
+          backgroundColor: bgColor,
+          borderRadius,
+          padding,
+          marginBottom: margin,
+          ...shadowStyle,
+        },
+        style,
+      ]}>
       {children}
     </View>
   );
