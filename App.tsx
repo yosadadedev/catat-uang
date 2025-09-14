@@ -20,7 +20,7 @@ export default function App() {
     return (
       <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-gray-600 mt-4 text-lg">Memuat aplikasi...</Text>
+        <Text className="mt-4 text-lg text-gray-600">Memuat aplikasi...</Text>
       </View>
     );
   }
@@ -28,8 +28,8 @@ export default function App() {
   if (error) {
     return (
       <View className="flex-1 items-center justify-center bg-white px-8">
-        <Text className="text-red-600 text-lg font-semibold mb-2">Terjadi Kesalahan</Text>
-        <Text className="text-gray-600 text-center">{error}</Text>
+        <Text className="mb-2 text-lg font-semibold text-red-600">Terjadi Kesalahan</Text>
+        <Text className="text-center text-gray-600">{error}</Text>
       </View>
     );
   }

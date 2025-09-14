@@ -5,8 +5,6 @@ import { Transaction, Category } from '../database/database';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 
-
-
 interface ChartData {
   label: string;
   value: number;
@@ -21,15 +19,11 @@ interface PieChartProps {
 }
 
 // Simple SVG-like Pie Chart using View components
-export const PieChart: React.FC<PieChartProps> = ({
-  data,
-  size = 200,
-  showLegend = true,
-}) => {
+export const PieChart: React.FC<PieChartProps> = ({ data, size = 200, showLegend = true }) => {
   const { colors } = useTheme();
   const { t } = useLocalization();
   const total = data.reduce((sum, item) => sum + item.value, 0);
-  
+
   if (total === 0) {
     return (
       <View style={{ alignItems: 'center', justifyContent: 'center', height: size }}>
@@ -55,13 +49,12 @@ export const PieChart: React.FC<PieChartProps> = ({
       {/* Pie Chart */}
       <View className="relative" style={{ width: size, height: size }}>
         <View
-          className="rounded-full overflow-hidden"
+          className="overflow-hidden rounded-full"
           style={{
             width: size,
             height: size,
             backgroundColor: '#F3F4F6',
-          }}
-        >
+          }}>
           {/* Simple representation using colored segments */}
           {segments.map((segment, index) => {
             const isLargest = segment.percentage > 25;
@@ -82,7 +75,7 @@ export const PieChart: React.FC<PieChartProps> = ({
             );
           })}
         </View>
-        
+
         {/* Center circle */}
         <View
           style={{
@@ -95,8 +88,7 @@ export const PieChart: React.FC<PieChartProps> = ({
             height: size * 0.6,
             top: size * 0.2,
             left: size * 0.2,
-          }}
-        >
+          }}>
           <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}>
             {data.length}
           </Text>
@@ -108,7 +100,14 @@ export const PieChart: React.FC<PieChartProps> = ({
       {showLegend && (
         <View style={{ marginTop: 24, width: '100%' }}>
           {data.map((item, index) => (
-            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8 }}>
+            <View
+              key={index}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingVertical: 8,
+              }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                 <View
                   style={{
@@ -116,7 +115,7 @@ export const PieChart: React.FC<PieChartProps> = ({
                     height: 16,
                     borderRadius: 8,
                     marginRight: 12,
-                    backgroundColor: item.color
+                    backgroundColor: item.color,
                   }}
                 />
                 <Text style={{ color: colors.text, fontWeight: '500', flex: 1 }} numberOfLines={1}>
@@ -150,15 +149,11 @@ interface BarChartProps {
   showValues?: boolean;
 }
 
-export const BarChart: React.FC<BarChartProps> = ({
-  data,
-  height = 200,
-  showValues = true,
-}) => {
+export const BarChart: React.FC<BarChartProps> = ({ data, height = 200, showValues = true }) => {
   const { colors } = useTheme();
   const { t } = useLocalization();
-  const maxValue = Math.max(...data.map(item => item.value));
-  
+  const maxValue = Math.max(...data.map((item) => item.value));
+
   if (maxValue === 0) {
     return (
       <View style={{ alignItems: 'center', justifyContent: 'center', height }}>
@@ -170,21 +165,33 @@ export const BarChart: React.FC<BarChartProps> = ({
 
   return (
     <View style={{ width: '100%' }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          height,
+        }}>
         {data.map((item, index) => {
           const barHeight = (item.value / maxValue) * (height - 40); // 40px for labels
           return (
             <View key={index} style={{ alignItems: 'center', flex: 1, marginHorizontal: 4 }}>
               {/* Value label */}
               {showValues && item.value > 0 && (
-                <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 4, fontWeight: '500' }}>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: colors.textSecondary,
+                    marginBottom: 4,
+                    fontWeight: '500',
+                  }}>
                   {new Intl.NumberFormat('id-ID', {
                     notation: 'compact',
                     compactDisplay: 'short',
                   }).format(item.value)}
                 </Text>
               )}
-              
+
               {/* Bar */}
               <View
                 style={{
@@ -196,7 +203,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                   minHeight: item.value > 0 ? 8 : 4,
                 }}
               />
-              
+
               {/* Category label */}
               <Text
                 style={{
@@ -204,10 +211,9 @@ export const BarChart: React.FC<BarChartProps> = ({
                   color: colors.text,
                   marginTop: 8,
                   textAlign: 'center',
-                  fontWeight: '500'
+                  fontWeight: '500',
                 }}
-                numberOfLines={2}
-              >
+                numberOfLines={2}>
                 {item.label}
               </Text>
             </View>
@@ -224,13 +230,11 @@ export const prepareChartData = (
   categories: Category[],
   type?: 'income' | 'expense'
 ): ChartData[] => {
-  const filteredTransactions = type
-    ? transactions.filter(t => t.type === type)
-    : transactions;
+  const filteredTransactions = type ? transactions.filter((t) => t.type === type) : transactions;
 
   const categoryTotals = new Map<number, number>();
-  
-  filteredTransactions.forEach(transaction => {
+
+  filteredTransactions.forEach((transaction) => {
     const current = categoryTotals.get(transaction.category_id) || 0;
     categoryTotals.set(transaction.category_id, current + Math.abs(transaction.amount));
   });
@@ -239,7 +243,7 @@ export const prepareChartData = (
   const total = Array.from(categoryTotals.values()).reduce((sum, value) => sum + value, 0);
 
   categoryTotals.forEach((value, categoryId) => {
-    const category = categories.find(c => c.id === categoryId);
+    const category = categories.find((c) => c.id === categoryId);
     if (category && value > 0) {
       chartData.push({
         label: category.name,
@@ -259,17 +263,14 @@ interface MonthlyTrendProps {
   months?: number;
 }
 
-export const MonthlyTrend: React.FC<MonthlyTrendProps> = ({
-  transactions,
-  months = 6,
-}) => {
+export const MonthlyTrend: React.FC<MonthlyTrendProps> = ({ transactions, months = 6 }) => {
   const monthlyData = React.useMemo(() => {
     const data: ChartData[] = [];
     const now = new Date();
-    
+
     for (let i = months - 1; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthTransactions = transactions.filter(t => {
+      const monthTransactions = transactions.filter((t) => {
         const transactionDate = new Date(t.date);
         return (
           transactionDate.getMonth() === date.getMonth() &&
@@ -277,9 +278,9 @@ export const MonthlyTrend: React.FC<MonthlyTrendProps> = ({
           t.type === 'expense'
         );
       });
-      
+
       const total = monthTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
-      
+
       data.push({
         label: date.toLocaleDateString('id-ID', { month: 'short' }),
         value: total,
@@ -287,13 +288,13 @@ export const MonthlyTrend: React.FC<MonthlyTrendProps> = ({
         percentage: 0, // Will be calculated if needed
       });
     }
-    
+
     return data;
   }, [transactions, months]);
 
   return (
-    <View className="bg-white rounded-xl p-4">
-      <Text className="text-lg font-bold text-gray-900 mb-4">
+    <View className="rounded-xl bg-white p-4">
+      <Text className="mb-4 text-lg font-bold text-gray-900">
         Tren Pengeluaran {months} Bulan Terakhir
       </Text>
       <BarChart data={monthlyData} height={150} />

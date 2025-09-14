@@ -15,22 +15,22 @@ interface FinanceState {
 
   // Database instance
   db: DatabaseManager | null;
-  
+
   // Actions
   initializeApp: () => Promise<void>;
-  
+
   // Transaction actions
   loadTransactions: () => Promise<void>;
   addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
   updateTransaction: (id: number, transaction: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: number) => Promise<void>;
-  
+
   // Category actions
   loadCategories: () => Promise<void>;
   addCategory: (category: Omit<Category, 'id'>) => Promise<void>;
   updateCategory: (id: number, category: Partial<Category>) => Promise<void>;
   deleteCategory: (id: number) => Promise<void>;
-  
+
   // Utility actions
   calculateBalance: () => void;
   getTransactionsByDateRange: (startDate: string, endDate: string) => Transaction[];
@@ -56,17 +56,17 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   // Initialize app
   initializeApp: async () => {
     const { db, loading } = get();
-    
+
     // Prevent multiple initialization
     if (db || loading) return;
-    
+
     set({ loading: true, error: null });
     try {
       // Initialize database
       const newDb = new DatabaseManager();
       await newDb.init();
       set({ db: newDb });
-      
+
       // Load data
       await get().loadCategories();
       await get().loadTransactions();
@@ -83,7 +83,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   loadTransactions: async () => {
     const { db } = get();
     if (!db) return;
-    
+
     try {
       const transactions = await db.getTransactions();
       set({ transactions });
@@ -96,7 +96,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   addTransaction: async (transaction) => {
     const { db } = get();
     if (!db) return;
-    
+
     try {
       const id = await db.addTransaction(transaction);
       const newTransaction: Transaction = {
@@ -116,13 +116,11 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   updateTransaction: async (id, updates) => {
     const { db } = get();
     if (!db) return;
-    
+
     try {
       await db.updateTransaction(id, updates);
       set((state) => ({
-        transactions: state.transactions.map((t) =>
-          t.id === id ? { ...t, ...updates } : t
-        ),
+        transactions: state.transactions.map((t) => (t.id === id ? { ...t, ...updates } : t)),
       }));
       get().calculateBalance();
     } catch (error) {
@@ -134,7 +132,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   deleteTransaction: async (id) => {
     const { db } = get();
     if (!db) return;
-    
+
     try {
       await db.deleteTransaction(id);
       set((state) => ({
@@ -151,7 +149,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   loadCategories: async () => {
     const { db } = get();
     if (!db) return;
-    
+
     try {
       const categories = await db.getCategories();
       set({ categories });
@@ -164,7 +162,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   addCategory: async (category) => {
     const { db } = get();
     if (!db) return;
-    
+
     try {
       const id = await db.addCategory(category);
       const newCategory: Category = {
@@ -183,13 +181,11 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   updateCategory: async (id, updates) => {
     const { db } = get();
     if (!db) return;
-    
+
     try {
       await db.updateCategory(id, updates);
       set((state) => ({
-        categories: state.categories.map((c) =>
-          c.id === id ? { ...c, ...updates } : c
-        ),
+        categories: state.categories.map((c) => (c.id === id ? { ...c, ...updates } : c)),
       }));
     } catch (error) {
       console.error('Failed to update category:', error);
@@ -200,7 +196,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   deleteCategory: async (id) => {
     const { db } = get();
     if (!db) return;
-    
+
     try {
       await db.deleteCategory(id);
       set((state) => ({
@@ -221,7 +217,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     const expense = transactions
       .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    
+
     set({
       balance: {
         total: income - expense,
@@ -264,10 +260,10 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   resetAllData: async () => {
     const { db } = get();
     if (!db) return;
-    
+
     try {
       set({ loading: true, error: null });
-      
+
       // Delete all transactions
       const transactions = await db.getTransactions();
       for (const transaction of transactions) {
@@ -275,7 +271,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
           await db.deleteTransaction(transaction.id);
         }
       }
-      
+
       // Delete all categories
       const categories = await db.getCategories();
       for (const category of categories) {
@@ -283,15 +279,14 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
           await db.deleteCategory(category.id);
         }
       }
-      
+
       // Reinitialize with default categories
       await db.init();
-      
+
       // Reload data
       await get().loadCategories();
       await get().loadTransactions();
       get().calculateBalance();
-      
     } catch (error) {
       console.error('Failed to reset data:', error);
       set({ error: error instanceof Error ? error.message : 'Failed to reset data' });

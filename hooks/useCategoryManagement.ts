@@ -11,7 +11,12 @@ interface UseCategoryManagementProps {
   updateCategory?: (id: number, category: any) => void;
 }
 
-export const useCategoryManagement = ({ categories, addCategory, deleteCategory, updateCategory }: UseCategoryManagementProps) => {
+export const useCategoryManagement = ({
+  categories,
+  addCategory,
+  deleteCategory,
+  updateCategory,
+}: UseCategoryManagementProps) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -25,7 +30,7 @@ export const useCategoryManagement = ({ categories, addCategory, deleteCategory,
     return iconColors[index % iconColors.length];
   };
 
-  const filteredCategories = categories.filter(category => category.type === filterType);
+  const filteredCategories = categories.filter((category) => category.type === filterType);
 
   const handleAddCategory = () => {
     if (newCategoryName.trim()) {
@@ -33,7 +38,7 @@ export const useCategoryManagement = ({ categories, addCategory, deleteCategory,
         name: newCategoryName.trim(),
         icon: selectedIcon,
         color: selectedIconColor,
-        type: selectedType
+        type: selectedType,
       });
       setNewCategoryName('');
       setSelectedIcon('folder-outline');
@@ -46,18 +51,14 @@ export const useCategoryManagement = ({ categories, addCategory, deleteCategory,
   };
 
   const handleDeleteCategory = (categoryId: number, categoryName: string) => {
-    Alert.alert(
-      'Hapus Kategori',
-      `Apakah Anda yakin ingin menghapus kategori "${categoryName}"?`,
-      [
-        { text: 'Batal', style: 'cancel' },
-        {
-          text: 'Hapus',
-          style: 'destructive',
-          onPress: () => deleteCategory(categoryId),
-        },
-      ]
-    );
+    Alert.alert('Hapus Kategori', `Apakah Anda yakin ingin menghapus kategori "${categoryName}"?`, [
+      { text: 'Batal', style: 'cancel' },
+      {
+        text: 'Hapus',
+        style: 'destructive',
+        onPress: () => deleteCategory(categoryId),
+      },
+    ]);
   };
 
   const handleEditCategory = (category: any) => {
@@ -76,7 +77,7 @@ export const useCategoryManagement = ({ categories, addCategory, deleteCategory,
         name: newCategoryName.trim(),
         icon: selectedIcon,
         color: selectedIconColor,
-        type: selectedType
+        type: selectedType,
       });
       resetForm();
       setShowEditModal(false);
@@ -118,6 +119,6 @@ export const useCategoryManagement = ({ categories, addCategory, deleteCategory,
     handleEditCategory,
     handleUpdateCategory,
     handleDeleteCategory,
-    resetForm
+    resetForm,
   };
 };

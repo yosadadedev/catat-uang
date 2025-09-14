@@ -29,7 +29,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled = false,
   style,
   textStyle,
-  fullWidth = false
+  fullWidth = false,
 }) => {
   const { colors } = useTheme();
 
@@ -139,27 +139,21 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      style={[getButtonStyle(), style]}
-    >
+    <TouchableOpacity onPress={onPress} disabled={disabled} style={[getButtonStyle(), style]}>
       {icon && iconPosition === 'left' && (
-        <Ionicons 
-          name={icon} 
-          size={getIconSize()} 
-          color={getIconColor()} 
+        <Ionicons
+          name={icon}
+          size={getIconSize()}
+          color={getIconColor()}
           style={{ marginRight: 8 }}
         />
       )}
-      <Text style={[getTextStyle(), textStyle]}>
-        {title}
-      </Text>
+      <Text style={[getTextStyle(), textStyle]}>{title}</Text>
       {icon && iconPosition === 'right' && (
-        <Ionicons 
-          name={icon} 
-          size={getIconSize()} 
-          color={getIconColor()} 
+        <Ionicons
+          name={icon}
+          size={getIconSize()}
+          color={getIconColor()}
           style={{ marginLeft: 8 }}
         />
       )}

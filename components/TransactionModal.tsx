@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFinanceStore } from '../store/useStore';
 import { Category, Transaction } from '../database/database';
+import AddCategoryModal from './AddCategoryModal';
 
 interface TransactionModalProps {
   visible: boolean;
@@ -31,8 +32,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   initialCategoryId,
 }) => {
   const categories = useFinanceStore((state) => state.categories);
-  const { addTransaction, updateTransaction } = useFinanceStore();
-  
+  const { addTransaction, updateTransaction, deleteTransaction, addCategory } = useFinanceStore();
+
   const isEditMode = !!transaction;
 
   const [amount, setAmount] = useState('');
@@ -43,6 +44,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
   const [previousCategories, setPreviousCategories] = useState<{
     income?: Category;
     expense?: Category;
@@ -56,13 +58,13 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         setDescription(transaction.description || '');
         setSelectedDate(new Date(transaction.date));
         setTransactionType(transaction.type);
-        
-        const category = categories.find(c => c.id === transaction.category_id);
+
+        const category = categories.find((c) => c.id === transaction.category_id);
         if (category) {
           setSelectedCategory(category);
           // Initialize previousCategories with current category
           setPreviousCategories({
-            [category.type]: category
+            [category.type]: category,
           });
         }
       } else {
@@ -73,16 +75,16 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         setSelectedDate(new Date());
         setTransactionType(initialType);
         setPreviousCategories({});
-        
+
         // Set initial category if provided
         if (initialCategoryId) {
-          const category = categories.find(c => c.id === initialCategoryId);
+          const category = categories.find((c) => c.id === initialCategoryId);
           if (category) {
             setSelectedCategory(category);
             setTransactionType(category.type);
             // Initialize previousCategories with initial category
             setPreviousCategories({
-              [category.type]: category
+              [category.type]: category,
             });
           }
         }
@@ -121,9 +123,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     setIsLoading(true);
 
     try {
-      const transactionAmount = transactionType === 'expense' 
-        ? -Math.abs(parseCurrency(amount))
-        : Math.abs(parseCurrency(amount));
+      const transactionAmount =
+        transactionType === 'expense'
+          ? -Math.abs(parseCurrency(amount))
+          : Math.abs(parseCurrency(amount));
 
       const transactionData = {
         amount: transactionAmount,
@@ -150,35 +153,69 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         ]
       );
     } catch {
-      Alert.alert('Error', `Gagal ${isEditMode ? 'memperbarui' : 'menyimpan'} transaksi. Silakan coba lagi.`);
+      Alert.alert(
+        'Error',
+        `Gagal ${isEditMode ? 'memperbarui' : 'menyimpan'} transaksi. Silakan coba lagi.`
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredCategories = categories.filter(c => c.type === transactionType);
+  const handleDeleteTransaction = () => {
+    if (transaction && transaction.id) {
+      Alert.alert('Hapus Transaksi', 'Apakah Anda yakin ingin menghapus transaksi ini?', [
+        { text: 'Batal', style: 'cancel' },
+        {
+          text: 'Hapus',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteTransaction(transaction.id!);
+              onClose();
+            } catch (error) {
+              Alert.alert('Error', 'Gagal menghapus transaksi');
+            }
+          },
+        },
+      ]);
+    }
+  };
+
+  const handleAddCategory = async (categoryData: {
+    name: string;
+    icon: string;
+    color: string;
+    type: 'income' | 'expense';
+  }) => {
+    try {
+      await addCategory(categoryData);
+
+      // Find the newly added category
+      const updatedCategories = categories.filter((c) => c.type === transactionType);
+      const addedCategory = updatedCategories.find((c) => c.name === categoryData.name);
+
+      if (addedCategory) {
+        setSelectedCategory(addedCategory);
+      }
+
+      setShowCategoryPicker(false);
+    } catch (error) {
+      Alert.alert('Error', 'Gagal menambah kategori');
+    }
+  };
+
+  const filteredCategories = categories.filter((c) => c.type === transactionType);
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <TouchableOpacity 
-        style={styles.modalContainer}
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <TouchableOpacity 
-          activeOpacity={1} 
-          onPress={() => {}}
-          style={styles.modalContent}
-        >
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
+      <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={onClose}>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={(e) => e.stopPropagation()}
+          style={styles.modalContent}>
           <View style={styles.header}>
-            <Text style={styles.title}>
-              {isEditMode ? 'Edit Transaksi' : 'Tambah Transaksi'}
-            </Text>
+            <Text style={styles.title}>{isEditMode ? 'Edit Transaksi' : 'Tambah Transaksi'}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color="#6B7280" />
             </TouchableOpacity>
@@ -193,62 +230,62 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                   style={[
                     styles.typeButton,
                     transactionType === 'expense' && styles.typeButtonActive,
-                    { backgroundColor: transactionType === 'expense' ? '#EF4444' : '#F3F4F6' }
+                    { backgroundColor: transactionType === 'expense' ? '#EF4444' : '#F3F4F6' },
                   ]}
                   onPress={() => {
                     // Save current category for income type
                     if (transactionType === 'income' && selectedCategory) {
-                      setPreviousCategories(prev => ({
+                      setPreviousCategories((prev) => ({
                         ...prev,
-                        income: selectedCategory
+                        income: selectedCategory,
                       }));
                     }
                     setTransactionType('expense');
                     // Restore previous expense category if exists
                     setSelectedCategory(previousCategories.expense);
-                  }}
-                >
-                  <Ionicons 
-                    name="trending-down" 
-                    size={20} 
-                    color={transactionType === 'expense' ? 'white' : '#6B7280'} 
+                  }}>
+                  <Ionicons
+                    name="trending-down"
+                    size={20}
+                    color={transactionType === 'expense' ? 'white' : '#6B7280'}
                   />
-                  <Text style={[
-                    styles.typeButtonText,
-                    { color: transactionType === 'expense' ? 'white' : '#6B7280' }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.typeButtonText,
+                      { color: transactionType === 'expense' ? 'white' : '#6B7280' },
+                    ]}>
                     Pengeluaran
                   </Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   style={[
                     styles.typeButton,
                     transactionType === 'income' && styles.typeButtonActive,
-                    { backgroundColor: transactionType === 'income' ? '#10B981' : '#F3F4F6' }
+                    { backgroundColor: transactionType === 'income' ? '#10B981' : '#F3F4F6' },
                   ]}
                   onPress={() => {
                     // Save current category for expense type
                     if (transactionType === 'expense' && selectedCategory) {
-                      setPreviousCategories(prev => ({
+                      setPreviousCategories((prev) => ({
                         ...prev,
-                        expense: selectedCategory
+                        expense: selectedCategory,
                       }));
                     }
                     setTransactionType('income');
                     // Restore previous income category if exists
                     setSelectedCategory(previousCategories.income);
-                  }}
-                >
-                  <Ionicons 
-                    name="trending-up" 
-                    size={20} 
-                    color={transactionType === 'income' ? 'white' : '#6B7280'} 
+                  }}>
+                  <Ionicons
+                    name="trending-up"
+                    size={20}
+                    color={transactionType === 'income' ? 'white' : '#6B7280'}
                   />
-                  <Text style={[
-                    styles.typeButtonText,
-                    { color: transactionType === 'income' ? 'white' : '#6B7280' }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.typeButtonText,
+                      { color: transactionType === 'income' ? 'white' : '#6B7280' },
+                    ]}>
                     Pemasukan
                   </Text>
                 </TouchableOpacity>
@@ -291,17 +328,15 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
               <Text style={styles.label}>Kategori *</Text>
               <TouchableOpacity
                 style={styles.categorySelector}
-                onPress={() => setShowCategoryPicker(true)}
-              >
+                onPress={() => setShowCategoryPicker(true)}>
                 <View style={styles.categoryDisplay}>
                   {selectedCategory ? (
                     <>
                       <View
                         style={[
                           styles.categoryIcon,
-                          { backgroundColor: selectedCategory.color + '20' }
-                        ]}
-                      >
+                          { backgroundColor: selectedCategory.color + '20' },
+                        ]}>
                         <Ionicons
                           name={selectedCategory.icon as any}
                           size={20}
@@ -321,10 +356,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             {/* Date Selection */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Tanggal *</Text>
-              <TouchableOpacity
-                style={styles.dateSelector}
-                onPress={() => setShowDatePicker(true)}
-              >
+              <TouchableOpacity style={styles.dateSelector} onPress={() => setShowDatePicker(true)}>
                 <View style={styles.dateDisplay}>
                   <Ionicons name="calendar" size={20} color="#6B7280" />
                   <Text style={styles.dateText}>
@@ -332,7 +364,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
-                      day: 'numeric'
+                      day: 'numeric',
                     })}
                   </Text>
                 </View>
@@ -342,13 +374,22 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 
           {/* Save Button - Fixed at bottom */}
           <View style={styles.buttonContainer}>
+            {isEditMode && (
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteTransaction}>
+                <Ionicons name="trash" size={20} color="white" />
+                <Text style={styles.deleteButtonText}>Hapus</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
-              style={styles.saveButton}
+              style={[styles.saveButton, isEditMode && styles.saveButtonWithDelete]}
               onPress={handleSaveTransaction}
-              disabled={isLoading}
-            >
+              disabled={isLoading}>
               <Text style={styles.saveButtonText}>
-                {isLoading ? 'Menyimpan...' : (isEditMode ? 'Perbarui Transaksi' : 'Simpan Transaksi')}
+                {isLoading
+                  ? 'Menyimpan...'
+                  : isEditMode
+                    ? 'Perbarui Transaksi'
+                    : 'Simpan Transaksi'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -361,8 +402,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           visible={showCategoryPicker}
           animationType="slide"
           transparent={true}
-          onRequestClose={() => setShowCategoryPicker(false)}
-        >
+          onRequestClose={() => setShowCategoryPicker(false)}>
           <View style={styles.categoryModalContainer}>
             <View style={styles.categoryModalContent}>
               <View style={styles.categoryModalHeader}>
@@ -378,26 +418,17 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                     onPress={() => {
                       setSelectedCategory(category);
                       setShowCategoryPicker(false);
-                      
+
                       // Save selected category to previousCategories
-                      setPreviousCategories(prev => ({
+                      setPreviousCategories((prev) => ({
                         ...prev,
-                        [transactionType]: category
+                        [transactionType]: category,
                       }));
                     }}
-                    style={styles.categoryItem}
-                  >
+                    style={styles.categoryItem}>
                     <View
-                      style={[
-                        styles.categoryItemIcon,
-                        { backgroundColor: category.color + '20' }
-                      ]}
-                    >
-                      <Ionicons
-                        name={category.icon as any}
-                        size={20}
-                        color={category.color}
-                      />
+                      style={[styles.categoryItemIcon, { backgroundColor: category.color + '20' }]}>
+                      <Ionicons name={category.icon as any} size={20} color={category.color} />
                     </View>
                     <Text style={styles.categoryItemText}>{category.name}</Text>
                     {selectedCategory?.id === category.id && (
@@ -406,6 +437,18 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                   </TouchableOpacity>
                 ))}
               </ScrollView>
+              {/* Add Category Option */}
+              <TouchableOpacity
+                style={styles.addCategoryOption}
+                onPress={() => {
+                  setShowCategoryPicker(false);
+                  setShowAddCategoryModal(true);
+                }}>
+                <View style={styles.addCategoryIcon}>
+                  <Ionicons name="add" size={24} color="#3B82F6" />
+                </View>
+                <Text style={styles.addCategoryText}>Tambah Kategori Baru</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -425,6 +468,14 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           }}
         />
       )}
+
+      {/* Add Category Modal */}
+      <AddCategoryModal
+        visible={showAddCategoryModal}
+        onClose={() => setShowAddCategoryModal(false)}
+        onAddCategory={handleAddCategory}
+        transactionType={transactionType}
+      />
     </Modal>
   );
 };
@@ -584,6 +635,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   buttonContainer: {
+    flexDirection: 'row' as const,
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderTopWidth: 1,
@@ -591,12 +643,32 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    gap: 12,
   },
   saveButton: {
     backgroundColor: '#3B82F6',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center' as const,
+    flex: 1,
+  },
+  saveButtonWithDelete: {
+    flex: 2,
+  },
+  deleteButton: {
+    backgroundColor: '#EF4444',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    flexDirection: 'row' as const,
+    gap: 8,
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600' as const,
   },
   saveButtonDisabled: {
     backgroundColor: '#9CA3AF',
@@ -648,7 +720,6 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   categoryList: {
-    maxHeight: 400,
     padding: 16,
   },
   categoryItem: {
@@ -717,6 +788,129 @@ const styles = StyleSheet.create({
   datePickerContainer: {
     paddingVertical: 20,
     alignItems: 'center' as const,
+  },
+  addCategoryOption: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    marginTop: 8,
+  },
+  addCategoryIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EBF4FF',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    marginRight: 12,
+  },
+  addCategoryText: {
+    fontSize: 16,
+    color: '#3B82F6',
+    fontWeight: '500' as const,
+  },
+  addCategoryModalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    width: '100%' as const,
+    maxHeight: '80%' as const,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -5,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  addCategoryHeader: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  addCategoryTitle: {
+    fontSize: 18,
+    fontWeight: '600' as const,
+    color: '#111827',
+  },
+  addCategoryForm: {
+    padding: 20,
+  },
+  addCategoryLabel: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#374151',
+    marginBottom: 8,
+    marginTop: 16,
+  },
+  addCategoryInput: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    padding: 12,
+    fontSize: 16,
+    color: '#111827',
+  },
+  iconScrollView: {
+    marginBottom: 8,
+  },
+  iconOption: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedIconOption: {
+    backgroundColor: '#3B82F6',
+    borderColor: '#1D4ED8',
+  },
+  colorScrollView: {
+    marginBottom: 24,
+  },
+  colorOption: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    borderWidth: 3,
+    borderColor: 'transparent',
+  },
+  selectedColorOption: {
+    borderColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  addCategoryButton: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center' as const,
+  },
+  addCategoryButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600' as const,
   },
 });
 

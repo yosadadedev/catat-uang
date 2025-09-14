@@ -15,7 +15,7 @@ const translations = {
     transactions: 'Transaksi',
     reports: 'Laporan',
     categories: 'Kategori',
-    
+
     // Settings Screen
     settingsTitle: 'Pengaturan',
     settingsSubtitle: 'Kelola preferensi aplikasi Anda',
@@ -28,7 +28,7 @@ const translations = {
     languageDesc: 'Pilih bahasa aplikasi',
     categoryManagement: 'Manajemen Kategori',
     categoryManagementDesc: 'Kelola kategori pemasukan dan pengeluaran',
-    
+
     // Reports Screen
     financialReport: 'Laporan Keuangan',
     export: 'Export',
@@ -36,7 +36,7 @@ const translations = {
     month: 'Bulan',
     year: 'Tahun',
     custom: 'Custom',
-    
+
     // Transactions Screen
     daily: 'Harian',
     weekly: 'Mingguan',
@@ -46,7 +46,7 @@ const translations = {
     expense: 'Pengeluaran',
     balance: 'Saldo',
     expenseDistribution: 'Distribusi Pengeluaran',
-    
+
     // Category Management
     addCategory: 'Tambah',
     incomeCategories: 'Kategori Pemasukan',
@@ -61,7 +61,7 @@ const translations = {
     categoryName: 'Nama Kategori',
     enterCategoryName: 'Masukkan nama kategori',
     categoryType: 'Jenis Kategori',
-    
+
     // Add Transaction
     addTransaction: 'Tambah Transaksi',
     amount: 'Jumlah',
@@ -73,13 +73,13 @@ const translations = {
     edit: 'Edit',
     add: 'Tambah',
     noData: 'Tidak ada data',
-    
+
     // Category Modal
     addCategoryTitle: 'Tambah Kategori',
     editCategoryTitle: 'Edit Kategori',
     categoryIcon: 'Icon Kategori',
     categoryColor: 'Warna Kategori',
-    
+
     // Messages
     success: 'Sukses',
     error: 'Error',
@@ -95,7 +95,7 @@ const translations = {
     transactions: 'Transactions',
     reports: 'Reports',
     categories: 'Categories',
-    
+
     // Settings Screen
     settingsTitle: 'Settings',
     settingsSubtitle: 'Manage your app preferences',
@@ -108,7 +108,7 @@ const translations = {
     languageDesc: 'Choose app language',
     categoryManagement: 'Category Management',
     categoryManagementDesc: 'Manage income and expense categories',
-    
+
     // Reports Screen
     financialReport: 'Financial Report',
     export: 'Export',
@@ -116,7 +116,7 @@ const translations = {
     month: 'Month',
     year: 'Year',
     custom: 'Custom',
-    
+
     // Transactions Screen
     daily: 'Daily',
     weekly: 'Weekly',
@@ -126,7 +126,7 @@ const translations = {
     expense: 'Expense',
     balance: 'Balance',
     expenseDistribution: 'Expense Distribution',
-    
+
     // Category Management
     addCategory: 'Add',
     incomeCategories: 'Income Categories',
@@ -141,7 +141,7 @@ const translations = {
     categoryName: 'Category Name',
     enterCategoryName: 'Enter category name',
     categoryType: 'Category Type',
-    
+
     // Add Transaction
     addTransaction: 'Add Transaction',
     amount: 'Amount',
@@ -153,13 +153,13 @@ const translations = {
     edit: 'Edit',
     add: 'Add',
     noData: 'No data',
-    
+
     // Category Modal
     addCategoryTitle: 'Add Category',
     editCategoryTitle: 'Edit Category',
     categoryIcon: 'Category Icon',
     categoryColor: 'Category Color',
-    
+
     // Messages
     success: 'Success',
     error: 'Error',
@@ -207,7 +207,8 @@ export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const t = (key: string): string => {
-    const currentTranslations = translations[locale as keyof typeof translations] || translations.id;
+    const currentTranslations =
+      translations[locale as keyof typeof translations] || translations.id;
     return currentTranslations[key as keyof typeof currentTranslations] || key;
   };
 

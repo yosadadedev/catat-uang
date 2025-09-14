@@ -1,5 +1,13 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, PanResponder, Animated, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  PanResponder,
+  Animated,
+  Dimensions,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Transaction, Category } from '../database/database';
 
@@ -47,9 +55,9 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
   onSwipeDelete,
 }) => {
   const isIncome = transaction.type === 'income';
-  const iconName = category?.icon as keyof typeof Ionicons.glyphMap || 'ellipsis-horizontal';
+  const iconName = (category?.icon as keyof typeof Ionicons.glyphMap) || 'ellipsis-horizontal';
   const categoryColor = category?.color || '#6B7280';
-  
+
   const translateX = useRef(new Animated.Value(0)).current;
   const [isSwipeActive, setIsSwipeActive] = useState(false);
   const screenWidth = Dimensions.get('window').width;
@@ -92,29 +100,27 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
   };
 
   return (
-    <View className="mx-4 mb-2 relative">
+    <View className="relative mx-4 mb-2">
       {/* Delete Button Background */}
       {isSwipeActive && (
-        <View className="absolute right-3 top-4 bottom-0 w-16 h-14 bg-red-500 rounded-xl items-center justify-center">
+        <View className="absolute bottom-0 right-3 top-4 h-14 w-16 items-center justify-center rounded-xl bg-red-500">
           <TouchableOpacity
             onPress={() => {
               resetSwipe();
               onSwipeDelete?.();
             }}
-            className="w-full h-full items-center justify-center"
-          >
+            className="h-full w-full items-center justify-center">
             <Ionicons name="trash" size={24} color="white" />
           </TouchableOpacity>
         </View>
       )}
-      
+
       {/* Main Card */}
       <Animated.View
         {...panResponder.panHandlers}
         style={{
           transform: [{ translateX }],
-        }}
-      >
+        }}>
         <TouchableOpacity
           onPress={() => {
             if (isSwipeActive) {
@@ -123,64 +129,49 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
               onPress?.();
             }
           }}
-          className="bg-white rounded-xl p-2 shadow-sm border border-gray-100"
-          activeOpacity={0.7}
-        >
-      <View className="flex-row items-center justify-between">
-        {/* Left side - Icon and details */}
-        <View className="flex-row items-center flex-1">
-          {/* Category Icon */}
-          <View
-            className="w-12 h-12 rounded-full items-center justify-center mr-4"
-            style={{ backgroundColor: categoryColor + '20' }}
-          >
-            <Ionicons
-              name={iconName}
-              size={24}
-              color={categoryColor}
-            />
-          </View>
+          className="rounded-xl border border-gray-100 bg-white p-2 shadow-sm"
+          activeOpacity={0.7}>
+          <View className="flex-row items-center justify-between">
+            {/* Left side - Icon and details */}
+            <View className="flex-1 flex-row items-center">
+              {/* Category Icon */}
+              <View
+                className="mr-4 h-12 w-12 items-center justify-center rounded-full"
+                style={{ backgroundColor: categoryColor + '20' }}>
+                <Ionicons name={iconName} size={24} color={categoryColor} />
+              </View>
 
-          {/* Transaction details */}
-          <View className="flex-1">
-            <Text className="text-gray-900 font-semibold text-base mb-1">
-              {category?.name || 'Kategori tidak ditemukan'}
-            </Text>
-            {transaction.description && (
-              <Text className="text-gray-500 text-sm mb-1" numberOfLines={1}>
-                {transaction.description}
+              {/* Transaction details */}
+              <View className="flex-1">
+                <Text className="mb-1 text-base font-semibold text-gray-900">
+                  {category?.name || 'Kategori tidak ditemukan'}
+                </Text>
+                {transaction.description && (
+                  <Text className="mb-1 text-sm text-gray-500" numberOfLines={1}>
+                    {transaction.description}
+                  </Text>
+                )}
+                <Text className="text-xs text-gray-400">{formatDate(transaction.date)}</Text>
+              </View>
+            </View>
+
+            {/* Right side - Amount */}
+            <View className="items-end">
+              <Text className={`text-lg font-bold ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
+                {isIncome ? '+' : '-'}
+                {formatCurrency(Math.abs(transaction.amount))}
               </Text>
-            )}
-            <Text className="text-gray-400 text-xs">
-              {formatDate(transaction.date)}
-            </Text>
+              <View
+                className={`mt-1 rounded-full px-2 py-1 ${
+                  isIncome ? 'bg-green-100' : 'bg-red-100'
+                }`}>
+                <Text
+                  className={`text-xs font-medium ${isIncome ? 'text-green-700' : 'text-red-700'}`}>
+                  {isIncome ? 'Pemasukan' : 'Pengeluaran'}
+                </Text>
+              </View>
+            </View>
           </View>
-        </View>
-
-        {/* Right side - Amount */}
-        <View className="items-end">
-          <Text
-            className={`font-bold text-lg ${
-              isIncome ? 'text-green-600' : 'text-red-600'
-            }`}
-          >
-            {isIncome ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
-          </Text>
-          <View
-            className={`px-2 py-1 rounded-full mt-1 ${
-              isIncome ? 'bg-green-100' : 'bg-red-100'
-            }`}
-          >
-            <Text
-              className={`text-xs font-medium ${
-                isIncome ? 'text-green-700' : 'text-red-700'
-              }`}
-            >
-              {isIncome ? 'Pemasukan' : 'Pengeluaran'}
-            </Text>
-          </View>
-        </View>
-      </View>
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -207,10 +198,8 @@ export const TransactionList: React.FC<TransactionListProps> = ({
     return (
       <View className="flex-1 items-center justify-center py-12">
         <Ionicons name="receipt-outline" size={64} color="#D1D5DB" />
-        <Text className="text-gray-500 text-lg font-medium mt-4">
-          {emptyMessage}
-        </Text>
-        <Text className="text-gray-400 text-sm mt-2 text-center px-8">
+        <Text className="mt-4 text-lg font-medium text-gray-500">{emptyMessage}</Text>
+        <Text className="mt-2 px-8 text-center text-sm text-gray-400">
           Mulai catat transaksi keuangan Anda untuk melihat ringkasan di sini
         </Text>
       </View>
@@ -218,7 +207,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   }
 
   const renderTransaction = ({ item: transaction }: { item: Transaction }) => {
-    const category = categories.find(cat => cat.id === transaction.category_id);
+    const category = categories.find((cat) => cat.id === transaction.category_id);
     return (
       <TransactionCard
         transaction={transaction}

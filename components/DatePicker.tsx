@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -16,10 +11,7 @@ interface DatePickerProps {
   disabled?: boolean;
 }
 
-export const DatePicker: React.FC<DatePickerProps> = ({
-  date,
-  onDateChange,
-}) => {
+export const DatePicker: React.FC<DatePickerProps> = ({ date, onDateChange }) => {
   return (
     <TouchableOpacity
       style={{
@@ -27,16 +19,13 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         borderWidth: 1,
         borderColor: '#d1d5db',
         borderRadius: 8,
-        backgroundColor: 'white'
+        backgroundColor: 'white',
       }}
       onPress={() => {
         // This is a simplified version - in a real app you might want to show a modal with date picker
         console.log('Date picker pressed');
-      }}
-    >
-      <Text style={{ color: '#374151' }}>
-        {date.toLocaleDateString('id-ID')}
-      </Text>
+      }}>
+      <Text style={{ color: '#374151' }}>{date.toLocaleDateString('id-ID')}</Text>
     </TouchableOpacity>
   );
 };
@@ -64,8 +53,18 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const [selectingStart, setSelectingStart] = useState(true);
 
   const monthNames = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember',
   ];
 
   const dayNames = ['M', 'S', 'S', 'R', 'K', 'J', 'S'];
@@ -79,17 +78,17 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     const startingDayOfWeek = (firstDay.getDay() + 6) % 7; // Adjust for Monday start
 
     const days = [];
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day));
     }
-    
+
     return days;
   };
 
@@ -135,7 +134,20 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   const formatDate = (date: Date) => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return `${days[date.getDay()]}, ${date.getDate().toString().padStart(2, '0')} ${months[date.getMonth()]} ${date.getFullYear()}`;
   };
 
@@ -144,7 +156,14 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   return (
     <View style={{ backgroundColor: colors.surface, flex: 1 }}>
       {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: 16,
+          borderBottomWidth: 1,
+          borderBottomColor: '#e5e7eb',
+        }}>
         <TouchableOpacity onPress={onClose} style={{ marginRight: 16 }}>
           <Ionicons name="arrow-back" size={24} color="#374151" />
         </TouchableOpacity>
@@ -153,7 +172,13 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
       <ScrollView style={{ flex: 1 }}>
         {/* Month Navigation */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: 16,
+          }}>
           <TouchableOpacity onPress={() => navigateMonth('prev')}>
             <Ionicons name="chevron-back" size={24} color="#6b7280" />
           </TouchableOpacity>
@@ -169,7 +194,9 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         <View style={{ flexDirection: 'row', paddingHorizontal: 16, marginBottom: 8 }}>
           {dayNames.map((day, index) => (
             <View key={index} style={{ flex: 1, alignItems: 'center' }}>
-              <Text style={{ fontSize: 14, fontWeight: '500', color: colors.textSecondary }}>{day}</Text>
+              <Text style={{ fontSize: 14, fontWeight: '500', color: colors.textSecondary }}>
+                {day}
+              </Text>
             </View>
           ))}
         </View>
@@ -182,7 +209,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 const isSelected = date && isDateSelected(date);
                 const isInRange = date && isDateInRange(date);
                 const isToday = date && date.toDateString() === new Date().toDateString();
-                
+
                 return (
                   <View key={dayIndex} style={{ flex: 1, aspectRatio: 1, padding: 2 }}>
                     {date ? (
@@ -198,16 +225,16 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                           },
                           isSelected && { backgroundColor: colors.primary },
                           isInRange && !isSelected && { backgroundColor: colors.primary + '20' },
-                          isToday && !isSelected && !isInRange && { borderWidth: 1, borderColor: colors.primary }
-                        ]}
-                      >
+                          isToday &&
+                            !isSelected &&
+                            !isInRange && { borderWidth: 1, borderColor: colors.primary },
+                        ]}>
                         <Text
                           style={[
                             { fontSize: 16, fontWeight: '500' },
                             isSelected ? { color: 'white' } : { color: colors.text },
-                            isInRange && !isSelected && { color: colors.primary }
-                          ]}
-                        >
+                            isInRange && !isSelected && { color: colors.primary },
+                          ]}>
                           {date.getDate()}
                         </Text>
                       </TouchableOpacity>
@@ -226,7 +253,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
           const nextMonth = new Date(currentMonth);
           nextMonth.setMonth(nextMonth.getMonth() + 1);
           const nextMonthDays = getDaysInMonth(nextMonth);
-          
+
           return (
             <View style={{ marginTop: 24 }}>
               {/* Next Month Header */}
@@ -240,7 +267,9 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               <View style={{ flexDirection: 'row', paddingHorizontal: 16, marginBottom: 8 }}>
                 {dayNames.map((day, index) => (
                   <View key={index} style={{ flex: 1, alignItems: 'center' }}>
-                    <Text style={{ fontSize: 14, fontWeight: '500', color: colors.textSecondary }}>{day}</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '500', color: colors.textSecondary }}>
+                      {day}
+                    </Text>
                   </View>
                 ))}
               </View>
@@ -249,45 +278,48 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               <View style={{ paddingHorizontal: 16, marginBottom: 24 }}>
                 {Array.from({ length: Math.ceil(nextMonthDays.length / 7) }, (_, weekIndex) => (
                   <View key={weekIndex} style={{ flexDirection: 'row', marginBottom: 4 }}>
-                    {nextMonthDays.slice(weekIndex * 7, (weekIndex + 1) * 7).map((date, dayIndex) => {
-                      const isSelected = date && isDateSelected(date);
-                      const isInRange = date && isDateInRange(date);
-                      const isToday = date && date.toDateString() === new Date().toDateString();
-                      
-                      return (
-                        <View key={dayIndex} style={{ flex: 1, aspectRatio: 1, padding: 2 }}>
-                          {date ? (
-                            <TouchableOpacity
-                              onPress={() => handleDatePress(date)}
-                              style={[
-                                {
-                                  width: '100%',
-                                  height: '100%',
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
-                                  borderRadius: 8,
-                                },
-                                isSelected && { backgroundColor: colors.primary },
-                                isInRange && !isSelected && { backgroundColor: colors.primary + '20' },
-                                isToday && !isSelected && !isInRange && { borderWidth: 1, borderColor: colors.primary }
-                              ]}
-                            >
-                              <Text
+                    {nextMonthDays
+                      .slice(weekIndex * 7, (weekIndex + 1) * 7)
+                      .map((date, dayIndex) => {
+                        const isSelected = date && isDateSelected(date);
+                        const isInRange = date && isDateInRange(date);
+                        const isToday = date && date.toDateString() === new Date().toDateString();
+
+                        return (
+                          <View key={dayIndex} style={{ flex: 1, aspectRatio: 1, padding: 2 }}>
+                            {date ? (
+                              <TouchableOpacity
+                                onPress={() => handleDatePress(date)}
                                 style={[
-                                  { fontSize: 16, fontWeight: '500' },
-                                  isSelected ? { color: 'white' } : { color: colors.text },
-                                  isInRange && !isSelected && { color: colors.primary }
-                                ]}
-                              >
-                                {date.getDate()}
-                              </Text>
-                            </TouchableOpacity>
-                          ) : (
-                            <View style={{ flex: 1 }} />
-                          )}
-                        </View>
-                      );
-                    })}
+                                  {
+                                    width: '100%',
+                                    height: '100%',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    borderRadius: 8,
+                                  },
+                                  isSelected && { backgroundColor: colors.primary },
+                                  isInRange &&
+                                    !isSelected && { backgroundColor: colors.primary + '20' },
+                                  isToday &&
+                                    !isSelected &&
+                                    !isInRange && { borderWidth: 1, borderColor: colors.primary },
+                                ]}>
+                                <Text
+                                  style={[
+                                    { fontSize: 16, fontWeight: '500' },
+                                    isSelected ? { color: 'white' } : { color: colors.text },
+                                    isInRange && !isSelected && { color: colors.primary },
+                                  ]}>
+                                  {date.getDate()}
+                                </Text>
+                              </TouchableOpacity>
+                            ) : (
+                              <View style={{ flex: 1 }} />
+                            )}
+                          </View>
+                        );
+                      })}
                   </View>
                 ))}
               </View>
@@ -309,22 +341,25 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             paddingVertical: 12,
             borderRadius: 8,
             alignItems: 'center',
-            marginBottom: 16
-          }}
-        >
+            marginBottom: 16,
+          }}>
           <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>Terapkan</Text>
         </TouchableOpacity>
 
         {/* Date Range Display */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <View style={{ flex: 1, marginRight: 8 }}>
-            <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 4 }}>Tanggal Awal</Text>
+            <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 4 }}>
+              Tanggal Awal
+            </Text>
             <Text style={{ fontSize: 14, color: colors.text, fontWeight: '500' }}>
               {formatDate(startDate)}
             </Text>
           </View>
           <View style={{ flex: 1, marginLeft: 8 }}>
-            <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 4 }}>Tanggal Akhir</Text>
+            <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 4 }}>
+              Tanggal Akhir
+            </Text>
             <Text style={{ fontSize: 14, color: colors.text, fontWeight: '500' }}>
               {formatDate(endDate)}
             </Text>

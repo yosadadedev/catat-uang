@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-} from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useTheme } from '../contexts/ThemeContext';
@@ -20,8 +16,6 @@ interface Props {
 const AboutScreen: React.FC<Props> = ({ navigation }) => {
   const { colors } = useTheme();
 
-
-
   return (
     <Container>
       <ScreenHeader
@@ -36,12 +30,13 @@ const AboutScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.appIconContainer}>
             <View style={[styles.appIcon, { backgroundColor: colors.primary }]}>
               <Ionicons name="wallet" size={40} color="white" />
-             </View>
+            </View>
           </View>
           <Text style={[styles.appName, { color: colors.text }]}>Catat Uang</Text>
           <Text style={[styles.appVersion, { color: colors.textSecondary }]}>Versi 1.0.0</Text>
           <Text style={[styles.appDescription, { color: colors.textSecondary }]}>
-            Aplikasi pencatat keuangan pribadi gratis yang membantu Anda mengelola pemasukan dan pengeluaran dengan mudah dan efisien.
+            Aplikasi pencatat keuangan pribadi gratis yang membantu Anda mengelola pemasukan dan
+            pengeluaran dengan mudah dan efisien.
           </Text>
         </Card>
 
@@ -51,23 +46,33 @@ const AboutScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.featureList}>
             <View style={styles.featureItem}>
               <Ionicons name="add-circle" size={20} color={colors.primary} />
-              <Text style={[styles.featureText, { color: colors.textSecondary }]}>Catat transaksi pemasukan dan pengeluaran</Text>
+              <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+                Catat transaksi pemasukan dan pengeluaran
+              </Text>
             </View>
             <View style={styles.featureItem}>
               <Ionicons name="pie-chart" size={20} color={colors.primary} />
-              <Text style={[styles.featureText, { color: colors.textSecondary }]}>Laporan keuangan dengan grafik</Text>
+              <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+                Laporan keuangan dengan grafik
+              </Text>
             </View>
             <View style={styles.featureItem}>
               <Ionicons name="grid" size={20} color={colors.primary} />
-              <Text style={[styles.featureText, { color: colors.textSecondary }]}>Kelola kategori custom</Text>
+              <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+                Kelola kategori custom
+              </Text>
             </View>
             <View style={styles.featureItem}>
               <Ionicons name="download" size={20} color={colors.primary} />
-              <Text style={[styles.featureText, { color: colors.textSecondary }]}>Ekspor data ke CSV</Text>
+              <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+                Ekspor data ke CSV
+              </Text>
             </View>
             <View style={styles.featureItem}>
               <Ionicons name="language" size={20} color={colors.primary} />
-              <Text style={[styles.featureText, { color: colors.textSecondary }]}>Dukungan multi bahasa</Text>
+              <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+                Dukungan multi bahasa
+              </Text>
             </View>
           </View>
         </Card>
@@ -75,18 +80,30 @@ const AboutScreen: React.FC<Props> = ({ navigation }) => {
         {/* Changelog Section */}
         <Card>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>📝 Changelog</Text>
-          
+
           <View style={styles.changelogItem}>
             <Text style={[styles.versionTitle, { color: colors.text }]}>Versi 1.0.0</Text>
-            <Text style={[styles.releaseDate, { color: colors.textSecondary }]}>31 Januari 2025</Text>
+            <Text style={[styles.releaseDate, { color: colors.textSecondary }]}>
+              31 Januari 2025
+            </Text>
             <View style={styles.changelogList}>
               <View style={styles.changelogEntry}>
                 <Text style={[styles.changelogType, { color: '#10B981' }]}>✨ Fitur Baru</Text>
-                <Text style={[styles.changelogText, { color: colors.textSecondary }]}>• Pencatatan transaksi pemasukan dan pengeluaran</Text>
-                <Text style={[styles.changelogText, { color: colors.textSecondary }]}>• Manajemen kategori custom dengan icon dan warna</Text>
-                <Text style={[styles.changelogText, { color: colors.textSecondary }]}>• Laporan keuangan dengan grafik pie chart</Text>
-                <Text style={[styles.changelogText, { color: colors.textSecondary }]}>• Ekspor data ke format CSV, XLS, dan PDF</Text>
-                <Text style={[styles.changelogText, { color: colors.textSecondary }]}>• Dukungan multi bahasa (Indonesia & English)</Text>
+                <Text style={[styles.changelogText, { color: colors.textSecondary }]}>
+                  • Pencatatan transaksi pemasukan dan pengeluaran
+                </Text>
+                <Text style={[styles.changelogText, { color: colors.textSecondary }]}>
+                  • Manajemen kategori custom dengan icon dan warna
+                </Text>
+                <Text style={[styles.changelogText, { color: colors.textSecondary }]}>
+                  • Laporan keuangan dengan grafik pie chart
+                </Text>
+                <Text style={[styles.changelogText, { color: colors.textSecondary }]}>
+                  • Ekspor data ke format CSV, XLS, dan PDF
+                </Text>
+                <Text style={[styles.changelogText, { color: colors.textSecondary }]}>
+                  • Dukungan multi bahasa (Indonesia & English)
+                </Text>
               </View>
             </View>
           </View>

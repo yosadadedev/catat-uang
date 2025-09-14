@@ -13,7 +13,13 @@ interface UseTransactionFiltersProps {
   useCustomDateRange?: boolean;
 }
 
-export const useTransactionFilters = ({ transactions, categories, startDate, endDate, useCustomDateRange = false }: UseTransactionFiltersProps) => {
+export const useTransactionFilters = ({
+  transactions,
+  categories,
+  startDate,
+  endDate,
+  useCustomDateRange = false,
+}: UseTransactionFiltersProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('daily');
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [sortOrder, setSortOrder] = useState<SortType>('newest');
@@ -24,7 +30,7 @@ export const useTransactionFilters = ({ transactions, categories, startDate, end
   const getDateRange = (tab: TabType, date: Date) => {
     const start = new Date(date);
     const end = new Date(date);
-    
+
     switch (tab) {
       case 'daily':
         start.setHours(0, 0, 0, 0);
@@ -51,13 +57,13 @@ export const useTransactionFilters = ({ transactions, categories, startDate, end
         end.setHours(23, 59, 59, 999);
         break;
     }
-    
+
     return { start, end };
   };
 
   const navigateDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate);
-    
+
     switch (activeTab) {
       case 'daily':
         newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
@@ -72,22 +78,63 @@ export const useTransactionFilters = ({ transactions, categories, startDate, end
         newDate.setFullYear(newDate.getFullYear() + (direction === 'next' ? 1 : -1));
         break;
     }
-    
+
     setSelectedDate(newDate);
   };
 
-  const formatDate = (date: Date | null) => {
+  const formatDate = (date: Date | null, tab?: TabType) => {
     if (!date) return '';
-    return date.toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+
+    const currentTab = tab || activeTab;
+
+    switch (currentTab) {
+      case 'daily':
+        return date.toLocaleDateString('id-ID', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        });
+
+      case 'weekly': {
+        // Get start and end of week
+        const startOfWeek = new Date(date);
+        const dayOfWeek = startOfWeek.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        startOfWeek.setDate(startOfWeek.getDate() - daysToMonday);
+
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+        const startDay = startOfWeek.getDate();
+        const endDay = endOfWeek.getDate();
+        const month = startOfWeek.toLocaleDateString('id-ID', { month: 'short' });
+        const year = startOfWeek.getFullYear();
+
+        return `${startDay} - ${endDay} ${month} ${year}`;
+      }
+
+      case 'monthly':
+        return date.toLocaleDateString('id-ID', {
+          month: 'short',
+          year: 'numeric',
+        });
+
+      case 'yearly':
+        return date.getFullYear().toString();
+
+      default:
+        return date.toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
+    }
   };
 
   useEffect(() => {
     let filtered = transactions;
-    
+
     // Use custom date range if provided, otherwise use tab-based range
     let start: Date, end: Date;
     if (useCustomDateRange && startDate && endDate) {
@@ -102,7 +149,7 @@ export const useTransactionFilters = ({ transactions, categories, startDate, end
     }
 
     // Filter by date range
-    filtered = filtered.filter(transaction => {
+    filtered = filtered.filter((transaction) => {
       const transactionDate = new Date(transaction.date);
       if (isNaN(transactionDate.getTime())) {
         return false;
@@ -112,12 +159,12 @@ export const useTransactionFilters = ({ transactions, categories, startDate, end
 
     // Filter by type
     if (filterType !== 'all') {
-      filtered = filtered.filter(transaction => transaction.type === filterType);
+      filtered = filtered.filter((transaction) => transaction.type === filterType);
     }
 
     // Filter by category
     if (selectedCategory) {
-      filtered = filtered.filter(transaction => transaction.category_id === selectedCategory);
+      filtered = filtered.filter((transaction) => transaction.category_id === selectedCategory);
     }
 
     // Sort by date
@@ -128,7 +175,18 @@ export const useTransactionFilters = ({ transactions, categories, startDate, end
     });
 
     setFilteredTransactions(filtered);
-  }, [transactions, activeTab, selectedDate, filterType, selectedCategory, sortOrder, categories, startDate, endDate, useCustomDateRange]);
+  }, [
+    transactions,
+    activeTab,
+    selectedDate,
+    filterType,
+    selectedCategory,
+    sortOrder,
+    categories,
+    startDate,
+    endDate,
+    useCustomDateRange,
+  ]);
 
   return {
     activeTab,
@@ -144,6 +202,6 @@ export const useTransactionFilters = ({ transactions, categories, startDate, end
     filteredTransactions,
     navigateDate,
     formatDate,
-    getDateRange
+    getDateRange,
   };
 };
