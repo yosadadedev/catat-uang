@@ -305,7 +305,7 @@ const TransactionsScreen = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#3B82F6'}}>
       <ScreenHeader
-          title="Transaksi"
+          title=""
           onMenuPress={() => navigation.openDrawer()}
           rightButton={[
           {
@@ -323,6 +323,12 @@ const TransactionsScreen = () => {
             backgroundColor:  selectedCategory !== null ? '#10B981' : 'rgba(255,255,255,0.2)'
           },
         ]}
+        dateNavigation={{
+          currentDate: formatDate(selectedDate, activeTab),
+          onPrevious: () => navigateDate('prev'),
+          onNext: () => navigateDate('next'),
+          onDatePress: () => setShowDatePicker(true)
+        }}
         />
       {/* Time Filter Tabs */}
       <View style={{
@@ -375,65 +381,7 @@ const TransactionsScreen = () => {
         </View>
         
         {/* Date Navigation */}
-        <View style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: 16,
-          gap: 12
-        }}>
-          <View style={{
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            borderRadius: 6,
-            paddingHorizontal: 8,
-            paddingVertical: 8,
-            justifyContent: 'space-between'
-          }}>
-            <TouchableOpacity
-              onPress={() => navigateDate('prev')}
-              style={{ padding: 4 }}
-            >
-              <Ionicons name="chevron-back" size={16} color="white" />
-            </TouchableOpacity>
-            
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              flex: 1,
-              justifyContent: 'center',
-              gap: 8
-            }}>
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 6
-                }}
-              >
-                <Ionicons name="calendar" size={14} color="white" />
-                <Text style={{
-                  fontSize: 12,
-                  fontWeight: 'bold',
-                  color: 'white',
-                  textAlign: 'center'
-                }}>
-                  {formatDateHeader()}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            
-            <TouchableOpacity
-              onPress={() => navigateDate('next')}
-              style={{ padding: 4 }}
-            >
-              <Ionicons name="chevron-forward" size={16} color="white" />
-            </TouchableOpacity>
-          </View>
-          
-        </View>
+
 
 
 

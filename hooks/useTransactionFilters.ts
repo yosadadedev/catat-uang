@@ -76,13 +76,54 @@ export const useTransactionFilters = ({ transactions, categories, startDate, end
     setSelectedDate(newDate);
   };
 
-  const formatDate = (date: Date | null) => {
+  const formatDate = (date: Date | null, tab?: TabType) => {
     if (!date) return '';
-    return date.toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    
+    const currentTab = tab || activeTab;
+    
+    switch (currentTab) {
+      case 'daily':
+        return date.toLocaleDateString('id-ID', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+      
+      case 'weekly': {
+        // Get start and end of week
+        const startOfWeek = new Date(date);
+        const dayOfWeek = startOfWeek.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        startOfWeek.setDate(startOfWeek.getDate() - daysToMonday);
+        
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        
+        const startDay = startOfWeek.getDate();
+        const endDay = endOfWeek.getDate();
+        const month = startOfWeek.toLocaleDateString('id-ID', { month: 'short' });
+        const year = startOfWeek.getFullYear();
+        
+        return `${startDay} - ${endDay} ${month} ${year}`;
+      }
+      
+      case 'monthly':
+        return date.toLocaleDateString('id-ID', {
+          month: 'short',
+          year: 'numeric'
+        });
+      
+      case 'yearly':
+        return date.getFullYear().toString();
+      
+      default:
+        return date.toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+    }
   };
 
   useEffect(() => {
