@@ -1,7 +1,7 @@
 # Catat Uang – Aplikasi Mobile untuk Manajemen Keuangan Personal
 
 **Capstone Project**  
-Universitas Terbuka – 7 September 2025
+IBM Skillbuild x Hacktiv8 – 7 September 2025
 
 ## Problem Statement
 
@@ -24,7 +24,7 @@ Universitas Terbuka – 7 September 2025
 ✅ **Laporan Keuangan** (grafik dan statistik)  
 ✅ **Export Data** (Excel, PDF)  
 ✅ **Swipe to Delete** (gesture intuitif)  
-✅ **Responsive UI** (iOS & Android)  
+✅ **Responsive UI** (iOS & Android)
 
 ## Technical Architecture
 
@@ -53,33 +53,37 @@ Onboarding → List Transaksi → Tambah Transaksi → Lihat Laporan → Filter 
 ## Technical Implementation
 
 ### Database Setup
+
 - SQLite untuk penyimpanan lokal
 - Schema: transactions, categories, settings
 - CRUD operations dengan TypeScript
 
 ### Cross-platform Development
+
 - React Native + Expo untuk iOS & Android
 - NativeWind untuk styling konsisten
 - Responsive design untuk berbagai ukuran layar
 
 ### State Management
+
 - Zustand untuk global state
 - Persistent storage untuk data offline
 - Optimistic updates untuk UX yang smooth
 
 ## Challenges & Solutions
 
-| Challenge | Solution |
-|-----------|----------|
-| **Cross-platform compatibility** | React Native + Expo |
-| **Data persistence** | SQLite dengan Expo SQLite |
-| **State management** | Zustand dengan persistence |
-| **UI consistency** | NativeWind + design system |
-| **Performance** | Optimized queries & lazy loading |
+| Challenge                        | Solution                         |
+| -------------------------------- | -------------------------------- |
+| **Cross-platform compatibility** | React Native + Expo              |
+| **Data persistence**             | SQLite dengan Expo SQLite        |
+| **State management**             | Zustand dengan persistence       |
+| **UI consistency**               | NativeWind + design system       |
+| **Performance**                  | Optimized queries & lazy loading |
 
 ## Current Status & Achievements
 
 ### ✅ Completed
+
 - Core transaction management
 - Category management system
 - Financial reports with charts
@@ -88,11 +92,13 @@ Onboarding → List Transaksi → Tambah Transaksi → Lihat Laporan → Filter 
 - Responsive UI design
 
 ### 🚧 In Progress
+
 - Advanced filtering options
 - Budget tracking features
 - Data backup & restore
 
 ### 📋 Planned
+
 - Cloud synchronization
 - Multi-currency support
 - Recurring transactions
@@ -100,9 +106,9 @@ Onboarding → List Transaksi → Tambah Transaksi → Lihat Laporan → Filter 
 - AI-powered insights
 
 ## Future Enhancements
+
 - **Google Drive Backup**: Backup data ke Google Drive untuk keamanan ekstra
 - **UI/UX Improvements**: Peningkatan antarmuka pengguna yang lebih modern dan intuitif
-
 
 ## Demo
 
@@ -111,6 +117,7 @@ Onboarding → List Transaksi → Tambah Transaksi → Lihat Laporan → Filter 
 🎥 **Video Demo**: [Lihat Demo di YouTube](https://youtube.com/shorts/-jJyWbXOiVo?si=cuXDyss0GrksuCJT)
 
 ### Cara Install Aplikasi:
+
 1. Buka link APK di atas
 2. Scan QR code dengan kamera HP atau
 3. Download dan install aplikasi
@@ -119,18 +126,21 @@ Onboarding → List Transaksi → Tambah Transaksi → Lihat Laporan → Filter 
 ## Lessons Learned
 
 ### Technical Skills
+
 - **React Native**: Cross-platform mobile development
 - **SQLite**: Local database management
 - **State Management**: Zustand implementation
 - **UI/UX**: Mobile-first design principles
 
 ### Project Management
+
 - **Agile Development**: Sprint planning & execution
 - **Version Control**: Git workflow & collaboration
 - **Testing**: Unit testing & device testing
 - **Documentation**: Technical & user documentation
 
 ### Problem Solving
+
 - **Performance Optimization**: Query optimization
 - **User Experience**: Intuitive gesture implementation
 - **Data Management**: Efficient storage strategies
@@ -139,16 +149,19 @@ Onboarding → List Transaksi → Tambah Transaksi → Lihat Laporan → Filter 
 ## Development Roadmap
 
 ### Phase 1: Core Features (✅ Completed)
+
 - Basic transaction management
 - Category system
 - Simple reports
 
 ### Phase 2: Enhanced Features (🚧 Current)
+
 - Advanced filtering
 - Better analytics
 - Export improvements
 
 ### Phase 3: Advanced Features (📋 Planned)
+
 - Cloud sync
 - AI insights
 - Multi-currency
@@ -174,10 +187,10 @@ Distributed under the MIT License. See `LICENSE` for more information.
 💼 **LinkedIn**: [linkedin.com/in/yosadade](https://linkedin.com/in/yosadade)  
 🐙 **GitHub**: [github.com/yosadadedev/catat-uang](https://github.com/yosadadedev/catat-uang)  
 📱 **APK Download**: [Expo Build](https://expo.dev/accounts/yosadadev/projects/catat-uang/builds/c2697af4-fe7c-4a54-bdb0-eba41087aa6a)  
-🎥 **Demo Video**: [YouTube Demo](https://youtube.com/shorts/-jJyWbXOiVo?si=cuXDyss0GrksuCJT)  
+🎥 **Demo Video**: [YouTube Demo](https://youtube.com/shorts/-jJyWbXOiVo?si=cuXDyss0GrksuCJT)
 
 ---
 
 **Terima kasih telah menggunakan Catat Uang! 🙏**
 
-*Aplikasi ini dibuat dengan ❤️ untuk membantu mengelola keuangan personal dengan lebih baik.*
+_Aplikasi ini dibuat dengan ❤️ untuk membantu mengelola keuangan personal dengan lebih baik._
