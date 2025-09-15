@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  RefreshControl,
+  TouchableOpacity,
+  Modal,
+  SafeAreaView,
+} from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,8 +16,6 @@ import { ScreenHeader, Card } from '../components/common';
 import { useReportData } from '../hooks';
 import { useFinanceStore } from '../store/useStore';
 
-import { useTheme } from '../contexts/ThemeContext';
-import { useLocalization } from '../contexts/LocalizationContext';
 import { DrawerParamList } from '../navigation/AppNavigator';
 import { DateRangePicker } from '~/components/DatePicker';
 
@@ -19,8 +25,6 @@ type TabType = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 const ReportsScreen = () => {
   const navigation = useNavigation<ReportsScreenNavigationProp>();
-  const { colors } = useTheme();
-  const { t } = useLocalization();
   const transactions = useFinanceStore((state) => state.transactions);
   const categories = useFinanceStore((state) => state.categories);
   const loading = useFinanceStore((state) => state.loading);
@@ -34,7 +38,6 @@ const ReportsScreen = () => {
 
   // Use custom hook for report data logic
   const {
-    selectedPeriod,
     startDate,
     endDate,
     setStartDate,
@@ -292,303 +295,329 @@ const ReportsScreen = () => {
 
       {/* Content */}
       <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
-
-      <ScrollView
-        style={{ flex: 1 }}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={handleRefresh} />}
-        showsVerticalScrollIndicator={false}>
-        {/* Summary Cards */}
-        <View
-          style={{
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-          }}>
+        <ScrollView
+          style={{ flex: 1 }}
+          refreshControl={<RefreshControl refreshing={loading} onRefresh={handleRefresh} />}
+          showsVerticalScrollIndicator={false}>
+          {/* Summary Cards */}
           <View
             style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              gap: 8,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
             }}>
-            {/* Income Card */}
-            <Card style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                <View
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 8,
-                    backgroundColor: '#DCFCE7',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 8,
-                  }}>
-                  <Ionicons name="trending-up" size={16} color="#16A34A" />
-                </View>
-                <Text style={{ fontSize: 12, color: '#6B7280', fontWeight: '500' }}>Pemasukan</Text>
-              </View>
-              <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#16A34A' }}>
-                {formatCurrency(summary.income)}
-              </Text>
-              <Text style={{ fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>
-                {summary.incomeCount} transaksi
-              </Text>
-            </Card>
-
-            {/* Expense Card */}
-            <Card style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                <View
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 8,
-                    backgroundColor: '#FEE2E2',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 8,
-                  }}>
-                  <Ionicons name="trending-down" size={16} color="#DC2626" />
-                </View>
-                <Text style={{ fontSize: 12, color: '#6B7280', fontWeight: '500' }}>
-                  Pengeluaran
-                </Text>
-              </View>
-              <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#DC2626' }}>
-                {formatCurrency(summary.expense)}
-              </Text>
-              <Text style={{ fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>
-                {summary.expenseCount} transaksi
-              </Text>
-            </Card>
-          </View>
-
-          {/* Net Income Card */}
-          <Card style={{ marginTop: 0 }}>
             <View
               style={{
                 flexDirection: 'row',
-                alignItems: 'center',
                 justifyContent: 'space-between',
+                gap: 8,
               }}>
-              <View>
-                <Text
-                  style={{ fontSize: 12, color: '#6B7280', fontWeight: '500', marginBottom: 4 }}>
-                  Saldo
+              {/* Income Card */}
+              <Card style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                  <View
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 8,
+                      backgroundColor: '#DCFCE7',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: 8,
+                    }}>
+                    <Ionicons name="trending-up" size={16} color="#16A34A" />
+                  </View>
+                  <Text style={{ fontSize: 12, color: '#6B7280', fontWeight: '500' }}>
+                    Pemasukan
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#16A34A' }}>
+                  {formatCurrency(summary.income)}
                 </Text>
-                <Text
-                  style={{
-                    fontSize: 20,
-                    fontWeight: 'bold',
-                    color: summary.balance >= 0 ? '#16A34A' : '#DC2626',
-                  }}>
-                  {formatCurrency(summary.balance)}
+                <Text style={{ fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>
+                  {summary.incomeCount} transaksi
                 </Text>
-              </View>
+              </Card>
+
+              {/* Expense Card */}
+              <Card style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                  <View
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 8,
+                      backgroundColor: '#FEE2E2',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: 8,
+                    }}>
+                    <Ionicons name="trending-down" size={16} color="#DC2626" />
+                  </View>
+                  <Text style={{ fontSize: 12, color: '#6B7280', fontWeight: '500' }}>
+                    Pengeluaran
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#DC2626' }}>
+                  {formatCurrency(summary.expense)}
+                </Text>
+                <Text style={{ fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>
+                  {summary.expenseCount} transaksi
+                </Text>
+              </Card>
+            </View>
+
+            {/* Net Income Card */}
+            <Card style={{ marginTop: 0 }}>
               <View
                 style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  backgroundColor: summary.balance >= 0 ? '#DCFCE7' : '#FEE2E2',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                <View>
+                  <Text
+                    style={{ fontSize: 12, color: '#6B7280', fontWeight: '500', marginBottom: 4 }}>
+                    Saldo
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 'bold',
+                      color: summary.balance >= 0 ? '#16A34A' : '#DC2626',
+                    }}>
+                    {formatCurrency(summary.balance)}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 10,
+                    backgroundColor: summary.balance >= 0 ? '#DCFCE7' : '#FEE2E2',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Ionicons
+                    name={summary.balance >= 0 ? 'trending-up' : 'trending-down'}
+                    size={20}
+                    color={summary.balance >= 0 ? '#16A34A' : '#DC2626'}
+                  />
+                </View>
+              </View>
+            </Card>
+          </View>
+
+          {/* Charts Section */}
+          {filteredTransactions.length > 0 ? (
+            <>
+              {/* Expense Pie Chart */}
+              {summary.expense > 0 && (
+                <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 'bold',
+                      color: '#111827',
+                      marginBottom: 16,
+                    }}>
+                    Distribusi Pengeluaran
+                  </Text>
+                  <PieChart
+                    data={prepareChartData(
+                      filteredTransactions.filter((t) => t.type === 'expense'),
+                      categories,
+                      'expense'
+                    )}
+                    size={200}
+                    showLegend={true}
+                  />
+                </Card>
+              )}
+
+              {/* Income Pie Chart */}
+              {summary.income > 0 && (
+                <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 'bold',
+                      color: '#111827',
+                      marginBottom: 16,
+                    }}>
+                    Distribusi Pemasukan
+                  </Text>
+                  <PieChart
+                    data={prepareChartData(
+                      filteredTransactions.filter((t) => t.type === 'income'),
+                      categories,
+                      'income'
+                    )}
+                    size={200}
+                    showLegend={true}
+                  />
+                </Card>
+              )}
+
+              {/* Monthly Trend */}
+              <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
+                <Text
+                  style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>
+                  Tren Bulanan
+                </Text>
+                <MonthlyTrend transactions={transactions} />
+              </Card>
+
+              {/* Top Expenses */}
+              {topExpenses.length > 0 && (
+                <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 'bold',
+                      color: '#111827',
+                      marginBottom: 16,
+                    }}>
+                    Top Pengeluaran
+                  </Text>
+                  {topExpenses.map((item, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingVertical: 12,
+                        borderBottomWidth: index < topExpenses.length - 1 ? 1 : 0,
+                        borderBottomColor: '#F3F4F6',
+                      }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                        <View
+                          style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 10,
+                            backgroundColor: item.color + '20',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginRight: 12,
+                          }}>
+                          <Ionicons name={item.icon as any} size={20} color={item.color} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ color: '#111827', fontWeight: '500' }}>
+                            {item.category}
+                          </Text>
+                          <Text style={{ color: '#6B7280', fontSize: 12 }}>
+                            {item.percentage.toFixed(1)}% dari total • {item.count} transaksi
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={{ color: '#DC2626', fontWeight: 'bold' }}>
+                        {formatCurrency(item.amount)}
+                      </Text>
+                    </View>
+                  ))}
+                </Card>
+              )}
+
+              {topIncome.length > 0 && (
+                <Card style={{ marginHorizontal: 16, marginTop: 16 }}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 'bold',
+                      color: '#111827',
+                      marginBottom: 16,
+                    }}>
+                    Top Pemasukan
+                  </Text>
+                  {topIncome.map((item, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingVertical: 12,
+                        borderBottomWidth: index < topIncome.length - 1 ? 1 : 0,
+                        borderBottomColor: '#F3F4F6',
+                      }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                        <View
+                          style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 10,
+                            backgroundColor: item.color + '20',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginRight: 12,
+                          }}>
+                          <Ionicons name={item.icon as any} size={20} color={item.color} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ color: '#111827', fontWeight: '500' }}>
+                            {item.category}
+                          </Text>
+                          <Text style={{ color: '#6B7280', fontSize: 12 }}>
+                            {item.percentage.toFixed(1)}% dari total • {item.count} transaksi
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={{ color: '#16A34A', fontWeight: 'bold' }}>
+                        {formatCurrency(item.amount)}
+                      </Text>
+                    </View>
+                  ))}
+                </Card>
+              )}
+            </>
+          ) : (
+            <Card
+              style={{ marginHorizontal: 16, marginTop: 16, padding: 32, alignItems: 'center' }}>
+              <View
+                style={{
+                  width: 64,
+                  height: 64,
+                  backgroundColor: '#F3F4F6',
+                  borderRadius: 32,
                   alignItems: 'center',
                   justifyContent: 'center',
+                  marginBottom: 16,
                 }}>
-                <Ionicons
-                  name={summary.balance >= 0 ? 'trending-up' : 'trending-down'}
-                  size={20}
-                  color={summary.balance >= 0 ? '#16A34A' : '#DC2626'}
-                />
+                <Ionicons name="bar-chart-outline" size={32} color="#9CA3AF" />
               </View>
-            </View>
-          </Card>
-        </View>
-
-        {/* Charts Section */}
-        {filteredTransactions.length > 0 ? (
-          <>
-            {/* Expense Pie Chart */}
-            {summary.expense > 0 && (
-              <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
-                <Text
-                  style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>
-                  Distribusi Pengeluaran
-                </Text>
-                <PieChart
-                  data={prepareChartData(
-                    filteredTransactions.filter((t) => t.type === 'expense'),
-                    categories,
-                    'expense'
-                  )}
-                  size={200}
-                  showLegend={true}
-                />
-              </Card>
-            )}
-
-            {/* Income Pie Chart */}
-            {summary.income > 0 && (
-              <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
-                <Text
-                  style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>
-                  Distribusi Pemasukan
-                </Text>
-                <PieChart
-                  data={prepareChartData(
-                    filteredTransactions.filter((t) => t.type === 'income'),
-                    categories,
-                    'income'
-                  )}
-                  size={200}
-                  showLegend={true}
-                />
-              </Card>
-            )}
-
-            {/* Monthly Trend */}
-            <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
-              <Text
-                style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>
-                Tren Bulanan
+              <Text style={{ color: '#111827', fontWeight: '600', fontSize: 18, marginBottom: 8 }}>
+                Tidak Ada Data
               </Text>
-              <MonthlyTrend transactions={transactions} />
+              <Text style={{ color: '#6B7280', textAlign: 'center' }}>
+                Belum ada transaksi dalam periode yang dipilih
+              </Text>
             </Card>
+          )}
 
-            {/* Top Expenses */}
-            {topExpenses.length > 0 && (
-              <Card style={{ marginHorizontal: 16, marginTop: 0 }}>
-                <Text
-                  style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>
-                  Top Pengeluaran
-                </Text>
-                {topExpenses.map((item, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      paddingVertical: 12,
-                      borderBottomWidth: index < topExpenses.length - 1 ? 1 : 0,
-                      borderBottomColor: '#F3F4F6',
-                    }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                      <View
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 10,
-                          backgroundColor: item.color + '20',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginRight: 12,
-                        }}>
-                        <Ionicons name={item.icon as any} size={20} color={item.color} />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: '#111827', fontWeight: '500' }}>{item.category}</Text>
-                        <Text style={{ color: '#6B7280', fontSize: 12 }}>
-                          {item.percentage.toFixed(1)}% dari total • {item.count} transaksi
-                        </Text>
-                      </View>
-                    </View>
-                    <Text style={{ color: '#DC2626', fontWeight: 'bold' }}>
-                      {formatCurrency(item.amount)}
-                    </Text>
-                  </View>
-                ))}
-              </Card>
-            )}
+          {/* Bottom Spacing */}
+          <View style={{ height: 32 }} />
+        </ScrollView>
 
-            {topIncome.length > 0 && (
-              <Card style={{ marginHorizontal: 16, marginTop: 16 }}>
-                <Text
-                  style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 }}>
-                  Top Pemasukan
-                </Text>
-                {topIncome.map((item, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      paddingVertical: 12,
-                      borderBottomWidth: index < topIncome.length - 1 ? 1 : 0,
-                      borderBottomColor: '#F3F4F6',
-                    }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                      <View
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 10,
-                          backgroundColor: item.color + '20',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginRight: 12,
-                        }}>
-                        <Ionicons name={item.icon as any} size={20} color={item.color} />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: '#111827', fontWeight: '500' }}>{item.category}</Text>
-                        <Text style={{ color: '#6B7280', fontSize: 12 }}>
-                          {item.percentage.toFixed(1)}% dari total • {item.count} transaksi
-                        </Text>
-                      </View>
-                    </View>
-                    <Text style={{ color: '#16A34A', fontWeight: 'bold' }}>
-                      {formatCurrency(item.amount)}
-                    </Text>
-                  </View>
-                ))}
-              </Card>
-            )}
-          </>
-        ) : (
-          <Card style={{ marginHorizontal: 16, marginTop: 16, padding: 32, alignItems: 'center' }}>
-            <View
-              style={{
-                width: 64,
-                height: 64,
-                backgroundColor: '#F3F4F6',
-                borderRadius: 32,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 16,
-              }}>
-              <Ionicons name="bar-chart-outline" size={32} color="#9CA3AF" />
-            </View>
-            <Text style={{ color: '#111827', fontWeight: '600', fontSize: 18, marginBottom: 8 }}>
-              Tidak Ada Data
-            </Text>
-            <Text style={{ color: '#6B7280', textAlign: 'center' }}>
-              Belum ada transaksi dalam periode yang dipilih
-            </Text>
-          </Card>
-        )}
-
-        {/* Bottom Spacing */}
-        <View style={{ height: 32 }} />
-      </ScrollView>
-
-      {/* Date Range Picker Modal */}
-      <Modal
-        visible={showDatePicker}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowDatePicker(false)}>
-        <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
-          onClose={() => setShowDatePicker(false)}
-          onApply={() => {
-            setUseCustomDateRange(true);
-            setShowDatePicker(false);
-          }}
-        />
-      </Modal>
+        {/* Date Range Picker Modal */}
+        <Modal
+          visible={showDatePicker}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowDatePicker(false)}>
+          <DateRangePicker
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+            onClose={() => setShowDatePicker(false)}
+            onApply={() => {
+              setUseCustomDateRange(true);
+              setShowDatePicker(false);
+            }}
+          />
+        </Modal>
       </View>
     </SafeAreaView>
   );

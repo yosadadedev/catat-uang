@@ -1,13 +1,5 @@
 import React, { useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  FlatList,
-  PanResponder,
-  Animated,
-  Dimensions,
-} from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, PanResponder, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Transaction, Category } from '../database/database';
 
@@ -60,7 +52,6 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
 
   const translateX = useRef(new Animated.Value(0)).current;
   const [isSwipeActive, setIsSwipeActive] = useState(false);
-  const screenWidth = Dimensions.get('window').width;
   const swipeThreshold = -80;
 
   const panResponder = PanResponder.create({

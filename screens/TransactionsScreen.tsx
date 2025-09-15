@@ -15,7 +15,6 @@ import { ScreenHeader } from '../components/common';
 import { useTransactionFilters, TabType, FilterType } from '../hooks';
 import { Transaction } from '../database/database';
 import { DrawerParamList, RootStackParamList } from '../navigation/AppNavigator';
-import { DateRangePicker } from '~/components/DatePicker';
 
 type TransactionsScreenNavigationProp = CompositeNavigationProp<
   DrawerNavigationProp<DrawerParamList, 'Transactions'>,

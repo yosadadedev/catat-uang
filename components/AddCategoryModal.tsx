@@ -54,7 +54,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
       setSelectedIcon('help-circle');
       setSelectedIconColor('#3B82F6');
       onClose();
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Gagal menambah kategori');
     }
   };

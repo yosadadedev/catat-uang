@@ -45,6 +45,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [calculatorDisplay, setCalculatorDisplay] = useState('0');
+  const [calculatorExpression, setCalculatorExpression] = useState('');
+
+  const [calculatorWaitingForOperand, setCalculatorWaitingForOperand] = useState(false);
   const [previousCategories, setPreviousCategories] = useState<{
     income?: Category;
     expense?: Category;
@@ -105,6 +110,156 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const handleAmountChange = (value: string) => {
     const formatted = formatCurrency(value);
     setAmount(formatted);
+  };
+
+  // Calculator functions
+  const formatCalculatorNumber = (value: string): string => {
+    const numericValue = value.replace(/[^0-9.]/g, '');
+    if (!numericValue || numericValue === '.') return '0';
+
+    const parts = numericValue.split('.');
+    const integerPart = parts[0];
+    const decimalPart = parts[1];
+
+    const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart) || 0);
+
+    if (decimalPart !== undefined) {
+      return formattedInteger + '.' + decimalPart;
+    }
+
+    return formattedInteger;
+  };
+
+  const getCalculatorDisplayValue = (): string => {
+    if (calculatorExpression) {
+      // Show the full expression
+      let displayExpression = calculatorExpression;
+
+      // Add current number if we're not waiting for operand
+      if (!calculatorWaitingForOperand && calculatorDisplay !== '0') {
+        displayExpression += formatCalculatorNumber(calculatorDisplay);
+      }
+
+      return displayExpression;
+    }
+
+    return formatCalculatorNumber(calculatorDisplay);
+  };
+
+  const handleCalculatorNumber = (num: string) => {
+    if (calculatorWaitingForOperand) {
+      setCalculatorDisplay(num);
+      setCalculatorWaitingForOperand(false);
+    } else {
+      const currentValue = calculatorDisplay.replace(/[^0-9.]/g, '');
+      setCalculatorDisplay(currentValue === '0' ? num : currentValue + num);
+    }
+  };
+
+  const handleCalculatorOperation = (nextOperation: string) => {
+    const formattedInput = formatCalculatorNumber(calculatorDisplay);
+    const operationSymbol =
+      nextOperation === '*' ? ' × ' : nextOperation === '/' ? ' ÷ ' : ` ${nextOperation} `;
+
+    if (calculatorExpression === '') {
+      // First operation
+      setCalculatorExpression(formattedInput + operationSymbol);
+    } else {
+      // Continue building expression
+      if (!calculatorWaitingForOperand) {
+        setCalculatorExpression(calculatorExpression + formattedInput + operationSymbol);
+      } else {
+        // Replace last operation
+        const lastOpIndex = Math.max(
+          calculatorExpression.lastIndexOf(' + '),
+          calculatorExpression.lastIndexOf(' - '),
+          calculatorExpression.lastIndexOf(' × '),
+          calculatorExpression.lastIndexOf(' ÷ ')
+        );
+        if (lastOpIndex !== -1) {
+          setCalculatorExpression(calculatorExpression.substring(0, lastOpIndex) + operationSymbol);
+        }
+      }
+    }
+
+    setCalculatorWaitingForOperand(true);
+  };
+
+  const handleCalculatorEquals = () => {
+    if (calculatorExpression && !calculatorWaitingForOperand) {
+      // Complete the expression with current display
+      const formattedInput = formatCalculatorNumber(calculatorDisplay);
+      const fullExpression = calculatorExpression + formattedInput;
+
+      // Evaluate the expression
+      try {
+        // Parse and calculate the full expression
+        const result = evaluateExpression(fullExpression);
+        setCalculatorDisplay(String(result));
+        setCalculatorExpression('');
+
+        setCalculatorWaitingForOperand(true);
+      } catch {
+        setCalculatorDisplay('Error');
+        setCalculatorExpression('');
+
+        setCalculatorWaitingForOperand(true);
+      }
+    }
+  };
+
+  const handleCalculatorClear = () => {
+    setCalculatorDisplay('0');
+    setCalculatorExpression('');
+
+    setCalculatorWaitingForOperand(false);
+  };
+
+  const handleCalculatorClearEntry = () => {
+    setCalculatorDisplay('0');
+  };
+
+  const evaluateExpression = (expression: string): number => {
+    // Remove formatting and convert symbols back
+    let cleanExpression = expression
+      .replace(/\./g, '') // Remove thousand separators
+      .replace(/×/g, '*')
+      .replace(/÷/g, '/')
+      .replace(/\s/g, ''); // Remove spaces
+
+    // Simple expression evaluator
+    try {
+      return Function('"use strict"; return (' + cleanExpression + ')')();
+    } catch {
+      throw new Error('Invalid expression');
+    }
+  };
+
+  const handleCalculatorUse = () => {
+    let finalValue = 0;
+
+    // If there's an expression, evaluate it first
+    if (calculatorExpression && !calculatorWaitingForOperand) {
+      try {
+        const formattedInput = formatCalculatorNumber(calculatorDisplay);
+        const fullExpression = calculatorExpression + formattedInput;
+        finalValue = evaluateExpression(fullExpression);
+      } catch {
+        // If evaluation fails, use current display
+        const cleanValue = calculatorDisplay.replace(/[^0-9.]/g, '');
+        finalValue = parseFloat(cleanValue) || 0;
+      }
+    } else {
+      // No expression, use current display
+      const cleanValue = calculatorDisplay.replace(/[^0-9.]/g, '');
+      finalValue = parseFloat(cleanValue) || 0;
+    }
+
+    if (!isNaN(finalValue)) {
+      setAmount(formatCurrency(String(Math.round(finalValue))));
+    }
+    setShowCalculator(false);
+    handleCalculatorClear();
   };
 
   const handleSaveTransaction = async () => {
@@ -173,7 +328,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             try {
               await deleteTransaction(transaction.id!);
               onClose();
-            } catch (error) {
+            } catch {
               Alert.alert('Error', 'Gagal menghapus transaksi');
             }
           },
@@ -200,7 +355,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       }
 
       setShowCategoryPicker(false);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Gagal menambah kategori');
     }
   };
@@ -305,6 +460,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                   keyboardType="numeric"
                   placeholderTextColor="#9CA3AF"
                 />
+                <TouchableOpacity
+                  style={styles.calculatorButton}
+                  onPress={() => setShowCalculator(true)}>
+                  <Ionicons name="calculator" size={20} color="#3B82F6" />
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -476,6 +636,144 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         onAddCategory={handleAddCategory}
         transactionType={transactionType}
       />
+
+      {/* Calculator Modal */}
+      <Modal
+        visible={showCalculator}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCalculator(false)}>
+        <View style={styles.calculatorModalContainer}>
+          <View style={styles.calculatorModalContent}>
+            <View style={styles.calculatorHeader}>
+              <Text style={styles.calculatorTitle}>Kalkulator</Text>
+              <TouchableOpacity style={styles.closeButton} onPress={() => setShowCalculator(false)}>
+                <Ionicons name="close" size={24} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.calculatorDisplay}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.calculatorDisplayScrollContent}>
+                <Text style={styles.calculatorDisplayText}>{getCalculatorDisplayValue()}</Text>
+              </ScrollView>
+            </View>
+
+            <View style={styles.calculatorButtons}>
+              <View style={styles.calculatorRow}>
+                <TouchableOpacity
+                  style={styles.calculatorButtonClear}
+                  onPress={handleCalculatorClear}>
+                  <Text style={styles.calculatorButtonClearText}>C</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonClear}
+                  onPress={handleCalculatorClearEntry}>
+                  <Text style={styles.calculatorButtonClearText}>CE</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonOperation}
+                  onPress={() => handleCalculatorOperation('/')}>
+                  <Text style={styles.calculatorButtonOperationText}>÷</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonOperation}
+                  onPress={() => handleCalculatorOperation('*')}>
+                  <Text style={styles.calculatorButtonOperationText}>×</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.calculatorRow}>
+                <TouchableOpacity
+                  style={styles.calculatorButtonNumber}
+                  onPress={() => handleCalculatorNumber('7')}>
+                  <Text style={styles.calculatorButtonNumberText}>7</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonNumber}
+                  onPress={() => handleCalculatorNumber('8')}>
+                  <Text style={styles.calculatorButtonNumberText}>8</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonNumber}
+                  onPress={() => handleCalculatorNumber('9')}>
+                  <Text style={styles.calculatorButtonNumberText}>9</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonOperation}
+                  onPress={() => handleCalculatorOperation('-')}>
+                  <Text style={styles.calculatorButtonOperationText}>-</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.calculatorRow}>
+                <TouchableOpacity
+                  style={styles.calculatorButtonNumber}
+                  onPress={() => handleCalculatorNumber('4')}>
+                  <Text style={styles.calculatorButtonNumberText}>4</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonNumber}
+                  onPress={() => handleCalculatorNumber('5')}>
+                  <Text style={styles.calculatorButtonNumberText}>5</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonNumber}
+                  onPress={() => handleCalculatorNumber('6')}>
+                  <Text style={styles.calculatorButtonNumberText}>6</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonOperation}
+                  onPress={() => handleCalculatorOperation('+')}>
+                  <Text style={styles.calculatorButtonOperationText}>+</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.calculatorRow}>
+                <TouchableOpacity
+                  style={styles.calculatorButtonNumber}
+                  onPress={() => handleCalculatorNumber('1')}>
+                  <Text style={styles.calculatorButtonNumberText}>1</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonNumber}
+                  onPress={() => handleCalculatorNumber('2')}>
+                  <Text style={styles.calculatorButtonNumberText}>2</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonNumber}
+                  onPress={() => handleCalculatorNumber('3')}>
+                  <Text style={styles.calculatorButtonNumberText}>3</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.calculatorButtonNumber}
+                  onPress={() => handleCalculatorNumber('0')}>
+                  <Text style={styles.calculatorButtonNumberText}>0</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.calculatorRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.calculatorButtonEquals,
+                    { width: '100%', height: 50, marginTop: 8 },
+                  ]}
+                  onPress={handleCalculatorEquals}>
+                  <Text style={styles.calculatorButtonEqualsText}>=</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.calculatorFooter}>
+              <TouchableOpacity style={styles.calculatorUseButton} onPress={handleCalculatorUse}>
+                <Text style={styles.calculatorUseButtonText}>Gunakan Hasil</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Modal>
   );
 };
@@ -908,6 +1206,137 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   addCategoryButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600' as const,
+  },
+  calculatorButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  calculatorModalContainer: {
+    flex: 1,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  calculatorModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    width: '90%' as const,
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  calculatorHeader: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  calculatorTitle: {
+    fontSize: 18,
+    fontWeight: '600' as const,
+    color: '#111827',
+  },
+  calculatorDisplay: {
+    backgroundColor: '#F9FAFB',
+    padding: 20,
+    alignItems: 'flex-end' as const,
+    justifyContent: 'center' as const,
+    minHeight: 80,
+  },
+  calculatorDisplayText: {
+    fontSize: 24,
+    fontWeight: '600' as const,
+    color: '#111827',
+    textAlign: 'right' as const,
+  },
+  calculatorDisplayScrollContent: {
+    alignItems: 'flex-end' as const,
+    justifyContent: 'center' as const,
+    minWidth: '100%' as const,
+  },
+  calculatorButtons: {
+    padding: 16,
+  },
+  calculatorRow: {
+    flexDirection: 'row' as const,
+    marginBottom: 12,
+    gap: 12,
+  },
+  calculatorButtonNumber: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    height: 56,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  calculatorButtonNumberText: {
+    fontSize: 20,
+    fontWeight: '600' as const,
+    color: '#111827',
+  },
+  calculatorButtonOperation: {
+    flex: 1,
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    height: 56,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  calculatorButtonOperationText: {
+    fontSize: 20,
+    fontWeight: '600' as const,
+    color: 'white',
+  },
+  calculatorButtonClear: {
+    flex: 1,
+    backgroundColor: '#EF4444',
+    borderRadius: 12,
+    height: 56,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  calculatorButtonClearText: {
+    fontSize: 20,
+    fontWeight: '600' as const,
+    color: 'white',
+  },
+  calculatorButtonEquals: {
+    flex: 1,
+    backgroundColor: '#10B981',
+    borderRadius: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  calculatorButtonEqualsText: {
+    fontSize: 24,
+    fontWeight: '600' as const,
+    color: 'white',
+  },
+  calculatorFooter: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  calculatorUseButton: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center' as const,
+  },
+  calculatorUseButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600' as const,

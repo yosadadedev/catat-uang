@@ -31,7 +31,6 @@ const CategoryManagementScreen = () => {
     setShowAddModal,
     showEditModal,
     setShowEditModal,
-    editingCategory,
     newCategoryName,
     setNewCategoryName,
     selectedIcon,
@@ -419,7 +418,6 @@ const CategoryManagementScreen = () => {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   {iconOptions.map((icon, index) => {
-                    const iconColor = iconColors[index % iconColors.length];
                     const isSelected = selectedIcon === icon;
                     return (
                       <TouchableOpacity
@@ -801,7 +799,6 @@ const CategoryManagementScreen = () => {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   {iconOptions.map((icon, index) => {
-                    const iconColor = iconColors[index % iconColors.length];
                     const isSelected = selectedIcon === icon;
                     return (
                       <TouchableOpacity

@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, View, Linking } from 'react-native';
+import { View } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 
 // Import screens (will be created later)
@@ -39,42 +39,42 @@ const Stack = createStackNavigator<RootStackParamList>();
 const DrawerNavigator = () => {
   const { colors } = useTheme();
 
-  const handleMenuPress = (menuType: string) => {
-    switch (menuType) {
-      case 'Share':
-        Alert.alert('Bagikan', 'Bagikan aplikasi ini ke teman-teman Anda!');
-        break;
-      case 'Gift':
-        Alert.alert('Hadiah untuk Developer', 'Terima kasih atas dukungan Anda!');
-        break;
-      case 'Rating':
-        Alert.alert(
-          'Rating Aplikasi',
-          'Terima kasih telah menggunakan Catat Uang. Bantu kami berkembang dengan memberi rating ⭐⭐⭐⭐⭐ di Play Store 🙏',
-          [
-            { text: 'Nanti Saja', style: 'cancel' },
-            {
-              text: 'Beri Rating ⭐',
-              onPress: () => {
-                const storeUrl = 'https://play.google.com/store/apps/details?id=com.catatuang.app';
-                Linking.canOpenURL(storeUrl)
-                  .then((supported) => {
-                    if (supported) {
-                      Linking.openURL(storeUrl);
-                    } else {
-                      Alert.alert('Error', 'Tidak dapat membuka store');
-                    }
-                  })
-                  .catch(() => {
-                    Alert.alert('Error', 'Gagal membuka store');
-                  });
-              },
-            },
-          ]
-        );
-        break;
-    }
-  };
+  // const handleMenuPress = (menuType: string) => {
+  //   switch (menuType) {
+  //     case 'Share':
+  //       Alert.alert('Bagikan', 'Bagikan aplikasi ini ke teman-teman Anda!');
+  //       break;
+  //     case 'Gift':
+  //       Alert.alert('Hadiah untuk Developer', 'Terima kasih atas dukungan Anda!');
+  //       break;
+  //     case 'Rating':
+  //       Alert.alert(
+  //         'Rating Aplikasi',
+  //         'Terima kasih telah menggunakan Catat Uang. Bantu kami berkembang dengan memberi rating ⭐⭐⭐⭐⭐ di Play Store 🙏',
+  //         [
+  //           { text: 'Nanti Saja', style: 'cancel' },
+  //           {
+  //             text: 'Beri Rating ⭐',
+  //             onPress: () => {
+  //               const storeUrl = 'https://play.google.com/store/apps/details?id=com.catatuang.app';
+  //               Linking.canOpenURL(storeUrl)
+  //                 .then((supported) => {
+  //                   if (supported) {
+  //                     Linking.openURL(storeUrl);
+  //                   } else {
+  //                     Alert.alert('Error', 'Tidak dapat membuka store');
+  //                   }
+  //                 })
+  //                 .catch(() => {
+  //                   Alert.alert('Error', 'Gagal membuka store');
+  //                 });
+  //             },
+  //           },
+  //         ]
+  //       );
+  //       break;
+  //   }
+  // };
 
   return (
     <Drawer.Navigator
