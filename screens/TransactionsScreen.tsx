@@ -54,7 +54,6 @@ const TransactionsScreen = () => {
   });
 
   // UI state
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [tempFilterType, setTempFilterType] = useState<FilterType>('all');
@@ -71,41 +70,6 @@ const TransactionsScreen = () => {
       setUseCustomDateRange(false);
     }, [])
   );
-
-  const getDateRange = (tab: TabType, date: Date) => {
-    const start = new Date(date);
-    const end = new Date(date);
-
-    switch (tab) {
-      case 'daily':
-        start.setHours(0, 0, 0, 0);
-        end.setHours(23, 59, 59, 999);
-        break;
-      case 'weekly':
-        // Mulai dari hari Senin (1) bukan Minggu (0)
-        const dayOfWeek = start.getDay();
-        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Jika Minggu, mundur 6 hari ke Senin
-        start.setDate(start.getDate() - daysToMonday);
-        start.setHours(0, 0, 0, 0);
-        end.setDate(start.getDate() + 6);
-        end.setHours(23, 59, 59, 999);
-        break;
-      case 'monthly':
-        start.setDate(1);
-        start.setHours(0, 0, 0, 0);
-        end.setMonth(start.getMonth() + 1, 0);
-        end.setHours(23, 59, 59, 999);
-        break;
-      case 'yearly':
-        start.setMonth(0, 1);
-        start.setHours(0, 0, 0, 0);
-        end.setMonth(11, 31);
-        end.setHours(23, 59, 59, 999);
-        break;
-    }
-
-    return { start, end };
-  };
 
   // Filter and sort transactions handled by custom hook
 
@@ -278,7 +242,7 @@ const TransactionsScreen = () => {
           currentDate: formatDate(selectedDate, activeTab),
           onPrevious: () => navigateDate('prev'),
           onNext: () => navigateDate('next'),
-          onDatePress: () => setShowDatePicker(true),
+          onDatePress: () => {},
         }}
       />
       {/* Time Filter Tabs */}
@@ -1040,23 +1004,6 @@ const TransactionsScreen = () => {
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
-
-      {showDatePicker && (
-        <Modal
-          visible={showDatePicker}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowDatePicker(false)}>
-          <DateRangePicker
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            onClose={() => setShowDatePicker(false)}
-            onApply={() => setUseCustomDateRange(true)}
-          />
-        </Modal>
-      )}
 
       {/* Floating Action Button */}
       <TouchableOpacity
