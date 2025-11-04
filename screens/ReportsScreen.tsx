@@ -233,7 +233,7 @@ const ReportsScreen = () => {
           currentDate: formatDateHeader(selectedDate, currentSelectedPeriod),
           onPrevious: () => navigateDate('prev'),
           onNext: () => navigateDate('next'),
-          onDatePress: () => setShowDatePicker(true),
+          onDatePress: () => {},
         }}
       />
       {/* Time Filter Tabs */}
